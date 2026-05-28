@@ -81,11 +81,15 @@ export default function UploadPage() {
     try {
       const ts = Date.now()
       const storagePath = `invoices/${ts}_${file.name.replace(/\s+/g, '_')}`
-      const { error: uploadErr } = await supabase.storage.from('invoices').upload(storagePath, file, { contentType: 'application/pdf' })
-      if (uploadErr) throw uploadErr
 
-      const { data: urlData } = await supabase.storage.from('invoices').createSignedUrl(storagePath, 60 * 60 * 24 * 365 * 10)
-      const pdfUrl = urlData?.signedUrl ?? ''
+      // Upload via server API (uses admin key, bypasses RLS)
+      const uploadForm = new FormData()
+      uploadForm.append('file', file)
+      uploadForm.append('path', storagePath)
+      const uploadRes = await fetch('/api/storage/upload', { method: 'POST', body: uploadForm })
+      const uploadData = await uploadRes.json()
+      if (!uploadRes.ok) throw new Error(uploadData.error || 'Upload failed')
+      const pdfUrl = uploadData.signedUrl ?? ''
 
       const { data: inv, error: invErr } = await supabase
         .from('invoices')
