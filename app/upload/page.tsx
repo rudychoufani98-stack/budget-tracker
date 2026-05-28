@@ -108,7 +108,6 @@ export default function UploadPage() {
           subcontractor_name: scanned.subcontractor_name,
           invoice_number: scanned.invoice_number,
           invoice_date: scanned.invoice_date || null,
-          currency: scanned.currency || 'EUR',
           amount_ht: scanned.amount_ht,
           amount_tva: scanned.amount_tva,
           amount_ttc: scanned.amount_ttc,
