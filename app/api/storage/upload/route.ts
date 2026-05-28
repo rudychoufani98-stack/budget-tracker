@@ -14,6 +14,9 @@ export async function POST(request: NextRequest) {
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
 
+    // Create bucket if it doesn't exist yet
+    await supabaseAdmin.storage.createBucket('invoices', { public: false }).catch(() => {})
+
     const { error: uploadErr } = await supabaseAdmin.storage
       .from('invoices')
       .upload(path, buffer, { contentType: 'application/pdf', upsert: false })
