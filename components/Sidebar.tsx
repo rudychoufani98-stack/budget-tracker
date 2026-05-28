@@ -61,15 +61,17 @@ export function Sidebar() {
       style={{ background: '#0C1F52' }}
     >
       {/* Logo */}
-      <div className="px-6 pt-7 pb-6 border-b" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
-        <Image
-          src="/logo.png"
-          alt="Skykapital"
-          width={160}
-          height={48}
-          className="brightness-0 invert"
-          priority
-        />
+      <div className="px-5 pt-6 pb-5 border-b" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
+        <div className="bg-white rounded-xl px-4 py-3 flex items-center justify-center">
+          <Image
+            src="/logo.png"
+            alt="Skykapital"
+            width={148}
+            height={44}
+            priority
+            style={{ objectFit: 'contain' }}
+          />
+        </div>
       </div>
 
       {/* Nav */}
