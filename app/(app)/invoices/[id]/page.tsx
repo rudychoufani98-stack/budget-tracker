@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase-browser'
+import { createClient } from '@/utils/supabase/client'
 import { formatCurrency, formatDate } from '@/lib/format'
 import type { Invoice, InvoiceLineItem, Validation } from '@/lib/types'
 
@@ -35,6 +36,14 @@ export default function InvoiceDetailPage() {
   const [editing, setEditing] = useState(false)
   const [editData, setEditData] = useState<Partial<Invoice>>({})
   const [showRejectModal, setShowRejectModal] = useState(false)
+  const [userRole, setUserRole] = useState<string>('')
+
+  useEffect(() => {
+    const auth = createClient()
+    auth.auth.getUser().then(({ data }) => {
+      setUserRole(data.user?.user_metadata?.role || 'viewer')
+    })
+  }, [])
 
   async function load() {
     const { data: inv } = await supabase.from('invoices').select('*').eq('id', id).single()
@@ -109,8 +118,16 @@ export default function InvoiceDetailPage() {
     return <div className="p-8 text-red-600 font-medium">Invoice not found.</div>
   }
 
-  const canValidate = ['pending_review', 'pending_placide', 'pending_hitech'].includes(invoice.status)
+  // Which role is allowed to validate at each step
+  const roleForStep: Record<string, string[]> = {
+    pending_review:  ['rudy', 'admin'],
+    pending_placide: ['placide'],
+    pending_hitech:  ['hitech'],
+  }
+  const stepAllowed = roleForStep[invoice.status] ?? []
+  const canValidate = stepAllowed.includes(userRole)
   const validatorLabel = invoice.status === 'pending_review' ? 'Rudy' : invoice.status === 'pending_placide' ? 'Placide' : 'Hitech'
+  const isWaitingForOther = ['pending_review', 'pending_placide', 'pending_hitech'].includes(invoice.status) && !canValidate
   const s = STATUS[invoice.status] ?? STATUS.pending_review
   const currentStep = STEPS.indexOf(invoice.status)
 
@@ -361,6 +378,21 @@ export default function InvoiceDetailPage() {
                   </div>
                 ))}
               </div>
+            </div>
+          )}
+
+          {/* Waiting banner for non-validators */}
+          {isWaitingForOther && (
+            <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+              <div className="flex items-center gap-2 mb-1">
+                <div className="w-2 h-2 bg-amber-400 rounded-full animate-pulse" />
+                <h2 className="text-sm font-semibold text-gray-700">
+                  Waiting for {validatorLabel}
+                </h2>
+              </div>
+              <p className="text-xs text-gray-400">
+                This invoice is pending validation by {validatorLabel}. You don&apos;t have permission to validate at this step.
+              </p>
             </div>
           )}
 
