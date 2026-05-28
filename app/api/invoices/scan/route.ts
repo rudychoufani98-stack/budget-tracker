@@ -45,16 +45,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 })
     }
 
-    // Extract text from PDF
+    // Extract text from PDF using unpdf (serverless-compatible)
     const bytes = await file.arrayBuffer()
-    const buffer = Buffer.from(bytes)
+    const { extractText } = await import('unpdf')
+    const { text: pdfText } = await extractText(new Uint8Array(bytes), { mergePages: true })
 
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const pdfParse = require('pdf-parse')
-    const pdfData = await pdfParse(buffer)
-    const pdfText = pdfData.text?.trim()
-
-    if (!pdfText) {
+    if (!pdfText?.trim()) {
       return NextResponse.json(
         { error: 'Could not extract text from this PDF. It may be a scanned image — please try a text-based PDF.' },
         { status: 400 }
