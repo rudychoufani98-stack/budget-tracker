@@ -29,6 +29,14 @@ const NAVY = '#0C1F52'
 const CATEGORIES = ['Subcontracting', 'Travel', 'Accommodation', 'Meals', 'Equipment', 'Other']
 const CURRENCIES = ['EUR', 'USD', 'GBP', 'CHF', 'MAD', 'XOF', 'NGN', 'CAD', 'AED', 'JPY', 'Other']
 
+const CURRENCY_SYMBOLS: Record<string, string> = {
+  EUR: '€', USD: '$', GBP: '£', CHF: 'Fr', MAD: 'MAD', XOF: 'FCFA',
+  NGN: '₦', CAD: 'CA$', AED: 'AED', JPY: '¥', Other: ''
+}
+function currencySymbol(code: string) {
+  return CURRENCY_SYMBOLS[code] ?? code
+}
+
 export default function UploadPage() {
   const router = useRouter()
   const fileRef = useRef<HTMLInputElement>(null)
@@ -197,10 +205,10 @@ export default function UploadPage() {
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4">
               <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400">Amounts</h2>
               <div className="grid grid-cols-2 gap-4">
-                <LightField label="Excl. VAT (€)" value={String(scanned.amount_ht ?? '')} onChange={v => updateField('amount_ht', parseFloat(v) || 0)} type="number" />
+                <LightField label={`Excl. VAT (${currencySymbol(scanned.currency || 'EUR')})`} value={String(scanned.amount_ht ?? '')} onChange={v => updateField('amount_ht', parseFloat(v) || 0)} type="number" />
                 <LightField label="VAT Rate (%)" value={String(scanned.vat_rate ?? '')} onChange={v => updateField('vat_rate', parseFloat(v) || 0)} type="number" />
-                <LightField label="VAT Amount (€)" value={String(scanned.amount_tva ?? '')} onChange={v => updateField('amount_tva', parseFloat(v) || 0)} type="number" />
-                <LightField label="Total incl. VAT (€)" value={String(scanned.amount_ttc ?? '')} onChange={v => updateField('amount_ttc', parseFloat(v) || 0)} type="number" />
+                <LightField label={`VAT Amount (${currencySymbol(scanned.currency || 'EUR')})`} value={String(scanned.amount_tva ?? '')} onChange={v => updateField('amount_tva', parseFloat(v) || 0)} type="number" />
+                <LightField label={`Total incl. VAT (${currencySymbol(scanned.currency || 'EUR')})`} value={String(scanned.amount_ttc ?? '')} onChange={v => updateField('amount_ttc', parseFloat(v) || 0)} type="number" />
               </div>
             </div>
 
