@@ -317,7 +317,8 @@ export default function UploadPage() {
           <button
             onClick={submitForValidation}
             disabled={submitting}
-            className="flex-1 bg-blue-700 hover:bg-blue-800 disabled:opacity-60 text-white text-sm font-bold py-3 rounded-xl transition-colors shadow-sm"
+            className="flex-1 disabled:opacity-60 text-white text-sm font-bold py-3 rounded-xl transition-opacity hover:opacity-90 shadow-sm"
+            style={{ background: '#0C1F52' }}
           >
             {submitting ? 'Submitting…' : 'Submit to Rudy for Validation →'}
           </button>
@@ -395,7 +396,8 @@ export default function UploadPage() {
       <button
         onClick={scanInvoice}
         disabled={!file || scanning}
-        className="w-full bg-blue-700 hover:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl text-sm transition-colors shadow-sm flex items-center justify-center gap-2"
+        className="w-full disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl text-sm transition-opacity hover:opacity-90 shadow-sm flex items-center justify-center gap-2"
+        style={{ background: '#0C1F52' }}
       >
         {scanning ? (
           <>

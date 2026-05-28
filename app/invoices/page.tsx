@@ -41,7 +41,8 @@ export default async function InvoicesPage() {
         </div>
         <Link
           href="/upload"
-          className="flex items-center gap-2 bg-blue-700 hover:bg-blue-800 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors shadow-sm"
+          className="flex items-center gap-2 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-opacity hover:opacity-90 shadow-sm"
+          style={{ background: '#0C1F52' }}
         >
           <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
             <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
@@ -133,7 +134,7 @@ function Pill({ label, count, active, color }: { label: string; count: number; a
   return (
     <span className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-semibold ${
       active
-        ? 'bg-blue-700 text-white border-blue-700'
+        ? 'text-white border-[#0C1F52]'
         : color || 'bg-white text-slate-600 border-slate-200'
     }`}>
       {label}

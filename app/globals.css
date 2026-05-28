@@ -3,9 +3,10 @@
 @tailwind utilities;
 
 :root {
-  --bg: #F4F6FA;
-  --navy: #0B1437;
-  --blue: #1D4ED8;
+  --navy:   #0C1F52;
+  --navy2:  #0D2460;
+  --bg:     #F4F6FA;
+  --accent: #0C1F52;
 }
 
 body {
