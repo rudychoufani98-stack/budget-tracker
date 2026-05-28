@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation'
 
 const nav = [
   {
-    href: '/',
+    href: '/dashboard',
     label: 'Dashboard',
     icon: (
       <svg width="17" height="17" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
@@ -18,14 +18,24 @@ const nav = [
     ),
   },
   {
-    href: '/invoices',
-    label: 'Invoices',
+    href: '/contracts',
+    label: 'Contracts',
     icon: (
       <svg width="17" height="17" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
         <polyline points="14 2 14 8 20 8" />
         <line x1="8" y1="13" x2="16" y2="13" />
-        <line x1="8" y1="17" x2="13" y2="17" />
+        <line x1="8" y1="17" x2="12" y2="17" />
+      </svg>
+    ),
+  },
+  {
+    href: '/invoices',
+    label: 'Invoices',
+    icon: (
+      <svg width="17" height="17" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
+        <rect x="2" y="5" width="20" height="14" rx="2" />
+        <line x1="2" y1="10" x2="22" y2="10" />
       </svg>
     ),
   },
@@ -51,7 +61,7 @@ export function Sidebar() {
       style={{ background: '#0C1F52' }}
     >
       {/* Logo */}
-      <div className="px-6 pt-7 pb-6 border-b border-white/10">
+      <div className="px-6 pt-7 pb-6 border-b" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
         <Image
           src="/logo.png"
           alt="Skykapital"
@@ -64,22 +74,39 @@ export function Sidebar() {
 
       {/* Nav */}
       <nav className="flex-1 px-3 py-5">
-        <p className="text-xs font-semibold uppercase tracking-widest px-3 mb-3" style={{ color: 'rgba(255,255,255,0.3)' }}>
+        <p
+          className="text-xs font-semibold uppercase tracking-widest px-3 mb-3"
+          style={{ color: 'rgba(255,255,255,0.35)' }}
+        >
           Menu
         </p>
         <ul className="space-y-1">
           {nav.map(({ href, label, icon }) => {
-            const active = href === '/' ? pathname === '/' : pathname.startsWith(href)
+            const active = href === '/dashboard'
+              ? pathname === '/' || pathname.startsWith('/dashboard')
+              : pathname.startsWith(href)
             return (
               <li key={href}>
                 <Link
                   href={href}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all"
+                  style={
                     active
-                      ? 'text-white'
-                      : 'hover:bg-white/5'
-                  }`}
-                  style={active ? { background: 'rgba(255,255,255,0.12)' } : { color: 'rgba(255,255,255,0.55)' }}
+                      ? { background: 'rgba(255,255,255,0.15)', color: '#fff' }
+                      : { color: 'rgba(255,255,255,0.55)' }
+                  }
+                  onMouseEnter={e => {
+                    if (!active) {
+                      (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.07)'
+                      ;(e.currentTarget as HTMLElement).style.color = '#fff'
+                    }
+                  }}
+                  onMouseLeave={e => {
+                    if (!active) {
+                      (e.currentTarget as HTMLElement).style.background = 'transparent'
+                      ;(e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.55)'
+                    }
+                  }}
                 >
                   {icon}
                   {label}
@@ -91,11 +118,11 @@ export function Sidebar() {
       </nav>
 
       {/* User */}
-      <div className="px-4 py-5 border-t border-white/10">
+      <div className="px-4 py-5 border-t" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
         <div className="flex items-center gap-3 px-2">
           <div
             className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
-            style={{ background: 'rgba(255,255,255,0.15)' }}
+            style={{ background: 'rgba(255,255,255,0.2)' }}
           >
             RC
           </div>

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
-import { TopNav } from '@/components/TopNav'
+import { Sidebar } from '@/components/Sidebar'
 
 export const metadata: Metadata = {
   title: 'ESG Tracker — Skykapital',
@@ -11,10 +11,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body>
-        <TopNav />
-        <main className="min-h-screen" style={{ background: '#F4F6FA' }}>
-          {children}
-        </main>
+        <div className="flex min-h-screen">
+          <Sidebar />
+          <main className="flex-1 overflow-auto" style={{ background: '#F4F6FA' }}>
+            {children}
+          </main>
+        </div>
       </body>
     </html>
   )
