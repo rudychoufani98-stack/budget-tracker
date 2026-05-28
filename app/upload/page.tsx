@@ -65,8 +65,9 @@ export default function UploadPage() {
       const formData = new FormData()
       formData.append('file', file)
       const res = await fetch('/api/invoices/scan', { method: 'POST', body: formData })
-      if (!res.ok) throw new Error('Scan failed')
-      setScanned(await res.json())
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Scan failed')
+      setScanned(data)
       setStep('review')
     } catch {
       setError('AI scanning failed. Please check your Claude API key and try again.')

@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
-
 const PROMPT = `Extract all data from this invoice and return ONLY a valid JSON object with no markdown, no explanation, just raw JSON.
 
 Required format:
@@ -36,6 +34,11 @@ Rules:
 - Return ONLY the JSON, nothing else`
 
 export async function POST(request: NextRequest) {
+  const apiKey = process.env.GEMINI_API_KEY
+  if (!apiKey) {
+    return NextResponse.json({ error: 'GEMINI_API_KEY is not set in environment variables' }, { status: 500 })
+  }
+
   try {
     const formData = await request.formData()
     const file = formData.get('file') as File | null
@@ -47,7 +50,8 @@ export async function POST(request: NextRequest) {
     const bytes = await file.arrayBuffer()
     const base64 = Buffer.from(bytes).toString('base64')
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' })
+    const genAI = new GoogleGenerativeAI(apiKey)
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
 
     const result = await model.generateContent([
       {
@@ -68,8 +72,9 @@ export async function POST(request: NextRequest) {
 
     const parsed = JSON.parse(cleaned)
     return NextResponse.json(parsed)
-  } catch (error) {
-    console.error('Scan error:', error)
-    return NextResponse.json({ error: 'Failed to scan invoice' }, { status: 500 })
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error)
+    console.error('Scan error:', message)
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }
