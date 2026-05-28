@@ -101,30 +101,33 @@ export default function UploadPage() {
       if (!uploadRes.ok) throw new Error(uploadData.error || 'Upload failed')
       const pdfUrl = uploadData.signedUrl ?? ''
 
-      const { data: inv, error: invErr } = await supabase
-        .from('invoices')
-        .insert({
-          contract_id: contractId || null,
-          subcontractor_name: scanned.subcontractor_name,
-          invoice_number: scanned.invoice_number,
-          invoice_date: scanned.invoice_date || null,
-          currency: scanned.currency || 'EUR',
-          amount_ht: scanned.amount_ht,
-          amount_tva: scanned.amount_tva,
-          amount_ttc: scanned.amount_ttc,
-          vat_rate: scanned.vat_rate,
-          category: scanned.category,
-          description: scanned.description,
-          pdf_url: pdfUrl,
-          status: 'pending_review',
-          submitted_at: new Date().toISOString(),
-        })
-        .select().single()
-      if (invErr) throw invErr
-
-      if (scanned.line_items?.length > 0) {
-        await supabase.from('invoice_line_items').insert(scanned.line_items.map(item => ({ ...item, invoice_id: inv.id })))
-      }
+      // Use server API to insert (supabaseAdmin bypasses schema cache issues)
+      const createRes = await fetch('/api/invoices/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          invoice: {
+            contract_id: contractId || null,
+            subcontractor_name: scanned.subcontractor_name,
+            invoice_number: scanned.invoice_number,
+            invoice_date: scanned.invoice_date || null,
+            currency: scanned.currency || 'EUR',
+            amount_ht: scanned.amount_ht,
+            amount_tva: scanned.amount_tva,
+            amount_ttc: scanned.amount_ttc,
+            vat_rate: scanned.vat_rate,
+            category: scanned.category,
+            description: scanned.description,
+            pdf_url: pdfUrl,
+            status: 'pending_review',
+            submitted_at: new Date().toISOString(),
+          },
+          line_items: scanned.line_items || [],
+        }),
+      })
+      const createData = await createRes.json()
+      if (!createRes.ok) throw new Error(createData.error || 'Failed to save invoice')
+      const inv = { id: createData.id }
 
       setStep('done')
       setTimeout(() => router.push(`/invoices/${inv.id}`), 2000)
