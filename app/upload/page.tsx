@@ -38,7 +38,6 @@ export default function UploadPage() {
   const [error, setError] = useState('')
   const [step, setStep] = useState<'upload' | 'review' | 'done'>('upload')
 
-  // Load contracts on mount
   useState(() => {
     supabase.from('contracts').select('id, contract_name').eq('status', 'active').then(({ data }) => {
       setContracts(data || [])
@@ -91,7 +90,6 @@ export default function UploadPage() {
     setSubmitting(true)
     setError('')
     try {
-      // 1. Upload PDF to Supabase Storage
       const ts = Date.now()
       const safeName = file.name.replace(/\s+/g, '_')
       const storagePath = `invoices/${ts}_${safeName}`
@@ -105,7 +103,6 @@ export default function UploadPage() {
         .createSignedUrl(storagePath, 60 * 60 * 24 * 365 * 10)
       const pdfUrl = urlData?.signedUrl ?? ''
 
-      // 2. Create invoice record
       const { data: inv, error: invErr } = await supabase
         .from('invoices')
         .insert({
@@ -127,14 +124,12 @@ export default function UploadPage() {
         .single()
       if (invErr) throw invErr
 
-      // 3. Insert line items
       if (scanned.line_items?.length > 0) {
         await supabase.from('invoice_line_items').insert(
           scanned.line_items.map(item => ({ ...item, invoice_id: inv.id }))
         )
       }
 
-      // 4. Notify via API
       await fetch(`/api/invoices/${inv.id}/validate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -158,70 +153,77 @@ export default function UploadPage() {
     setScanned({ ...scanned, [field]: value })
   }
 
-  // ── STEP: DONE ──
+  // DONE
   if (step === 'done') {
     return (
-      <div className="p-8 max-w-2xl mx-auto flex flex-col items-center justify-center min-h-[60vh] text-center">
-        <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mb-4">
-          <svg width="32" height="32" fill="none" stroke="#059669" strokeWidth="2.5" viewBox="0 0 24 24">
+      <div className="max-w-2xl mx-auto px-6 py-8 flex flex-col items-center justify-center min-h-[60vh] text-center">
+        <div
+          className="w-16 h-16 rounded-full flex items-center justify-center mb-5"
+          style={{ background: 'rgba(16,185,129,0.15)' }}
+        >
+          <svg width="32" height="32" fill="none" stroke="#10B981" strokeWidth="2.5" viewBox="0 0 24 24">
             <polyline points="20 6 9 17 4 12" />
           </svg>
         </div>
-        <h2 className="text-xl font-bold text-slate-900 mb-2">Invoice Submitted</h2>
-        <p className="text-slate-500 text-sm">
-          Sent to <strong>Rudy Choufani</strong> for validation. Redirecting…
+        <h2 className="text-xl font-bold mb-2" style={{ color: '#F9FAFB' }}>Invoice Submitted</h2>
+        <p className="text-sm" style={{ color: '#9CA3AF' }}>
+          Sent to <strong style={{ color: '#F9FAFB' }}>Rudy Choufani</strong> for validation. Redirecting…
         </p>
       </div>
     )
   }
 
-  // ── STEP: REVIEW ──
+  // REVIEW
   if (step === 'review' && scanned) {
     return (
-      <div className="p-8 max-w-4xl mx-auto space-y-6">
+      <div className="max-w-5xl mx-auto px-6 py-8 space-y-6">
         <div>
-          <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-1">Step 2 of 2</p>
-          <h1 className="text-2xl font-bold text-slate-900">Review Extracted Data</h1>
-          <p className="text-slate-500 text-sm mt-1">AI has scanned your invoice. Check the data and correct any errors before submitting.</p>
+          <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: '#9CA3AF' }}>Step 2 of 2</p>
+          <h1 className="text-2xl font-bold" style={{ color: '#F9FAFB' }}>Review Extracted Data</h1>
+          <p className="text-sm mt-1" style={{ color: '#9CA3AF' }}>
+            AI has scanned your invoice. Check the data and correct any errors before submitting.
+          </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
           {/* Left — editable fields */}
           <div className="space-y-5">
-            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 space-y-4">
-              <h2 className="text-sm font-bold text-slate-800 uppercase tracking-wide">Invoice Details</h2>
-              <Field label="Subcontractor Name" value={scanned.subcontractor_name} onChange={v => updateField('subcontractor_name', v)} />
-              <Field label="Invoice Number" value={scanned.invoice_number} onChange={v => updateField('invoice_number', v)} />
-              <Field label="Invoice Date" value={scanned.invoice_date} onChange={v => updateField('invoice_date', v)} type="date" />
+            <div className="rounded-2xl border p-6 space-y-4" style={{ background: '#111827', borderColor: '#1F2937' }}>
+              <h2 className="text-xs font-bold uppercase tracking-widest" style={{ color: '#9CA3AF' }}>Invoice Details</h2>
+              <DarkField label="Subcontractor Name" value={scanned.subcontractor_name} onChange={v => updateField('subcontractor_name', v)} />
+              <DarkField label="Invoice Number" value={scanned.invoice_number} onChange={v => updateField('invoice_number', v)} />
+              <DarkField label="Invoice Date" value={scanned.invoice_date} onChange={v => updateField('invoice_date', v)} type="date" />
               <div>
-                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide block mb-1.5">Category</label>
+                <label className="text-xs font-semibold uppercase tracking-wide block mb-1.5" style={{ color: '#9CA3AF' }}>Category</label>
                 <select
                   value={scanned.category}
                   onChange={e => updateField('category', e.target.value)}
-                  className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                  className="w-full rounded-xl px-4 py-2.5 text-sm focus:outline-none"
+                  style={{ background: '#0A0F1E', border: '1px solid #374151', color: '#F9FAFB' }}
                 >
                   {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
-              <Field label="Description" value={scanned.description} onChange={v => updateField('description', v)} />
+              <DarkField label="Description" value={scanned.description} onChange={v => updateField('description', v)} />
             </div>
 
-            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 space-y-4">
-              <h2 className="text-sm font-bold text-slate-800 uppercase tracking-wide">Amounts</h2>
+            <div className="rounded-2xl border p-6 space-y-4" style={{ background: '#111827', borderColor: '#1F2937' }}>
+              <h2 className="text-xs font-bold uppercase tracking-widest" style={{ color: '#9CA3AF' }}>Amounts</h2>
               <div className="grid grid-cols-2 gap-4">
-                <Field label="Amount Excl. VAT (€)" value={String(scanned.amount_ht ?? '')} onChange={v => updateField('amount_ht', parseFloat(v) || 0)} type="number" />
-                <Field label="VAT Rate (%)" value={String(scanned.vat_rate ?? '')} onChange={v => updateField('vat_rate', parseFloat(v) || 0)} type="number" />
-                <Field label="VAT Amount (€)" value={String(scanned.amount_tva ?? '')} onChange={v => updateField('amount_tva', parseFloat(v) || 0)} type="number" />
-                <Field label="Total Incl. VAT (€)" value={String(scanned.amount_ttc ?? '')} onChange={v => updateField('amount_ttc', parseFloat(v) || 0)} type="number" />
+                <DarkField label="Excl. VAT (€)" value={String(scanned.amount_ht ?? '')} onChange={v => updateField('amount_ht', parseFloat(v) || 0)} type="number" />
+                <DarkField label="VAT Rate (%)" value={String(scanned.vat_rate ?? '')} onChange={v => updateField('vat_rate', parseFloat(v) || 0)} type="number" />
+                <DarkField label="VAT Amount (€)" value={String(scanned.amount_tva ?? '')} onChange={v => updateField('amount_tva', parseFloat(v) || 0)} type="number" />
+                <DarkField label="Total incl. VAT (€)" value={String(scanned.amount_ttc ?? '')} onChange={v => updateField('amount_ttc', parseFloat(v) || 0)} type="number" />
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
-              <h2 className="text-sm font-bold text-slate-800 uppercase tracking-wide mb-4">Link to Contract</h2>
+            <div className="rounded-2xl border p-6" style={{ background: '#111827', borderColor: '#1F2937' }}>
+              <h2 className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: '#9CA3AF' }}>Link to Contract</h2>
               <select
                 value={contractId}
                 onChange={e => setContractId(e.target.value)}
-                className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                className="w-full rounded-xl px-4 py-2.5 text-sm focus:outline-none"
+                style={{ background: '#0A0F1E', border: '1px solid #374151', color: '#F9FAFB' }}
               >
                 <option value="">— Select a contract (optional) —</option>
                 {contracts.map(c => (
@@ -232,33 +234,38 @@ export default function UploadPage() {
           </div>
 
           {/* Right — line items */}
-          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden self-start">
-            <div className="px-6 py-4 border-b border-slate-100">
-              <h2 className="text-sm font-bold text-slate-800 uppercase tracking-wide">Line Items</h2>
-              <p className="text-xs text-slate-400 mt-0.5">{scanned.line_items?.length || 0} item(s) detected</p>
+          <div className="rounded-2xl border overflow-hidden self-start" style={{ background: '#111827', borderColor: '#1F2937' }}>
+            <div className="px-6 py-4 border-b" style={{ borderColor: '#1F2937' }}>
+              <h2 className="text-xs font-bold uppercase tracking-widest" style={{ color: '#9CA3AF' }}>Line Items</h2>
+              <p className="text-xs mt-0.5" style={{ color: '#9CA3AF' }}>
+                {scanned.line_items?.length || 0} item(s) detected
+              </p>
             </div>
             {!scanned.line_items?.length ? (
-              <p className="text-sm text-slate-400 p-6 text-center">No line items detected</p>
+              <p className="text-sm p-6 text-center" style={{ color: '#9CA3AF' }}>No line items detected</p>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-xs">
                   <thead>
-                    <tr className="bg-slate-50 text-slate-400 font-semibold uppercase tracking-wide">
+                    <tr
+                      className="text-xs font-semibold uppercase tracking-wide border-b"
+                      style={{ background: '#0A0F1E', color: '#9CA3AF', borderColor: '#1F2937' }}
+                    >
                       <th className="text-left px-4 py-3">Description</th>
                       <th className="text-right px-3 py-3">Qty</th>
                       <th className="text-right px-3 py-3">Unit</th>
                       <th className="text-right px-4 py-3">Total HT</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-50">
+                  <tbody className="divide-y" style={{ borderColor: '#1F2937' }}>
                     {scanned.line_items.map((item, i) => (
                       <tr key={i}>
-                        <td className="px-4 py-3 text-slate-700">{item.description || '—'}</td>
-                        <td className="px-3 py-3 text-right text-slate-500">{item.quantity ?? '—'}</td>
-                        <td className="px-3 py-3 text-right text-slate-500">
+                        <td className="px-4 py-3" style={{ color: '#F9FAFB' }}>{item.description || '—'}</td>
+                        <td className="px-3 py-3 text-right" style={{ color: '#9CA3AF' }}>{item.quantity ?? '—'}</td>
+                        <td className="px-3 py-3 text-right" style={{ color: '#9CA3AF' }}>
                           {item.unit_price != null ? `€${item.unit_price}` : '—'}
                         </td>
-                        <td className="px-4 py-3 text-right font-semibold text-slate-900">
+                        <td className="px-4 py-3 text-right font-semibold" style={{ color: '#10B981' }}>
                           {item.total_ht != null ? `€${item.total_ht}` : '—'}
                         </td>
                       </tr>
@@ -271,14 +278,17 @@ export default function UploadPage() {
         </div>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3 font-medium">
+          <div
+            className="text-sm rounded-xl px-4 py-3 font-medium"
+            style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', color: '#EF4444' }}
+          >
             {error}
           </div>
         )}
 
-        {/* Validation chain preview */}
-        <div className="bg-slate-50 rounded-2xl border border-slate-200 p-5">
-          <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-3">Approval Chain</p>
+        {/* Approval chain */}
+        <div className="rounded-2xl border p-5" style={{ background: '#111827', borderColor: '#1F2937' }}>
+          <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: '#9CA3AF' }}>Approval Chain</p>
           <div className="flex items-center gap-3 flex-wrap">
             {[
               { step: '1', name: 'Rudy Choufani', role: 'Invoice Review', active: true },
@@ -286,19 +296,31 @@ export default function UploadPage() {
               { step: '3', name: 'Hitech', role: 'Final Approval', active: false },
             ].map(({ step, name, role, active }, i) => (
               <div key={step} className="flex items-center gap-3">
-                <div className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl border text-sm ${
-                  active ? 'bg-blue-700 border-blue-700 text-white' : 'bg-white border-slate-200 text-slate-500'
-                }`}>
-                  <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
-                    active ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'
-                  }`}>{step}</span>
+                <div
+                  className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl border text-sm"
+                  style={
+                    active
+                      ? { background: 'rgba(16,185,129,0.12)', borderColor: 'rgba(16,185,129,0.4)', color: '#10B981' }
+                      : { background: '#1F2937', borderColor: '#374151', color: '#9CA3AF' }
+                  }
+                >
+                  <span
+                    className="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
+                    style={
+                      active
+                        ? { background: '#10B981', color: '#fff' }
+                        : { background: '#374151', color: '#9CA3AF' }
+                    }
+                  >
+                    {step}
+                  </span>
                   <div>
                     <p className="font-semibold leading-none">{name}</p>
-                    <p className={`text-xs mt-0.5 ${active ? 'text-blue-200' : 'text-slate-400'}`}>{role}</p>
+                    <p className="text-xs mt-0.5" style={{ color: active ? 'rgba(16,185,129,0.7)' : '#9CA3AF' }}>{role}</p>
                   </div>
                 </div>
                 {i < 2 && (
-                  <svg width="16" height="16" fill="none" stroke="#CBD5E1" strokeWidth="2" viewBox="0 0 24 24">
+                  <svg width="16" height="16" fill="none" stroke="#374151" strokeWidth="2" viewBox="0 0 24 24">
                     <polyline points="9 18 15 12 9 6" />
                   </svg>
                 )}
@@ -310,15 +332,16 @@ export default function UploadPage() {
         <div className="flex gap-3">
           <button
             onClick={() => setStep('upload')}
-            className="px-5 py-3 text-sm font-semibold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors"
+            className="px-5 py-3 text-sm font-semibold rounded-xl border"
+            style={{ color: '#9CA3AF', borderColor: '#374151', background: 'transparent' }}
           >
             ← Back
           </button>
           <button
             onClick={submitForValidation}
             disabled={submitting}
-            className="flex-1 disabled:opacity-60 text-white text-sm font-bold py-3 rounded-xl transition-opacity hover:opacity-90 shadow-sm"
-            style={{ background: '#0C1F52' }}
+            className="flex-1 disabled:opacity-50 text-white text-sm font-bold py-3 rounded-xl"
+            style={{ background: '#10B981' }}
           >
             {submitting ? 'Submitting…' : 'Submit to Rudy for Validation →'}
           </button>
@@ -327,13 +350,15 @@ export default function UploadPage() {
     )
   }
 
-  // ── STEP: UPLOAD ──
+  // UPLOAD
   return (
-    <div className="p-8 max-w-2xl mx-auto space-y-6">
+    <div className="max-w-2xl mx-auto px-6 py-8 space-y-6">
       <div>
-        <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-1">Step 1 of 2</p>
-        <h1 className="text-2xl font-bold text-slate-900">Upload Invoice</h1>
-        <p className="text-slate-500 text-sm mt-1">Upload a PDF and our AI will extract all data automatically.</p>
+        <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: '#9CA3AF' }}>Step 1 of 2</p>
+        <h1 className="text-2xl font-bold" style={{ color: '#F9FAFB' }}>Upload Invoice</h1>
+        <p className="text-sm mt-1" style={{ color: '#9CA3AF' }}>
+          Upload a PDF and our AI will extract all data automatically.
+        </p>
       </div>
 
       {/* Drop zone */}
@@ -341,50 +366,75 @@ export default function UploadPage() {
         onDrop={onDrop}
         onDragOver={e => e.preventDefault()}
         onClick={() => fileRef.current?.click()}
-        className={`border-2 border-dashed rounded-2xl p-12 text-center cursor-pointer transition-all ${
-          file ? 'border-blue-400 bg-blue-50' : 'border-slate-200 bg-white hover:border-blue-300 hover:bg-slate-50'
-        }`}
+        className="border-2 border-dashed rounded-2xl p-12 text-center cursor-pointer transition-all"
+        style={
+          file
+            ? { borderColor: '#10B981', background: 'rgba(16,185,129,0.07)' }
+            : { borderColor: '#374151', background: '#111827' }
+        }
+        onMouseEnter={e => {
+          if (!file) (e.currentTarget as HTMLElement).style.borderColor = '#10B981'
+        }}
+        onMouseLeave={e => {
+          if (!file) (e.currentTarget as HTMLElement).style.borderColor = '#374151'
+        }}
       >
         <input ref={fileRef} type="file" accept="application/pdf" className="hidden" onChange={onFileChange} />
         {file ? (
           <div>
-            <div className="w-14 h-14 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
-              <svg width="28" height="28" fill="none" stroke="#1D4ED8" strokeWidth="1.8" viewBox="0 0 24 24">
+            <div
+              className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-3"
+              style={{ background: 'rgba(16,185,129,0.15)' }}
+            >
+              <svg width="28" height="28" fill="none" stroke="#10B981" strokeWidth="1.8" viewBox="0 0 24 24">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                 <polyline points="14 2 14 8 20 8" />
               </svg>
             </div>
-            <p className="font-semibold text-blue-800 text-sm">{file.name}</p>
-            <p className="text-xs text-blue-500 mt-1">{(file.size / 1024).toFixed(0)} KB — Click to change</p>
+            <p className="font-semibold text-sm" style={{ color: '#10B981' }}>{file.name}</p>
+            <p className="text-xs mt-1" style={{ color: '#9CA3AF' }}>
+              {(file.size / 1024).toFixed(0)} KB — Click to change
+            </p>
           </div>
         ) : (
           <div>
-            <div className="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
-              <svg width="28" height="28" fill="none" stroke="#94A3B8" strokeWidth="1.8" viewBox="0 0 24 24">
+            <div
+              className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-3"
+              style={{ background: '#1F2937' }}
+            >
+              <svg width="28" height="28" fill="none" stroke="#9CA3AF" strokeWidth="1.8" viewBox="0 0 24 24">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                 <polyline points="17 8 12 3 7 8" />
                 <line x1="12" y1="3" x2="12" y2="15" />
               </svg>
             </div>
-            <p className="font-semibold text-slate-700 text-sm">Drop your PDF here</p>
-            <p className="text-xs text-slate-400 mt-1">or click to browse files</p>
+            <p className="font-semibold text-sm" style={{ color: '#F9FAFB' }}>Drop your PDF here</p>
+            <p className="text-xs mt-1" style={{ color: '#9CA3AF' }}>or click to browse files</p>
           </div>
         )}
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3 font-medium">
+        <div
+          className="text-sm rounded-xl px-4 py-3 font-medium"
+          style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', color: '#EF4444' }}
+        >
           {error}
         </div>
       )}
 
-      {/* AI scan info */}
-      <div className="bg-slate-900 rounded-2xl p-5 text-white">
-        <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">What AI extracts</p>
+      {/* What AI extracts */}
+      <div className="rounded-2xl p-5" style={{ background: '#111827', border: '1px solid #1F2937' }}>
+        <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: '#9CA3AF' }}>What AI extracts</p>
         <div className="grid grid-cols-2 gap-2 text-sm">
-          {['Subcontractor name', 'Invoice number & date', 'All line items', 'Total excl. VAT', 'VAT rate & amount', 'Total incl. VAT', 'Category detection', 'Description'].map(item => (
-            <div key={item} className="flex items-center gap-2 text-slate-300">
-              <svg width="12" height="12" fill="none" stroke="#22C55E" strokeWidth="2.5" viewBox="0 0 24 24">
+          {[
+            'Subcontractor name', 'Invoice number & date',
+            'All line items', 'Total excl. VAT',
+            'VAT rate & amount', 'Total incl. VAT',
+            'Category detection', 'Description',
+          ].map(item => (
+            <div key={item} className="flex items-center gap-2" style={{ color: '#9CA3AF' }}>
+              <svg width="12" height="12" fill="none" stroke="#10B981" strokeWidth="2.5" viewBox="0 0 24 24">
                 <polyline points="20 6 9 17 4 12" />
               </svg>
               {item}
@@ -396,8 +446,8 @@ export default function UploadPage() {
       <button
         onClick={scanInvoice}
         disabled={!file || scanning}
-        className="w-full disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl text-sm transition-opacity hover:opacity-90 shadow-sm flex items-center justify-center gap-2"
-        style={{ background: '#0C1F52' }}
+        className="w-full disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl text-sm flex items-center justify-center gap-2"
+        style={{ background: '#10B981' }}
       >
         {scanning ? (
           <>
@@ -419,17 +469,20 @@ export default function UploadPage() {
   )
 }
 
-function Field({ label, value, onChange, type = 'text' }: {
+function DarkField({ label, value, onChange, type = 'text' }: {
   label: string; value: string; onChange: (v: string) => void; type?: string
 }) {
   return (
     <div>
-      <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide block mb-1.5">{label}</label>
+      <label className="text-xs font-semibold uppercase tracking-wide block mb-1.5" style={{ color: '#9CA3AF' }}>
+        {label}
+      </label>
       <input
         type={type}
         value={value}
         onChange={e => onChange(e.target.value)}
-        className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+        className="w-full rounded-xl px-4 py-2.5 text-sm focus:outline-none"
+        style={{ background: '#0A0F1E', border: '1px solid #374151', color: '#F9FAFB' }}
       />
     </div>
   )

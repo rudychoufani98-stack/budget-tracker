@@ -66,6 +66,53 @@ export async function getInvoice(id: string) {
   return { invoice, lineItems: lineItems || [], validations: validations || [] }
 }
 
+export async function getContractBudgets() {
+  const { data: contracts } = await supabaseAdmin
+    .from('contracts')
+    .select('id, name, total_budget')
+    .eq('status', 'active')
+    .order('total_budget', { ascending: false })
+    .limit(8)
+
+  if (!contracts?.length) return []
+
+  const { data: approved } = await supabaseAdmin
+    .from('invoices')
+    .select('contract_id, amount_ttc')
+    .eq('status', 'approved')
+    .not('contract_id', 'is', null)
+
+  const spendMap: Record<string, number> = {}
+  for (const inv of approved || []) {
+    if (inv.contract_id)
+      spendMap[inv.contract_id] = (spendMap[inv.contract_id] || 0) + (inv.amount_ttc || 0)
+  }
+
+  return contracts.map((c) => ({
+    name: c.name,
+    budget: c.total_budget,
+    spent: spendMap[c.id] || 0,
+  }))
+}
+
+export async function getRecentInvoices(limit = 5) {
+  const { data } = await supabaseAdmin
+    .from('invoices')
+    .select('id, subcontractor_name, invoice_number, amount_ttc, status, submitted_at, invoice_date')
+    .order('created_at', { ascending: false })
+    .limit(limit)
+  return data || []
+}
+
+export async function getPendingValidations() {
+  const { data } = await supabaseAdmin
+    .from('invoices')
+    .select('id, subcontractor_name, invoice_number, amount_ttc, status, submitted_at')
+    .in('status', ['pending_review', 'pending_placide', 'pending_hitech'])
+    .order('created_at', { ascending: false })
+  return data || []
+}
+
 export async function getDashboardStats(): Promise<DashboardStats> {
   const { data: contracts } = await supabaseAdmin
     .from('contracts')
