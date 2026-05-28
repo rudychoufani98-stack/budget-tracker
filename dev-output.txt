@@ -1,0 +1,594 @@
+
+> esg-tracker@0.1.0 dev
+> next dev
+
+  ▲ Next.js 14.2.35
+  - Local:        http://localhost:3000
+  - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 3.4s
+ ○ Compiling /upload ...
+ ✓ Compiled /upload in 6.4s (654 modules)
+ GET /upload 200 in 6859ms
+ ✓ Compiled in 511ms (321 modules)
+ GET /upload 200 in 44ms
+ ⚠ ./app/upload/page.tsx
+Attempted import error: 'supabase' is not exported from '@/lib/supabase' (imported as 'supabase').
+
+Import trace for requested module:
+./app/upload/page.tsx
+
+./app/upload/page.tsx
+Attempted import error: 'supabase' is not exported from '@/lib/supabase' (imported as 'supabase').
+
+Import trace for requested module:
+./app/upload/page.tsx
+
+./app/upload/page.tsx
+Attempted import error: 'supabase' is not exported from '@/lib/supabase' (imported as 'supabase').
+
+Import trace for requested module:
+./app/upload/page.tsx
+
+./app/upload/page.tsx
+Attempted import error: 'supabase' is not exported from '@/lib/supabase' (imported as 'supabase').
+
+Import trace for requested module:
+./app/upload/page.tsx
+
+./app/upload/page.tsx
+Attempted import error: 'supabase' is not exported from '@/lib/supabase' (imported as 'supabase').
+
+Import trace for requested module:
+./app/upload/page.tsx
+ ✓ Compiled in 304ms (321 modules)
+ ✓ Compiled in 134ms (321 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, lstat 'C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js'
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Resolving '../../../../.next/server/app/upload/page' in C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server for build dependencies doesn't lead to expected result 'C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js', but to 'Error: Can't resolve '../../../../.next/server/app/upload/page' in 'C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server'' instead. Resolving dependencies are ignored for this path.
+<w>  at resolve commonjs file ../../../../.next/server/app/upload/page (expected C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js)
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\require.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\require.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\load-components.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\load-components.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\utils.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\utils.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\handle-externals.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\handle-externals.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at resolve commonjs C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+ ✓ Compiled in 170ms (321 modules)
+ ✓ Compiled in 97ms (321 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, lstat 'C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js'
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Resolving '../../../../.next/server/app/upload/page' in C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server for build dependencies doesn't lead to expected result 'C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js', but to 'Error: Can't resolve '../../../../.next/server/app/upload/page' in 'C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server'' instead. Resolving dependencies are ignored for this path.
+<w>  at resolve commonjs file ../../../../.next/server/app/upload/page (expected C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js)
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\require.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\require.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\load-components.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\load-components.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\utils.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\utils.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\handle-externals.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\handle-externals.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at resolve commonjs C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+ ✓ Compiled in 171ms (321 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, lstat 'C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js'
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Resolving '../../../../.next/server/app/upload/page' in C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server for build dependencies doesn't lead to expected result 'C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js', but to 'Error: Can't resolve '../../../../.next/server/app/upload/page' in 'C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server'' instead. Resolving dependencies are ignored for this path.
+<w>  at resolve commonjs file ../../../../.next/server/app/upload/page (expected C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js)
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\require.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\require.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\load-components.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\load-components.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\utils.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\utils.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-app-loader.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-app-loader.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\bundle5.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\bundle5.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\webpack.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\webpack.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\plugins\define-env-plugin.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\plugins\define-env-plugin.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\swc\index.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\swc\index.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\analysis\parse-module.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\analysis\parse-module.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\analysis\get-page-static-info.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\analysis\get-page-static-info.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-flight-client-module-loader.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-flight-client-module-loader.js
+<w>  at resolve commonjs C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-flight-client-module-loader.js
+   Reload env: .env.local
+ ✓ Compiled in 390ms (321 modules)
+ ✓ Compiled in 150ms (321 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, lstat 'C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js'
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Resolving '../../../../.next/server/app/upload/page' in C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server for build dependencies doesn't lead to expected result 'C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js', but to 'Error: Can't resolve '../../../../.next/server/app/upload/page' in 'C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server'' instead. Resolving dependencies are ignored for this path.
+<w>  at resolve commonjs file ../../../../.next/server/app/upload/page (expected C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js)
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\require.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\require.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\load-components.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\load-components.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\utils.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\utils.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-app-loader.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-app-loader.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\bundle5.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\bundle5.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\webpack.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\webpack.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\plugins\define-env-plugin.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\plugins\define-env-plugin.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\swc\index.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\swc\index.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at resolve commonjs C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+ ✓ Compiled in 319ms (321 modules)
+   Reload env: .env.local
+ ✓ Compiled in 137ms (307 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, lstat 'C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js'
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Resolving '../../../../.next/server/app/upload/page' in C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server for build dependencies doesn't lead to expected result 'C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js', but to 'Error: Can't resolve '../../../../.next/server/app/upload/page' in 'C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server'' instead. Resolving dependencies are ignored for this path.
+<w>  at resolve commonjs file ../../../../.next/server/app/upload/page (expected C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js)
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\require.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\require.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\load-components.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\load-components.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\utils.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\utils.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\handle-externals.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\handle-externals.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at resolve commonjs C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+ ✓ Compiled in 279ms (321 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, lstat 'C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js'
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Resolving '../../../../.next/server/app/upload/page' in C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server for build dependencies doesn't lead to expected result 'C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js', but to 'Error: Can't resolve '../../../../.next/server/app/upload/page' in 'C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server'' instead. Resolving dependencies are ignored for this path.
+<w>  at resolve commonjs file ../../../../.next/server/app/upload/page (expected C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js)
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\require.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\require.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\load-components.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\load-components.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\utils.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\utils.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-app-loader.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-app-loader.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\bundle5.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\bundle5.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\webpack.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\webpack.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\plugins\define-env-plugin.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\plugins\define-env-plugin.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\swc\index.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\swc\index.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at resolve commonjs C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+ ✓ Compiled in 168ms (321 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, lstat 'C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js'
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Resolving '../../../../.next/server/app/upload/page' in C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server for build dependencies doesn't lead to expected result 'C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js', but to 'Error: Can't resolve '../../../../.next/server/app/upload/page' in 'C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server'' instead. Resolving dependencies are ignored for this path.
+<w>  at resolve commonjs file ../../../../.next/server/app/upload/page (expected C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js)
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\require.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\require.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\load-components.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\load-components.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\utils.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\utils.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-app-loader.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-app-loader.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\bundle5.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\bundle5.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\webpack.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\webpack.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\plugins\define-env-plugin.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\plugins\define-env-plugin.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\swc\index.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\swc\index.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at resolve commonjs C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+ ✓ Compiled in 141ms (321 modules)
+ ✓ Compiled in 81ms (321 modules)
+ ✓ Compiled in 94ms (321 modules)
+ ✓ Compiled in 114ms (321 modules)
+ ✓ Compiled in 138ms (321 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, lstat 'C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js'
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Resolving '../../../../.next/server/app/upload/page' in C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server for build dependencies doesn't lead to expected result 'C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js', but to 'Error: Can't resolve '../../../../.next/server/app/upload/page' in 'C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server'' instead. Resolving dependencies are ignored for this path.
+<w>  at resolve commonjs file ../../../../.next/server/app/upload/page (expected C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js)
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\require.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\require.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\load-components.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\load-components.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\utils.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\utils.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-app-loader.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-app-loader.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\bundle5.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\bundle5.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\webpack.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\webpack.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\plugins\define-env-plugin.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\plugins\define-env-plugin.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\swc\index.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\swc\index.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at resolve commonjs C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+ ✓ Compiled in 347ms (321 modules)
+ ✓ Compiled in 164ms (321 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, lstat 'C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js'
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Resolving '../../../../.next/server/app/upload/page' in C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server for build dependencies doesn't lead to expected result 'C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js', but to 'Error: Can't resolve '../../../../.next/server/app/upload/page' in 'C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server'' instead. Resolving dependencies are ignored for this path.
+<w>  at resolve commonjs file ../../../../.next/server/app/upload/page (expected C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js)
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\require.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\require.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\load-components.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\load-components.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\utils.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\utils.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\plugins\flight-client-entry-plugin.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\plugins\flight-client-entry-plugin.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack-config.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack-config.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at resolve commonjs C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+ ✓ Compiled in 196ms (321 modules)
+ ✓ Compiled in 132ms (321 modules)
+ ✓ Compiled in 128ms (321 modules)
+ ✓ Compiled in 165ms (321 modules)
+ ✓ Compiled in 101ms (321 modules)
+ ✓ Compiled in 144ms (321 modules)
+ ✓ Compiled in 140ms (321 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, lstat 'C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js'
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Resolving '../../../../.next/server/app/upload/page' in C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server for build dependencies doesn't lead to expected result 'C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js', but to 'Error: Can't resolve '../../../../.next/server/app/upload/page' in 'C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server'' instead. Resolving dependencies are ignored for this path.
+<w>  at resolve commonjs file ../../../../.next/server/app/upload/page (expected C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js)
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\require.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\require.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\load-components.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\load-components.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\utils.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\utils.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-app-loader.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-app-loader.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\bundle5.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\bundle5.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\webpack.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\webpack.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\plugins\define-env-plugin.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\plugins\define-env-plugin.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\swc\index.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\swc\index.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at resolve commonjs C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+ ✓ Compiled in 118ms (321 modules)
+ ✓ Compiled in 77ms (321 modules)
+ ✓ Compiled in 147ms (321 modules)
+ ✓ Compiled in 98ms (321 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, lstat 'C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js'
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Resolving '../../../../.next/server/app/upload/page' in C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server for build dependencies doesn't lead to expected result 'C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js', but to 'Error: Can't resolve '../../../../.next/server/app/upload/page' in 'C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server'' instead. Resolving dependencies are ignored for this path.
+<w>  at resolve commonjs file ../../../../.next/server/app/upload/page (expected C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js)
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\require.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\require.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\load-components.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\load-components.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\utils.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\utils.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-app-loader.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-app-loader.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\bundle5.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\bundle5.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\webpack.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\webpack.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\plugins\define-env-plugin.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\plugins\define-env-plugin.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\swc\index.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\swc\index.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at resolve commonjs C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+ ✓ Compiled in 167ms (321 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, lstat 'C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js'
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Resolving '../../../../.next/server/app/upload/page' in C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server for build dependencies doesn't lead to expected result 'C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js', but to 'Error: Can't resolve '../../../../.next/server/app/upload/page' in 'C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server'' instead. Resolving dependencies are ignored for this path.
+<w>  at resolve commonjs file ../../../../.next/server/app/upload/page (expected C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js)
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\require.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\require.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\load-components.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\load-components.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\utils.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\utils.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-app-loader.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-app-loader.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\bundle5.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\bundle5.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\webpack.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\webpack.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\plugins\define-env-plugin.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\plugins\define-env-plugin.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\swc\index.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\swc\index.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at resolve commonjs C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+ ✓ Compiled in 151ms (321 modules)
+ ✓ Compiled in 99ms (321 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, lstat 'C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js'
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Resolving '../../../../.next/server/app/upload/page' in C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server for build dependencies doesn't lead to expected result 'C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js', but to 'Error: Can't resolve '../../../../.next/server/app/upload/page' in 'C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server'' instead. Resolving dependencies are ignored for this path.
+<w>  at resolve commonjs file ../../../../.next/server/app/upload/page (expected C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js)
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\require.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\require.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\load-components.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\load-components.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\utils.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\utils.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-route-loader\index.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-route-loader\index.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\entries.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\entries.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\plugins\next-types-plugin\index.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\plugins\next-types-plugin\index.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack-config.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack-config.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at resolve commonjs C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+ ✓ Compiled in 286ms (321 modules)
+ ✓ Compiled in 186ms (321 modules)
+ ✓ Compiled in 152ms (321 modules)
+ ✓ Compiled in 246ms (321 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, lstat 'C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js'
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Resolving '../../../../.next/server/app/upload/page' in C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server for build dependencies doesn't lead to expected result 'C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js', but to 'Error: Can't resolve '../../../../.next/server/app/upload/page' in 'C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server'' instead. Resolving dependencies are ignored for this path.
+<w>  at resolve commonjs file ../../../../.next/server/app/upload/page (expected C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js)
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\require.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\require.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\load-components.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\load-components.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\utils.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\utils.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-app-loader.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-app-loader.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\bundle5.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\bundle5.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\webpack.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\webpack.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\plugins\define-env-plugin.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\plugins\define-env-plugin.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\swc\index.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\swc\index.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\analysis\parse-module.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\analysis\parse-module.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\analysis\get-page-static-info.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\analysis\get-page-static-info.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-flight-client-module-loader.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-flight-client-module-loader.js
+<w>  at resolve commonjs C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-flight-client-module-loader.js
+ ✓ Compiled in 262ms (321 modules)
+ ✓ Compiled in 286ms (321 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, lstat 'C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js'
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Resolving '../../../../.next/server/app/upload/page' in C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server for build dependencies doesn't lead to expected result 'C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js', but to 'Error: Can't resolve '../../../../.next/server/app/upload/page' in 'C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server'' instead. Resolving dependencies are ignored for this path.
+<w>  at resolve commonjs file ../../../../.next/server/app/upload/page (expected C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js)
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\require.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\require.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\load-components.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\load-components.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\utils.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\utils.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-app-loader.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-app-loader.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\bundle5.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\bundle5.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\webpack.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\webpack.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\plugins\define-env-plugin.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\plugins\define-env-plugin.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\swc\index.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\swc\index.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\analysis\parse-module.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\analysis\parse-module.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\analysis\get-page-static-info.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\analysis\get-page-static-info.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-flight-client-module-loader.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-flight-client-module-loader.js
+<w>  at resolve commonjs C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-flight-client-module-loader.js
+ ✓ Compiled in 287ms (321 modules)
+ ✓ Compiled in 142ms (321 modules)
+ ✓ Compiled in 73ms (321 modules)
+ ✓ Compiled in 75ms (321 modules)
+ ✓ Compiled in 133ms (321 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, lstat 'C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js'
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Resolving '../../../../.next/server/app/upload/page' in C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server for build dependencies doesn't lead to expected result 'C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js', but to 'Error: Can't resolve '../../../../.next/server/app/upload/page' in 'C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server'' instead. Resolving dependencies are ignored for this path.
+<w>  at resolve commonjs file ../../../../.next/server/app/upload/page (expected C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js)
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\require.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\require.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\load-components.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\load-components.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\utils.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\utils.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-app-loader.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-app-loader.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\bundle5.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\bundle5.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\webpack.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\webpack.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\plugins\define-env-plugin.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\plugins\define-env-plugin.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\swc\index.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\swc\index.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\analysis\parse-module.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\analysis\parse-module.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\analysis\get-page-static-info.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\analysis\get-page-static-info.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-flight-client-module-loader.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-flight-client-module-loader.js
+<w>  at resolve commonjs C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-flight-client-module-loader.js
+ ✓ Compiled in 143ms (321 modules)
+ ✓ Compiled in 129ms (321 modules)
+ ✓ Compiled in 200ms (321 modules)
+ ✓ Compiled in 224ms (321 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, lstat 'C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js'
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Resolving '../../../../.next/server/app/upload/page' in C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server for build dependencies doesn't lead to expected result 'C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js', but to 'Error: Can't resolve '../../../../.next/server/app/upload/page' in 'C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server'' instead. Resolving dependencies are ignored for this path.
+<w>  at resolve commonjs file ../../../../.next/server/app/upload/page (expected C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js)
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\require.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\require.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\load-components.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\load-components.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\utils.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\utils.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-app-loader.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-app-loader.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\bundle5.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\bundle5.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\webpack.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\webpack.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\plugins\define-env-plugin.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\plugins\define-env-plugin.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\swc\index.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\swc\index.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at resolve commonjs C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+ ✓ Compiled in 254ms (321 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, lstat 'C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js'
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Resolving '../../../../.next/server/app/upload/page' in C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server for build dependencies doesn't lead to expected result 'C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js', but to 'Error: Can't resolve '../../../../.next/server/app/upload/page' in 'C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server'' instead. Resolving dependencies are ignored for this path.
+<w>  at resolve commonjs file ../../../../.next/server/app/upload/page (expected C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js)
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\require.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\require.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\load-components.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\load-components.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\utils.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\utils.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-app-loader.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-app-loader.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\bundle5.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\bundle5.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\webpack.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\webpack.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\plugins\define-env-plugin.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\plugins\define-env-plugin.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack-config.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack-config.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at resolve commonjs C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+ ✓ Compiled in 115ms (321 modules)
+ ✓ Compiled in 75ms (321 modules)
+ ✓ Compiled in 86ms (321 modules)
+ ✓ Compiled in 73ms (321 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, lstat 'C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js'
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Resolving '../../../../.next/server/app/upload/page' in C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server for build dependencies doesn't lead to expected result 'C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js', but to 'Error: Can't resolve '../../../../.next/server/app/upload/page' in 'C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server'' instead. Resolving dependencies are ignored for this path.
+<w>  at resolve commonjs file ../../../../.next/server/app/upload/page (expected C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js)
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\require.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\require.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\load-components.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\load-components.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\utils.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\utils.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-app-loader.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-app-loader.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\bundle5.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\bundle5.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\webpack.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\webpack.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\plugins\define-env-plugin.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\plugins\define-env-plugin.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\swc\index.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\swc\index.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at resolve commonjs C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+ ✓ Compiled in 109ms (321 modules)
+ ✓ Compiled in 143ms (321 modules)
+ ✓ Compiled in 86ms (321 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, lstat 'C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js'
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Resolving '../../../../.next/server/app/upload/page' in C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server for build dependencies doesn't lead to expected result 'C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js', but to 'Error: Can't resolve '../../../../.next/server/app/upload/page' in 'C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server'' instead. Resolving dependencies are ignored for this path.
+<w>  at resolve commonjs file ../../../../.next/server/app/upload/page (expected C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js)
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\require.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\require.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\load-components.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\load-components.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\utils.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\utils.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\handle-externals.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\handle-externals.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at resolve commonjs C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+ ✓ Compiled in 144ms (321 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, lstat 'C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js'
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Resolving '../../../../.next/server/app/upload/page' in C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server for build dependencies doesn't lead to expected result 'C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js', but to 'Error: Can't resolve '../../../../.next/server/app/upload/page' in 'C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server'' instead. Resolving dependencies are ignored for this path.
+<w>  at resolve commonjs file ../../../../.next/server/app/upload/page (expected C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js)
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\require.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\require.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\load-components.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\load-components.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\utils.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\utils.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-app-loader.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-app-loader.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\bundle5.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\bundle5.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\webpack.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\webpack.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\plugins\define-env-plugin.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\plugins\define-env-plugin.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\swc\index.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\swc\index.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at resolve commonjs C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+ ✓ Compiled in 105ms (321 modules)
+ ✓ Compiled in 75ms (321 modules)
+ ✓ Compiled in 44ms (307 modules)
+ ✓ Compiled in 91ms (321 modules)
+ ✓ Compiled in 72ms (307 modules)
+ ✓ Compiled in 83ms (321 modules)
+ ✓ Compiled in 45ms (307 modules)
+ ✓ Compiled in 233ms (335 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, lstat 'C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js'
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Resolving '../../../../.next/server/app/upload/page' in C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server for build dependencies doesn't lead to expected result 'C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js', but to 'Error: Can't resolve '../../../../.next/server/app/upload/page' in 'C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server'' instead. Resolving dependencies are ignored for this path.
+<w>  at resolve commonjs file ../../../../.next/server/app/upload/page (expected C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js)
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\require.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\require.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\load-components.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\load-components.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\utils.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\utils.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\plugins\flight-client-entry-plugin.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\plugins\flight-client-entry-plugin.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack-config.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack-config.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at resolve commonjs C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
