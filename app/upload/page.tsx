@@ -69,8 +69,8 @@ export default function UploadPage() {
       if (!res.ok) throw new Error(data.error || 'Scan failed')
       setScanned(data)
       setStep('review')
-    } catch {
-      setError('AI scanning failed. Please check your Claude API key and try again.')
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'AI scanning failed. Please try again.')
     }
     setScanning(false)
   }
