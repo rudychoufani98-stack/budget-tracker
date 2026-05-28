@@ -9,8 +9,8 @@ const NAVY = '#0C1F52'
 
 const STATUS: Record<string, { label: string; color: string; bg: string; dot: string }> = {
   pending_review:  { label: 'Awaiting Rudy',    color: '#C2410C', bg: '#FFF7ED', dot: '#F97316' },
-  pending_placide: { label: 'Awaiting Placide',  color: '#854D0E', bg: '#FEFCE8', dot: '#EAB308' },
-  pending_hitech:  { label: 'Awaiting Dani',     color: '#92400E', bg: '#FFFBEB', dot: '#FCD34D' },
+  pending_placide: { label: 'Awaiting Placide',  color: '#78350F', bg: '#FEF3C7', dot: '#D97706' },
+  pending_hitech:  { label: 'Awaiting Dani',     color: '#A16207', bg: '#FEFCE8', dot: '#FACC15' },
   approved:        { label: 'Approved',           color: '#065F46', bg: '#D1FAE5', dot: '#059669' },
   rejected:        { label: 'Rejected',           color: '#991B1B', bg: '#FEE2E2', dot: '#DC2626' },
 }
