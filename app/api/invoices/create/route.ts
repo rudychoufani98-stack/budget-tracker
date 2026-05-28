@@ -6,12 +6,10 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { invoice, line_items } = body
 
-    // Insert invoice using admin client (bypasses schema cache issues)
-    const { data: inv, error: invErr } = await supabaseAdmin
-      .from('invoices')
-      .insert(invoice)
-      .select()
-      .single()
+    // Use RPC function to bypass PostgREST schema cache
+    const { data: invId, error: invErr } = await supabaseAdmin
+      .rpc('insert_invoice', { data: invoice })
+    const inv = { id: invId }
 
     if (invErr) {
       console.error('Invoice insert error:', invErr)
