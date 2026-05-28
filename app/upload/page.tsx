@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 
@@ -39,11 +39,11 @@ export default function UploadPage() {
   const [error, setError] = useState('')
   const [step, setStep] = useState<'upload' | 'review' | 'done'>('upload')
 
-  useState(() => {
+  useEffect(() => {
     supabase.from('contracts').select('id, contract_name').eq('status', 'active').then(({ data }) => {
       setContracts(data || [])
     })
-  })
+  }, [])
 
   function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0]
