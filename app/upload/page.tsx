@@ -108,6 +108,7 @@ export default function UploadPage() {
           subcontractor_name: scanned.subcontractor_name,
           invoice_number: scanned.invoice_number,
           invoice_date: scanned.invoice_date || null,
+          currency: scanned.currency || 'EUR',
           amount_ht: scanned.amount_ht,
           amount_tva: scanned.amount_tva,
           amount_ttc: scanned.amount_ttc,
@@ -124,12 +125,6 @@ export default function UploadPage() {
       if (scanned.line_items?.length > 0) {
         await supabase.from('invoice_line_items').insert(scanned.line_items.map(item => ({ ...item, invoice_id: inv.id })))
       }
-
-      await fetch(`/api/invoices/${inv.id}/validate`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ decision: 'submitted', validator_name: 'System', comment: 'Invoice uploaded and scanned automatically' }),
-      }).catch(() => {})
 
       setStep('done')
       setTimeout(() => router.push(`/invoices/${inv.id}`), 2000)
