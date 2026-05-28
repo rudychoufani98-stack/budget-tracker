@@ -135,7 +135,11 @@ export default function UploadPage() {
       setStep('done')
       setTimeout(() => router.push(`/invoices/${inv.id}`), 2000)
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Submission failed. Please try again.')
+      const msg = e instanceof Error
+        ? e.message
+        : (e as { message?: string })?.message ?? JSON.stringify(e)
+      console.error('Submit error:', e)
+      setError(`Error: ${msg}`)
     }
     setSubmitting(false)
   }
