@@ -25,6 +25,7 @@ export default function InvoiceDetailPage() {
   const [invoice, setInvoice] = useState<Invoice | null>(null)
   const [lineItems, setLineItems] = useState<InvoiceLineItem[]>([])
   const [validations, setValidations] = useState<Validation[]>([])
+  const [currency, setCurrency] = useState('EUR')
   const [loading, setLoading] = useState(true)
   const [validatorName, setValidatorName] = useState('')
   const [comment, setComment] = useState('')
@@ -38,10 +39,12 @@ export default function InvoiceDetailPage() {
     const { data: inv } = await supabase.from('invoices').select('*').eq('id', id).single()
     const { data: items } = await supabase.from('invoice_line_items').select('*').eq('invoice_id', id)
     const { data: vals } = await supabase.from('validations').select('*').eq('invoice_id', id).order('validated_at')
+    const { data: cur } = await supabase.from('invoice_currency').select('currency').eq('invoice_id', id).single()
     setInvoice(inv)
     setEditData(inv || {})
     setLineItems(items || [])
     setValidations(vals || [])
+    if (cur?.currency) setCurrency(cur.currency)
     setLoading(false)
   }
 
@@ -261,15 +264,15 @@ export default function InvoiceDetailPage() {
             <div className="space-y-2.5">
               <div className="flex justify-between text-sm">
                 <span className="text-gray-500">Excl. VAT</span>
-                <span className="font-medium text-gray-800">{formatCurrency(invoice.amount_ht, invoice.currency || 'EUR')}</span>
+                <span className="font-medium text-gray-800">{formatCurrency(invoice.amount_ht, currency)}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-gray-500">VAT ({invoice.vat_rate || 0}%)</span>
-                <span className="font-medium text-gray-800">{formatCurrency(invoice.amount_tva, invoice.currency || 'EUR')}</span>
+                <span className="font-medium text-gray-800">{formatCurrency(invoice.amount_tva, currency)}</span>
               </div>
               <div className="flex justify-between pt-3 border-t border-gray-100">
                 <span className="font-semibold text-gray-800">Total incl. VAT</span>
-                <span className="text-xl font-bold" style={{ color: NAVY }}>{formatCurrency(invoice.amount_ttc, invoice.currency || 'EUR')}</span>
+                <span className="text-xl font-bold" style={{ color: NAVY }}>{formatCurrency(invoice.amount_ttc, currency)}</span>
               </div>
             </div>
           </div>
@@ -297,10 +300,10 @@ export default function InvoiceDetailPage() {
                       <tr key={item.id} className="hover:bg-gray-50">
                         <td className="px-6 py-3 text-gray-700">{item.description || '—'}</td>
                         <td className="px-4 py-3 text-right text-gray-500">{item.quantity ?? '—'}</td>
-                        <td className="px-4 py-3 text-right text-gray-500">{formatCurrency(item.unit_price, invoice.currency || 'EUR')}</td>
-                        <td className="px-4 py-3 text-right text-gray-700">{formatCurrency(item.total_ht, invoice.currency || 'EUR')}</td>
+                        <td className="px-4 py-3 text-right text-gray-500">{formatCurrency(item.unit_price, currency)}</td>
+                        <td className="px-4 py-3 text-right text-gray-700">{formatCurrency(item.total_ht, currency)}</td>
                         <td className="px-4 py-3 text-right text-gray-400">{item.vat_rate ? `${item.vat_rate}%` : '—'}</td>
-                        <td className="px-6 py-3 text-right font-semibold" style={{ color: NAVY }}>{formatCurrency(item.total_ttc, invoice.currency || 'EUR')}</td>
+                        <td className="px-6 py-3 text-right font-semibold" style={{ color: NAVY }}>{formatCurrency(item.total_ttc, currency)}</td>
                       </tr>
                     ))}
                   </tbody>
