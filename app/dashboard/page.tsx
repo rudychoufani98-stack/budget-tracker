@@ -6,12 +6,14 @@ import { ContractDonutChart } from '@/components/charts/ContractDonutChart'
 
 export const revalidate = 0
 
-const STATUS: Record<string, { label: string; color: string; dot: string }> = {
-  pending_review:  { label: 'Awaiting Rudy',    color: '#F59E0B', dot: '#F59E0B' },
-  pending_placide: { label: 'Awaiting Placide',  color: '#F59E0B', dot: '#F59E0B' },
-  pending_hitech:  { label: 'Awaiting Hitech',   color: '#8B5CF6', dot: '#8B5CF6' },
-  approved:        { label: 'Approved',           color: '#10B981', dot: '#10B981' },
-  rejected:        { label: 'Rejected',           color: '#EF4444', dot: '#EF4444' },
+const NAVY = '#0C1F52'
+
+const STATUS: Record<string, { label: string; color: string; bg: string; dot: string }> = {
+  pending_review:  { label: 'Awaiting Rudy',    color: '#92400E', bg: '#FEF3C7', dot: '#D97706' },
+  pending_placide: { label: 'Awaiting Placide',  color: '#92400E', bg: '#FEF3C7', dot: '#D97706' },
+  pending_hitech:  { label: 'Awaiting Hitech',   color: '#5B21B6', bg: '#EDE9FE', dot: '#7C3AED' },
+  approved:        { label: 'Approved',           color: '#065F46', bg: '#D1FAE5', dot: '#059669' },
+  rejected:        { label: 'Rejected',           color: '#991B1B', bg: '#FEE2E2', dot: '#DC2626' },
 }
 
 export default async function DashboardPage() {
@@ -30,18 +32,18 @@ export default async function DashboardPage() {
   return (
     <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
 
-      {/* Page header */}
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: '#9CA3AF' }}>
+          <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: '#6B7280' }}>
             Overview
           </p>
-          <h1 className="text-2xl font-bold" style={{ color: '#F9FAFB' }}>Financial Dashboard</h1>
+          <h1 className="text-2xl font-bold" style={{ color: NAVY }}>Financial Dashboard</h1>
         </div>
         <Link
           href="/upload"
-          className="flex items-center gap-2 text-sm font-semibold px-4 py-2.5 rounded-xl shadow-sm"
-          style={{ background: '#10B981', color: '#fff' }}
+          className="flex items-center gap-2 text-sm font-semibold px-4 py-2.5 rounded-xl text-white shadow-sm"
+          style={{ background: NAVY }}
         >
           <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
             <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
@@ -50,61 +52,26 @@ export default async function DashboardPage() {
         </Link>
       </div>
 
-      {/* KPI row */}
+      {/* KPI cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <KpiCard
-          label="Total Budget"
-          value={formatCurrency(stats.totalBudget)}
-          sub="Active contracts"
-          icon={<BudgetIcon />}
-        />
-        <KpiCard
-          label="Total Spent"
-          value={formatCurrency(stats.totalSpent)}
-          sub={`${pct}% consumed`}
-          icon={<SpentIcon />}
-          accent
-        />
-        <KpiCard
-          label="Remaining"
-          value={formatCurrency(stats.totalRemaining)}
-          sub={stats.totalRemaining < 0 ? 'Over budget' : 'Available'}
-          icon={<RemainingIcon />}
-          positive={stats.totalRemaining >= 0}
-          danger={stats.totalRemaining < 0}
-        />
-        <KpiCard
-          label="Pending Approval"
-          value={String(pendingTotal)}
-          sub={`${stats.pendingRudy} · ${stats.pendingPlacide} · ${stats.pendingHitech}`}
-          icon={<PendingIcon />}
-          warn
-        />
+        <KpiCard label="Total Budget" value={formatCurrency(stats.totalBudget)} sub="Active contracts" icon={<BudgetIcon />} />
+        <KpiCard label="Total Spent" value={formatCurrency(stats.totalSpent)} sub={`${pct}% consumed`} icon={<SpentIcon />} navy />
+        <KpiCard label="Remaining" value={formatCurrency(stats.totalRemaining)} sub={stats.totalRemaining < 0 ? 'Over budget' : 'Available'} icon={<RemainingIcon />} positive={stats.totalRemaining >= 0} danger={stats.totalRemaining < 0} />
+        <KpiCard label="Pending Approval" value={String(pendingTotal)} sub={`${stats.pendingRudy} · ${stats.pendingPlacide} · ${stats.pendingHitech}`} icon={<PendingIcon />} warn />
       </div>
 
-      {/* Charts row */}
+      {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        {/* Monthly spend */}
-        <div className="rounded-2xl border p-6" style={{ background: '#111827', borderColor: '#1F2937' }}>
-          <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: '#9CA3AF' }}>
-            Monthly Spend
-          </p>
-          <p className="text-sm font-semibold mb-6" style={{ color: '#F9FAFB' }}>
-            Last 6 months — approved invoices
-          </p>
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+          <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: '#6B7280' }}>Monthly Spend</p>
+          <p className="text-sm font-semibold mb-6" style={{ color: NAVY }}>Last 6 months — approved invoices</p>
           <div style={{ height: 180 }}>
             <SpendBarChart data={stats.monthlyData} />
           </div>
         </div>
-
-        {/* Budget per contract donut */}
-        <div className="rounded-2xl border p-6" style={{ background: '#111827', borderColor: '#1F2937' }}>
-          <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: '#9CA3AF' }}>
-            Budget by Contract
-          </p>
-          <p className="text-sm font-semibold mb-6" style={{ color: '#F9FAFB' }}>
-            Consumption by active contract
-          </p>
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+          <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: '#6B7280' }}>Budget by Contract</p>
+          <p className="text-sm font-semibold mb-6" style={{ color: NAVY }}>Consumption by active contract</p>
           <div style={{ height: 180 }}>
             <ContractDonutChart data={contractBudgets} />
           </div>
@@ -112,77 +79,78 @@ export default async function DashboardPage() {
       </div>
 
       {/* Budget bar */}
-      <div className="rounded-2xl border p-6" style={{ background: '#111827', borderColor: '#1F2937' }}>
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
         <div className="flex items-end justify-between mb-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: '#9CA3AF' }}>
+            <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: '#6B7280' }}>
               Overall Budget Consumption
             </p>
-            <p className="text-sm" style={{ color: '#9CA3AF' }}>
-              <span className="font-bold" style={{ color: '#F9FAFB' }}>{formatCurrency(stats.totalSpent)}</span>
+            <p className="text-sm" style={{ color: '#6B7280' }}>
+              <span className="font-bold" style={{ color: '#111928' }}>{formatCurrency(stats.totalSpent)}</span>
               {' '}spent of {formatCurrency(stats.totalBudget)}
             </p>
           </div>
           <span
             className="text-4xl font-bold tabular-nums"
-            style={{ color: pct >= 90 ? '#EF4444' : pct >= 80 ? '#F59E0B' : '#10B981' }}
+            style={{ color: pct >= 90 ? '#DC2626' : pct >= 80 ? '#D97706' : NAVY }}
           >
             {pct}<span className="text-2xl">%</span>
           </span>
         </div>
-        <div className="h-3 rounded-full overflow-hidden" style={{ background: '#1F2937' }}>
+        <div className="h-3 rounded-full overflow-hidden bg-gray-100">
           <div
             className="h-full rounded-full transition-all duration-700"
             style={{
               width: `${pct}%`,
-              background: pct >= 90 ? '#EF4444' : pct >= 80 ? '#F59E0B' : '#10B981',
+              background: pct >= 90 ? '#DC2626' : pct >= 80 ? '#D97706' : NAVY,
             }}
           />
         </div>
-        <div className="flex justify-between mt-2 text-xs" style={{ color: '#9CA3AF' }}>
+        <div className="flex justify-between mt-2 text-xs" style={{ color: '#6B7280' }}>
           <span>€0</span>
           <span>{formatCurrency(stats.totalBudget)}</span>
         </div>
       </div>
 
-      {/* Tables row */}
+      {/* Tables */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {/* Recent invoices */}
-        <div className="rounded-2xl border overflow-hidden" style={{ background: '#111827', borderColor: '#1F2937' }}>
-          <div className="px-6 py-4 border-b flex items-center justify-between" style={{ borderColor: '#1F2937' }}>
-            <p className="text-sm font-semibold" style={{ color: '#F9FAFB' }}>Recent Invoices</p>
-            <Link href="/invoices" className="text-xs font-medium" style={{ color: '#10B981' }}>
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+            <p className="text-sm font-semibold" style={{ color: NAVY }}>Recent Invoices</p>
+            <Link href="/invoices" className="text-xs font-medium hover:underline" style={{ color: NAVY }}>
               View all →
             </Link>
           </div>
           {recentInvoices.length === 0 ? (
             <EmptyState message="No invoices yet" />
           ) : (
-            <div className="divide-y" style={{ borderColor: '#1F2937' }}>
+            <div className="divide-y divide-gray-50">
               {recentInvoices.map((inv) => {
                 const s = STATUS[inv.status] ?? STATUS.pending_review
                 return (
                   <Link
                     key={inv.id}
                     href={`/invoices/${inv.id}`}
-                    className="flex items-center justify-between px-6 py-3.5 group"
-                    style={{ transition: 'background 150ms' }}
-                    onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.03)')}
-                    onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                    className="flex items-center justify-between px-6 py-3.5 hover:bg-gray-50 transition-colors"
                   >
                     <div className="min-w-0">
-                      <p className="text-sm font-medium truncate" style={{ color: '#F9FAFB' }}>
+                      <p className="text-sm font-medium truncate" style={{ color: '#111928' }}>
                         {inv.subcontractor_name || '—'}
                       </p>
-                      <p className="text-xs mt-0.5" style={{ color: '#9CA3AF' }}>
+                      <p className="text-xs mt-0.5" style={{ color: '#6B7280' }}>
                         {inv.invoice_number || 'No number'} · {formatDate(inv.invoice_date || inv.submitted_at)}
                       </p>
                     </div>
                     <div className="flex items-center gap-3 shrink-0 ml-4">
-                      <span className="text-sm font-bold tabular-nums" style={{ color: '#F9FAFB' }}>
+                      <span className="text-sm font-bold tabular-nums" style={{ color: '#111928' }}>
                         {formatCurrency(inv.amount_ttc)}
                       </span>
-                      <StatusDot color={s.dot} label={s.label} />
+                      <span
+                        className="w-2 h-2 rounded-full shrink-0"
+                        style={{ background: s.dot }}
+                        title={s.label}
+                      />
                     </div>
                   </Link>
                 )
@@ -192,14 +160,11 @@ export default async function DashboardPage() {
         </div>
 
         {/* Pending validations */}
-        <div className="rounded-2xl border overflow-hidden" style={{ background: '#111827', borderColor: '#1F2937' }}>
-          <div className="px-6 py-4 border-b flex items-center justify-between" style={{ borderColor: '#1F2937' }}>
-            <p className="text-sm font-semibold" style={{ color: '#F9FAFB' }}>Pending Validations</p>
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+            <p className="text-sm font-semibold" style={{ color: NAVY }}>Pending Validations</p>
             {pendingValidations.length > 0 && (
-              <span
-                className="text-xs font-bold px-2 py-0.5 rounded-full"
-                style={{ background: 'rgba(245,158,11,0.15)', color: '#F59E0B' }}
-              >
+              <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">
                 {pendingValidations.length}
               </span>
             )}
@@ -207,33 +172,30 @@ export default async function DashboardPage() {
           {pendingValidations.length === 0 ? (
             <EmptyState message="All invoices are processed" icon="check" />
           ) : (
-            <div className="divide-y" style={{ borderColor: '#1F2937' }}>
+            <div className="divide-y divide-gray-50">
               {pendingValidations.slice(0, 5).map((inv) => {
                 const s = STATUS[inv.status] ?? STATUS.pending_review
                 return (
                   <Link
                     key={inv.id}
                     href={`/invoices/${inv.id}`}
-                    className="flex items-center justify-between px-6 py-3.5"
-                    style={{ transition: 'background 150ms' }}
-                    onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.03)')}
-                    onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                    className="flex items-center justify-between px-6 py-3.5 hover:bg-gray-50 transition-colors"
                   >
                     <div className="min-w-0">
-                      <p className="text-sm font-medium truncate" style={{ color: '#F9FAFB' }}>
+                      <p className="text-sm font-medium truncate" style={{ color: '#111928' }}>
                         {inv.subcontractor_name || '—'}
                       </p>
-                      <p className="text-xs mt-0.5" style={{ color: '#9CA3AF' }}>
+                      <p className="text-xs mt-0.5" style={{ color: '#6B7280' }}>
                         {formatDate(inv.submitted_at)}
                       </p>
                     </div>
                     <div className="flex items-center gap-3 shrink-0 ml-4">
-                      <span className="text-sm font-bold tabular-nums" style={{ color: '#F9FAFB' }}>
+                      <span className="text-sm font-bold tabular-nums" style={{ color: '#111928' }}>
                         {formatCurrency(inv.amount_ttc)}
                       </span>
                       <span
-                        className="text-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap"
-                        style={{ background: `${s.dot}18`, color: s.color }}
+                        className="text-xs font-semibold px-2.5 py-1 rounded-full"
+                        style={{ background: s.bg, color: s.color }}
                       >
                         {s.label}
                       </span>
@@ -247,75 +209,50 @@ export default async function DashboardPage() {
       </div>
 
       {/* VAT Summary */}
-      <div className="rounded-2xl border p-6" style={{ background: '#111827', borderColor: '#1F2937' }}>
-        <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: '#9CA3AF' }}>
-          VAT Summary
-        </p>
-        <p className="text-sm font-semibold mb-5" style={{ color: '#F9FAFB' }}>
-          Current quarter — approved invoices
-        </p>
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+        <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: '#6B7280' }}>VAT Summary</p>
+        <p className="text-sm font-semibold mb-5" style={{ color: NAVY }}>Current quarter — approved invoices</p>
         <div className="grid grid-cols-3 gap-4">
-          <VatCard label="Total Excl. VAT" value={formatCurrency(stats.vatSummary.totalHT)} />
-          <VatCard label="Recoverable VAT" value={formatCurrency(stats.vatSummary.totalTVA)} accent />
-          <VatCard label="Total Incl. VAT" value={formatCurrency(stats.vatSummary.totalTTC)} />
+          <div className="bg-gray-50 rounded-xl p-5 text-center">
+            <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-1">Total Excl. VAT</p>
+            <p className="text-xl font-bold tabular-nums" style={{ color: '#111928' }}>{formatCurrency(stats.vatSummary.totalHT)}</p>
+          </div>
+          <div className="rounded-xl p-5 text-center text-white" style={{ background: NAVY }}>
+            <p className="text-xs font-semibold uppercase tracking-wide mb-1 opacity-60">Recoverable VAT</p>
+            <p className="text-xl font-bold tabular-nums">{formatCurrency(stats.vatSummary.totalTVA)}</p>
+          </div>
+          <div className="bg-gray-50 rounded-xl p-5 text-center">
+            <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-1">Total Incl. VAT</p>
+            <p className="text-xl font-bold tabular-nums" style={{ color: '#111928' }}>{formatCurrency(stats.vatSummary.totalTTC)}</p>
+          </div>
         </div>
       </div>
-
     </div>
   )
 }
 
-function KpiCard({
-  label, value, sub, icon, accent, positive, danger, warn,
-}: {
+function KpiCard({ label, value, sub, icon, navy, positive, danger, warn }: {
   label: string; value: string; sub: string; icon: React.ReactNode
-  accent?: boolean; positive?: boolean; danger?: boolean; warn?: boolean
+  navy?: boolean; positive?: boolean; danger?: boolean; warn?: boolean
 }) {
-  const valueColor = accent ? '#10B981' : danger ? '#EF4444' : positive ? '#10B981' : warn ? '#F59E0B' : '#F9FAFB'
+  const valueColor = navy ? '#0C1F52' : danger ? '#DC2626' : positive ? '#059669' : warn ? '#D97706' : '#111928'
   return (
-    <div className="rounded-2xl border p-5" style={{ background: '#111827', borderColor: '#1F2937' }}>
+    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
       <div className="flex items-start justify-between mb-4">
-        <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: '#9CA3AF' }}>{label}</p>
+        <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: '#6B7280' }}>{label}</p>
         <div style={{ color: '#9CA3AF' }}>{icon}</div>
       </div>
       <p className="text-2xl font-bold tabular-nums" style={{ color: valueColor }}>{value}</p>
-      <p className="text-xs mt-1" style={{ color: '#9CA3AF' }}>{sub}</p>
+      <p className="text-xs mt-1" style={{ color: '#6B7280' }}>{sub}</p>
     </div>
-  )
-}
-
-function VatCard({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
-  return (
-    <div
-      className="rounded-xl p-5 text-center"
-      style={accent
-        ? { background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.3)' }
-        : { background: '#1F2937' }
-      }
-    >
-      <p className="text-xs font-semibold uppercase tracking-wide mb-1" style={{ color: accent ? '#10B981' : '#9CA3AF' }}>
-        {label}
-      </p>
-      <p className="text-xl font-bold tabular-nums" style={{ color: accent ? '#10B981' : '#F9FAFB' }}>
-        {value}
-      </p>
-    </div>
-  )
-}
-
-function StatusDot({ color, label }: { color: string; label: string }) {
-  return (
-    <span className="flex items-center gap-1.5 text-xs font-medium" style={{ color }}>
-      <span className="w-2 h-2 rounded-full" style={{ background: color }} />
-    </span>
   )
 }
 
 function EmptyState({ message, icon = 'doc' }: { message: string; icon?: string }) {
   return (
-    <div className="flex flex-col items-center justify-center py-12" style={{ color: '#9CA3AF' }}>
+    <div className="flex flex-col items-center justify-center py-12 text-gray-300">
       {icon === 'check' ? (
-        <svg width="32" height="32" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24" className="mb-3" style={{ color: '#10B981' }}>
+        <svg width="32" height="32" fill="none" stroke="#059669" strokeWidth="1.5" viewBox="0 0 24 24" className="mb-3">
           <path d="M20 6L9 17l-5-5" />
         </svg>
       ) : (
@@ -324,42 +261,20 @@ function EmptyState({ message, icon = 'doc' }: { message: string; icon?: string 
           <polyline points="14 2 14 8 20 8" />
         </svg>
       )}
-      <p className="text-sm font-medium">{message}</p>
+      <p className="text-sm font-medium text-gray-400">{message}</p>
     </div>
   )
 }
 
 function BudgetIcon() {
-  return (
-    <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
-      <rect x="2" y="7" width="20" height="14" rx="2" />
-      <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
-    </svg>
-  )
+  return <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" /><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" /></svg>
 }
-
 function SpentIcon() {
-  return (
-    <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
-      <line x1="12" y1="1" x2="12" y2="23" />
-      <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-    </svg>
-  )
+  return <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>
 }
-
 function RemainingIcon() {
-  return (
-    <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
-      <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-    </svg>
-  )
+  return <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></svg>
 }
-
 function PendingIcon() {
-  return (
-    <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
-      <circle cx="12" cy="12" r="10" />
-      <polyline points="12 6 12 12 16 14" />
-    </svg>
-  )
+  return <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
 }

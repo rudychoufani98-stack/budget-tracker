@@ -7,20 +7,22 @@ import { CsvExportButton } from '@/components/CsvExportButton'
 
 export const revalidate = 0
 
-const STATUS: Record<string, { label: string; color: string; bg: string }> = {
-  pending_review:  { label: 'Awaiting Rudy',    color: '#F59E0B', bg: 'rgba(245,158,11,0.12)' },
-  pending_placide: { label: 'Awaiting Placide',  color: '#F59E0B', bg: 'rgba(245,158,11,0.12)' },
-  pending_hitech:  { label: 'Awaiting Hitech',   color: '#8B5CF6', bg: 'rgba(139,92,246,0.12)' },
-  approved:        { label: 'Approved',           color: '#10B981', bg: 'rgba(16,185,129,0.12)' },
-  rejected:        { label: 'Rejected',           color: '#EF4444', bg: 'rgba(239,68,68,0.12)'  },
+const NAVY = '#0C1F52'
+
+const STATUS: Record<string, { label: string; color: string; bg: string; dot: string }> = {
+  pending_review:  { label: 'Awaiting Rudy',    color: '#92400E', bg: '#FEF3C7', dot: '#D97706' },
+  pending_placide: { label: 'Awaiting Placide',  color: '#92400E', bg: '#FEF3C7', dot: '#D97706' },
+  pending_hitech:  { label: 'Awaiting Hitech',   color: '#5B21B6', bg: '#EDE9FE', dot: '#7C3AED' },
+  approved:        { label: 'Approved',           color: '#065F46', bg: '#D1FAE5', dot: '#059669' },
+  rejected:        { label: 'Rejected',           color: '#991B1B', bg: '#FEE2E2', dot: '#DC2626' },
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
-  Subcontracting: '#10B981',
-  Travel: '#F59E0B',
-  Accommodation: '#3B82F6',
-  Meals: '#8B5CF6',
-  Equipment: '#EC4899',
+  Subcontracting: '#0C1F52',
+  Travel: '#D97706',
+  Accommodation: '#1E40AF',
+  Meals: '#7C3AED',
+  Equipment: '#DB2777',
   Other: '#9CA3AF',
 }
 
@@ -33,6 +35,7 @@ export default async function ContractDetailPage({ params }: { params: { id: str
   const spent = approvedInvoices.reduce((s, i) => s + (i.amount_ttc || 0), 0)
   const remaining = contract.total_budget - spent
   const pct = calcPercent(spent, contract.total_budget)
+  const barColor = pct >= 90 ? '#DC2626' : pct >= 80 ? '#D97706' : NAVY
 
   const categoryMap: Record<string, number> = {}
   for (const inv of approvedInvoices) {
@@ -62,102 +65,70 @@ export default async function ContractDetailPage({ params }: { params: { id: str
   return (
     <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
       {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-sm" style={{ color: '#9CA3AF' }}>
-        <Link href="/contracts" style={{ color: '#9CA3AF' }}>Contracts</Link>
+      <div className="flex items-center gap-2 text-sm text-gray-400">
+        <Link href="/contracts" className="hover:text-blue-600 transition-colors">Contracts</Link>
         <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
           <polyline points="9 18 15 12 9 6" />
         </svg>
-        <span className="font-medium truncate" style={{ color: '#F9FAFB' }}>{contract.contract_name}</span>
+        <span className="font-medium truncate" style={{ color: '#111928' }}>{contract.contract_name}</span>
       </div>
 
       {/* Header card */}
-      <div className="rounded-2xl border p-6" style={{ background: '#111827', borderColor: '#1F2937' }}>
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
         <div className="flex items-start justify-between gap-4 mb-6">
           <div>
             <div className="flex items-center gap-2.5 flex-wrap mb-1">
-              <h1 className="text-xl font-bold" style={{ color: '#F9FAFB' }}>{contract.contract_name}</h1>
-              <span
-                className="text-xs px-2.5 py-1 rounded-full font-medium"
-                style={{ background: 'rgba(16,185,129,0.12)', color: '#10B981' }}
-              >
+              <h1 className="text-xl font-bold" style={{ color: NAVY }}>{contract.contract_name}</h1>
+              <span className="text-xs px-2.5 py-1 rounded-full font-medium bg-blue-50 text-blue-700">
                 {contract.contract_type}
               </span>
               <span
                 className="text-xs px-2.5 py-1 rounded-full font-medium"
-                style={
-                  contract.status === 'active'
-                    ? { background: 'rgba(16,185,129,0.12)', color: '#10B981' }
-                    : { background: '#1F2937', color: '#9CA3AF' }
-                }
+                style={contract.status === 'active' ? { background: '#D1FAE5', color: '#065F46' } : { background: '#F3F4F6', color: '#6B7280' }}
               >
                 {contract.status === 'active' ? 'Active' : 'Closed'}
               </span>
             </div>
-            <p className="text-sm" style={{ color: '#9CA3AF' }}>
+            <p className="text-sm text-gray-400">
               {contract.client_name} · {formatDate(contract.start_date)} → {formatDate(contract.end_date)}
             </p>
           </div>
           <CsvExportButton invoices={invoices} contractName={contract.contract_name} />
         </div>
 
-        {/* Budget KPIs */}
         <div className="grid grid-cols-3 gap-4 mb-5">
-          <div className="rounded-xl p-4" style={{ background: '#1F2937' }}>
-            <p className="text-xs mb-1" style={{ color: '#9CA3AF' }}>Total Budget</p>
-            <p className="text-lg font-bold" style={{ color: '#F9FAFB' }}>{formatCurrency(contract.total_budget, contract.currency)}</p>
+          <div className="bg-gray-50 rounded-xl p-4">
+            <p className="text-xs text-gray-400 mb-1">Total Budget</p>
+            <p className="text-lg font-bold" style={{ color: '#111928' }}>{formatCurrency(contract.total_budget, contract.currency)}</p>
           </div>
-          <div className="rounded-xl p-4" style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)' }}>
-            <p className="text-xs mb-1" style={{ color: '#10B981' }}>Spent</p>
-            <p className="text-lg font-bold" style={{ color: '#10B981' }}>{formatCurrency(spent)}</p>
+          <div className="rounded-xl p-4" style={{ background: '#EFF6FF' }}>
+            <p className="text-xs text-blue-400 mb-1">Spent</p>
+            <p className="text-lg font-bold text-blue-700">{formatCurrency(spent)}</p>
           </div>
-          <div
-            className="rounded-xl p-4"
-            style={
-              remaining < 0
-                ? { background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)' }
-                : { background: '#1F2937' }
-            }
-          >
-            <p className="text-xs mb-1" style={{ color: remaining < 0 ? '#EF4444' : '#9CA3AF' }}>Remaining</p>
-            <p className="text-lg font-bold" style={{ color: remaining < 0 ? '#EF4444' : '#F9FAFB' }}>
-              {formatCurrency(remaining)}
-            </p>
+          <div className={`rounded-xl p-4 ${remaining < 0 ? 'bg-red-50' : 'bg-emerald-50'}`}>
+            <p className={`text-xs mb-1 ${remaining < 0 ? 'text-red-400' : 'text-emerald-400'}`}>Remaining</p>
+            <p className={`text-lg font-bold ${remaining < 0 ? 'text-red-600' : 'text-emerald-700'}`}>{formatCurrency(remaining)}</p>
           </div>
         </div>
 
-        {/* Progress */}
         <div>
-          <div className="flex justify-between text-xs mb-1.5" style={{ color: '#9CA3AF' }}>
+          <div className="flex justify-between text-xs text-gray-400 mb-1.5">
             <span>Budget consumption</span>
-            <span
-              className="font-semibold"
-              style={{ color: pct >= 90 ? '#EF4444' : pct >= 80 ? '#F59E0B' : '#10B981' }}
-            >
-              {pct}%
-            </span>
+            <span className="font-semibold" style={{ color: barColor }}>{pct}%</span>
           </div>
-          <div className="h-2.5 rounded-full overflow-hidden" style={{ background: '#1F2937' }}>
-            <div
-              className="h-full rounded-full transition-all"
-              style={{
-                width: `${Math.min(pct, 100)}%`,
-                background: pct >= 90 ? '#EF4444' : pct >= 80 ? '#F59E0B' : '#10B981',
-              }}
-            />
+          <div className="h-2.5 rounded-full overflow-hidden bg-gray-100">
+            <div className="h-full rounded-full transition-all" style={{ width: `${Math.min(pct, 100)}%`, background: barColor }} />
           </div>
         </div>
       </div>
 
-      {/* Charts row */}
+      {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        {/* Category breakdown */}
-        <div className="rounded-2xl border p-6" style={{ background: '#111827', borderColor: '#1F2937' }}>
-          <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: '#9CA3AF' }}>By Category</p>
-          <p className="text-sm font-semibold mb-5" style={{ color: '#F9FAFB' }}>Approved invoices — total TTC</p>
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+          <p className="text-xs font-semibold uppercase tracking-widest mb-1 text-gray-400">By Category</p>
+          <p className="text-sm font-semibold mb-5" style={{ color: NAVY }}>Approved invoices — total TTC</p>
           {categoryData.length === 0 ? (
-            <div className="flex items-center justify-center h-40 text-sm" style={{ color: '#9CA3AF' }}>
-              No approved invoices
-            </div>
+            <div className="flex items-center justify-center h-40 text-sm text-gray-400">No approved invoices</div>
           ) : (
             <div className="space-y-3">
               {categoryData.map(([cat, amt]) => {
@@ -166,14 +137,11 @@ export default async function ContractDetailPage({ params }: { params: { id: str
                 return (
                   <div key={cat}>
                     <div className="flex items-center justify-between text-xs mb-1">
-                      <span style={{ color: '#F9FAFB' }}>{cat}</span>
-                      <span style={{ color: '#9CA3AF' }}>{formatCurrency(amt)} · {catPct}%</span>
+                      <span className="font-medium text-gray-700">{cat}</span>
+                      <span className="text-gray-400">{formatCurrency(amt)} · {catPct}%</span>
                     </div>
-                    <div className="h-1.5 rounded-full" style={{ background: '#1F2937' }}>
-                      <div
-                        className="h-full rounded-full"
-                        style={{ width: `${catPct}%`, background: color }}
-                      />
+                    <div className="h-1.5 rounded-full bg-gray-100">
+                      <div className="h-full rounded-full" style={{ width: `${catPct}%`, background: color }} />
                     </div>
                   </div>
                 )
@@ -182,10 +150,9 @@ export default async function ContractDetailPage({ params }: { params: { id: str
           )}
         </div>
 
-        {/* Monthly spend */}
-        <div className="rounded-2xl border p-6" style={{ background: '#111827', borderColor: '#1F2937' }}>
-          <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: '#9CA3AF' }}>Monthly Spend</p>
-          <p className="text-sm font-semibold mb-5" style={{ color: '#F9FAFB' }}>Last 6 months</p>
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+          <p className="text-xs font-semibold uppercase tracking-widest mb-1 text-gray-400">Monthly Spend</p>
+          <p className="text-sm font-semibold mb-5" style={{ color: NAVY }}>Last 6 months</p>
           <div style={{ height: 160 }}>
             <SpendBarChart data={monthlyData} />
           </div>
@@ -193,57 +160,50 @@ export default async function ContractDetailPage({ params }: { params: { id: str
       </div>
 
       {/* VAT Summary */}
-      <div className="rounded-2xl border p-6" style={{ background: '#111827', borderColor: '#1F2937' }}>
-        <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: '#9CA3AF' }}>VAT Summary</p>
-        <p className="text-sm font-semibold mb-5" style={{ color: '#F9FAFB' }}>Approved invoices</p>
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+        <p className="text-xs font-semibold uppercase tracking-widest mb-1 text-gray-400">VAT Summary</p>
+        <p className="text-sm font-semibold mb-5" style={{ color: NAVY }}>Approved invoices</p>
         <div className="grid grid-cols-3 gap-4">
-          <div className="rounded-xl p-5 text-center" style={{ background: '#1F2937' }}>
-            <p className="text-xs font-semibold uppercase tracking-wide mb-1" style={{ color: '#9CA3AF' }}>Total Excl. VAT</p>
-            <p className="text-xl font-bold tabular-nums" style={{ color: '#F9FAFB' }}>{formatCurrency(totalHT)}</p>
+          <div className="bg-gray-50 rounded-xl p-5 text-center">
+            <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-1">Total Excl. VAT</p>
+            <p className="text-xl font-bold tabular-nums" style={{ color: '#111928' }}>{formatCurrency(totalHT)}</p>
           </div>
-          <div className="rounded-xl p-5 text-center" style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.3)' }}>
-            <p className="text-xs font-semibold uppercase tracking-wide mb-1" style={{ color: '#10B981' }}>Recoverable VAT</p>
-            <p className="text-xl font-bold tabular-nums" style={{ color: '#10B981' }}>{formatCurrency(totalTVA)}</p>
+          <div className="rounded-xl p-5 text-center text-white" style={{ background: NAVY }}>
+            <p className="text-xs font-semibold uppercase tracking-wide mb-1 opacity-60">Recoverable VAT</p>
+            <p className="text-xl font-bold tabular-nums">{formatCurrency(totalTVA)}</p>
           </div>
-          <div className="rounded-xl p-5 text-center" style={{ background: '#1F2937' }}>
-            <p className="text-xs font-semibold uppercase tracking-wide mb-1" style={{ color: '#9CA3AF' }}>Total Incl. VAT</p>
-            <p className="text-xl font-bold tabular-nums" style={{ color: '#F9FAFB' }}>{formatCurrency(totalTTC)}</p>
+          <div className="bg-gray-50 rounded-xl p-5 text-center">
+            <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-1">Total Incl. VAT</p>
+            <p className="text-xl font-bold tabular-nums" style={{ color: '#111928' }}>{formatCurrency(totalTTC)}</p>
           </div>
         </div>
       </div>
 
       {/* Invoices table */}
-      <div className="rounded-2xl border overflow-hidden" style={{ background: '#111827', borderColor: '#1F2937' }}>
-        <div className="px-6 py-4 border-b flex items-center justify-between" style={{ borderColor: '#1F2937' }}>
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
           <div>
-            <p className="text-sm font-semibold" style={{ color: '#F9FAFB' }}>Related Invoices</p>
-            <p className="text-xs mt-0.5" style={{ color: '#9CA3AF' }}>
-              {invoices.length} invoice{invoices.length !== 1 ? 's' : ''}
-            </p>
+            <p className="text-sm font-semibold" style={{ color: NAVY }}>Related Invoices</p>
+            <p className="text-xs text-gray-400 mt-0.5">{invoices.length} invoice{invoices.length !== 1 ? 's' : ''}</p>
           </div>
         </div>
         {invoices.length === 0 ? (
-          <div className="p-12 text-center text-sm" style={{ color: '#9CA3AF' }}>
-            No invoices linked to this contract
-          </div>
+          <div className="p-12 text-center text-sm text-gray-400">No invoices linked to this contract</div>
         ) : (
-          <div className="divide-y" style={{ borderColor: '#1F2937' }}>
+          <div className="divide-y divide-gray-50">
             {invoices.map((invoice) => {
               const s = STATUS[invoice.status] ?? STATUS.pending_review
               return (
                 <Link
                   key={invoice.id}
                   href={`/invoices/${invoice.id}`}
-                  className="flex items-center justify-between px-6 py-4 group"
-                  style={{ transition: 'background 150ms' }}
-                  onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.03)')}
-                  onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                  className="flex items-center justify-between px-6 py-4 hover:bg-gray-50 transition-colors group"
                 >
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate" style={{ color: '#F9FAFB' }}>
-                      {invoice.subcontractor_name || 'Unknown subcontractor'}
+                    <p className="text-sm font-medium truncate group-hover:text-blue-600 transition-colors" style={{ color: '#111928' }}>
+                      {invoice.subcontractor_name || 'Unknown'}
                     </p>
-                    <p className="text-xs mt-0.5" style={{ color: '#9CA3AF' }}>
+                    <p className="text-xs text-gray-400 mt-0.5">
                       {invoice.invoice_number ? `# ${invoice.invoice_number} · ` : ''}
                       {formatDate(invoice.invoice_date || invoice.submitted_at)}
                       {invoice.category ? ` · ${invoice.category}` : ''}
@@ -254,13 +214,13 @@ export default async function ContractDetailPage({ params }: { params: { id: str
                       className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full"
                       style={{ background: s.bg, color: s.color }}
                     >
-                      <span className="w-1.5 h-1.5 rounded-full" style={{ background: s.color }} />
+                      <span className="w-1.5 h-1.5 rounded-full" style={{ background: s.dot }} />
                       {s.label}
                     </span>
-                    <p className="text-sm font-bold w-28 text-right tabular-nums" style={{ color: '#F9FAFB' }}>
+                    <p className="text-sm font-bold w-28 text-right tabular-nums" style={{ color: '#111928' }}>
                       {formatCurrency(invoice.amount_ttc)}
                     </p>
-                    <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" style={{ color: '#9CA3AF' }}>
+                    <svg className="text-gray-300 group-hover:text-blue-400 transition-colors" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                       <polyline points="9 18 15 12 9 6" />
                     </svg>
                   </div>

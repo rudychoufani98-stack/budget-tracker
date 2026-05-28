@@ -11,8 +11,8 @@ import { Doughnut } from 'react-chartjs-2'
 ChartJS.register(ArcElement, Tooltip)
 
 const PALETTE = [
-  '#10B981', '#F59E0B', '#3B82F6', '#8B5CF6',
-  '#EC4899', '#06B6D4', '#EF4444', '#84CC16',
+  '#0C1F52', '#1E40AF', '#059669', '#D97706',
+  '#7C3AED', '#DB2777', '#0891B2', '#65A30D',
 ]
 
 interface ContractBudget {
@@ -28,7 +28,7 @@ interface Props {
 export function ContractDonutChart({ data }: Props) {
   if (!data.length) {
     return (
-      <div className="flex items-center justify-center h-full text-sm" style={{ color: '#9CA3AF' }}>
+      <div className="flex items-center justify-center h-full text-sm" style={{ color: '#6B7280' }}>
         No contracts yet
       </div>
     )
@@ -41,10 +41,10 @@ export function ContractDonutChart({ data }: Props) {
     plugins: {
       legend: { display: false },
       tooltip: {
-        backgroundColor: '#1F2937',
-        titleColor: '#9CA3AF',
-        bodyColor: '#F9FAFB',
-        borderColor: '#374151',
+        backgroundColor: '#0C1F52',
+        titleColor: 'rgba(255,255,255,0.6)',
+        bodyColor: '#fff',
+        borderColor: 'rgba(255,255,255,0.1)',
         borderWidth: 1,
         padding: 10,
         callbacks: {
@@ -65,7 +65,8 @@ export function ContractDonutChart({ data }: Props) {
       {
         data: data.map((d) => d.budget),
         backgroundColor: PALETTE.slice(0, data.length),
-        borderWidth: 0,
+        borderWidth: 2,
+        borderColor: '#fff',
         hoverOffset: 4,
       },
     ],
@@ -87,14 +88,14 @@ export function ContractDonutChart({ data }: Props) {
               />
               <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between gap-2">
-                  <p className="text-xs font-medium truncate" style={{ color: '#F9FAFB' }}>
+                  <p className="text-xs font-medium truncate" style={{ color: '#111928' }}>
                     {d.name}
                   </p>
-                  <span className="text-xs tabular-nums shrink-0" style={{ color: '#9CA3AF' }}>
+                  <span className="text-xs tabular-nums shrink-0" style={{ color: '#6B7280' }}>
                     {pct}%
                   </span>
                 </div>
-                <div className="h-1 rounded-full mt-1" style={{ background: '#1F2937' }}>
+                <div className="h-1 rounded-full mt-1" style={{ background: '#E5E7EB' }}>
                   <div
                     className="h-full rounded-full"
                     style={{ width: `${Math.min(pct, 100)}%`, background: PALETTE[i % PALETTE.length] }}

@@ -15,10 +15,7 @@ export function TopNav() {
   const pathname = usePathname()
 
   return (
-    <header
-      className="sticky top-0 z-50 border-b"
-      style={{ background: '#111827', borderColor: '#1F2937' }}
-    >
+    <header className="sticky top-0 z-50" style={{ background: '#0C1F52' }}>
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between gap-8">
         {/* Logo */}
         <Link href="/dashboard" className="shrink-0">
@@ -27,7 +24,7 @@ export function TopNav() {
             alt="Skykapital"
             width={140}
             height={40}
-            className="brightness-0 invert opacity-90"
+            className="brightness-0 invert opacity-95"
             priority
           />
         </Link>
@@ -42,17 +39,23 @@ export function TopNav() {
               <Link
                 key={href}
                 href={href}
-                className="px-4 py-2 rounded-lg text-sm font-medium transition-all"
+                className="px-4 py-2 rounded-lg text-sm font-medium"
                 style={
                   active
-                    ? { color: '#10B981', background: 'rgba(16,185,129,0.1)' }
-                    : { color: '#9CA3AF' }
+                    ? { color: '#fff', background: 'rgba(255,255,255,0.15)' }
+                    : { color: 'rgba(255,255,255,0.6)' }
                 }
                 onMouseEnter={e => {
-                  if (!active) (e.currentTarget as HTMLElement).style.color = '#F9FAFB'
+                  if (!active) {
+                    (e.currentTarget as HTMLElement).style.color = '#fff'
+                    ;(e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.08)'
+                  }
                 }}
                 onMouseLeave={e => {
-                  if (!active) (e.currentTarget as HTMLElement).style.color = '#9CA3AF'
+                  if (!active) {
+                    (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.6)'
+                    ;(e.currentTarget as HTMLElement).style.background = 'transparent'
+                  }
                 }}
               >
                 {label}
@@ -64,12 +67,12 @@ export function TopNav() {
         {/* User avatar */}
         <div className="flex items-center gap-3 shrink-0">
           <div className="text-right hidden sm:block">
-            <p className="text-sm font-semibold" style={{ color: '#F9FAFB' }}>Rudy Choufani</p>
-            <p className="text-xs" style={{ color: '#9CA3AF' }}>Administrator</p>
+            <p className="text-sm font-semibold text-white">Rudy Choufani</p>
+            <p className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>Administrator</p>
           </div>
           <div
             className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold"
-            style={{ background: '#10B981' }}
+            style={{ background: 'rgba(255,255,255,0.2)' }}
           >
             RC
           </div>

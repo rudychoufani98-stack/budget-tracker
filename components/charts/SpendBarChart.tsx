@@ -23,10 +23,10 @@ export function SpendBarChart({ data }: Props) {
     plugins: {
       legend: { display: false },
       tooltip: {
-        backgroundColor: '#1F2937',
-        titleColor: '#9CA3AF',
-        bodyColor: '#F9FAFB',
-        borderColor: '#374151',
+        backgroundColor: '#0C1F52',
+        titleColor: 'rgba(255,255,255,0.6)',
+        bodyColor: '#fff',
+        borderColor: 'rgba(255,255,255,0.1)',
         borderWidth: 1,
         padding: 10,
         callbacks: {
@@ -39,7 +39,7 @@ export function SpendBarChart({ data }: Props) {
       x: {
         grid: { display: false },
         border: { display: false },
-        ticks: { color: '#9CA3AF', font: { size: 11, family: 'Inter' } },
+        ticks: { color: '#6B7280', font: { size: 11, family: 'Inter' } },
       },
       y: {
         display: false,
@@ -55,7 +55,7 @@ export function SpendBarChart({ data }: Props) {
       {
         data: data.map((d) => d.amount),
         backgroundColor: data.map((_, i) =>
-          i === data.length - 1 ? '#10B981' : 'rgba(16,185,129,0.35)'
+          i === data.length - 1 ? '#0C1F52' : 'rgba(12,31,82,0.25)'
         ),
         borderRadius: 6,
         borderSkipped: false,

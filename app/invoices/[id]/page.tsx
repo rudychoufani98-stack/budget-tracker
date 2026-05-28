@@ -7,15 +7,18 @@ import { supabase } from '@/lib/supabase'
 import { formatCurrency, formatDate } from '@/lib/format'
 import type { Invoice, InvoiceLineItem, Validation } from '@/lib/types'
 
-const STATUS: Record<string, { label: string; color: string; bg: string }> = {
-  pending_review:  { label: 'Awaiting Rudy',    color: '#F59E0B', bg: 'rgba(245,158,11,0.12)' },
-  pending_placide: { label: 'Awaiting Placide',  color: '#F59E0B', bg: 'rgba(245,158,11,0.12)' },
-  pending_hitech:  { label: 'Awaiting Hitech',   color: '#8B5CF6', bg: 'rgba(139,92,246,0.12)' },
-  approved:        { label: 'Approved',           color: '#10B981', bg: 'rgba(16,185,129,0.12)' },
-  rejected:        { label: 'Rejected',           color: '#EF4444', bg: 'rgba(239,68,68,0.12)'  },
+const NAVY = '#0C1F52'
+
+const STATUS: Record<string, { label: string; color: string; bg: string; dot: string }> = {
+  pending_review:  { label: 'Awaiting Rudy',    color: '#92400E', bg: '#FEF3C7', dot: '#D97706' },
+  pending_placide: { label: 'Awaiting Placide',  color: '#92400E', bg: '#FEF3C7', dot: '#D97706' },
+  pending_hitech:  { label: 'Awaiting Hitech',   color: '#5B21B6', bg: '#EDE9FE', dot: '#7C3AED' },
+  approved:        { label: 'Approved',           color: '#065F46', bg: '#D1FAE5', dot: '#059669' },
+  rejected:        { label: 'Rejected',           color: '#991B1B', bg: '#FEE2E2', dot: '#DC2626' },
 }
 
 const STEPS = ['pending_review', 'pending_placide', 'pending_hitech', 'approved']
+const STEP_LABELS = ['Rudy', 'Placide', 'Hitech', 'Done']
 
 export default function InvoiceDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -85,18 +88,14 @@ export default function InvoiceDetailPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen" style={{ background: '#0A0F1E' }}>
-        <div className="text-sm" style={{ color: '#9CA3AF' }}>Loading…</div>
+      <div className="flex items-center justify-center h-screen" style={{ background: '#F4F6FA' }}>
+        <div className="text-sm text-gray-400">Loading…</div>
       </div>
     )
   }
 
   if (!invoice) {
-    return (
-      <div className="p-8">
-        <p className="font-medium" style={{ color: '#EF4444' }}>Invoice not found.</p>
-      </div>
-    )
+    return <div className="p-8 text-red-600 font-medium">Invoice not found.</div>
   }
 
   const canValidate = ['pending_review', 'pending_placide', 'pending_hitech'].includes(invoice.status)
@@ -107,30 +106,30 @@ export default function InvoiceDetailPage() {
   return (
     <div className="max-w-7xl mx-auto px-6 py-8">
       {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-sm mb-6" style={{ color: '#9CA3AF' }}>
-        <Link href="/invoices" style={{ color: '#9CA3AF' }}>Invoices</Link>
+      <div className="flex items-center gap-2 text-sm text-gray-400 mb-6">
+        <Link href="/invoices" className="hover:text-blue-600 transition-colors">Invoices</Link>
         <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
           <polyline points="9 18 15 12 9 6" />
         </svg>
-        <span style={{ color: '#F9FAFB' }} className="font-medium truncate">
+        <span className="font-medium truncate" style={{ color: '#111928' }}>
           {invoice.subcontractor_name || 'Invoice'}
         </span>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
 
-        {/* LEFT COLUMN */}
+        {/* LEFT */}
         <div className="space-y-5">
 
           {/* Header card */}
-          <div className="rounded-2xl border p-6" style={{ background: '#111827', borderColor: '#1F2937' }}>
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
             <div className="flex items-start justify-between gap-3 mb-5">
               <div>
-                <h1 className="text-xl font-bold" style={{ color: '#F9FAFB' }}>
+                <h1 className="text-xl font-bold" style={{ color: NAVY }}>
                   {invoice.subcontractor_name || 'Unknown subcontractor'}
                 </h1>
                 {invoice.invoice_number && (
-                  <p className="text-sm mt-0.5" style={{ color: '#9CA3AF' }}>Invoice # {invoice.invoice_number}</p>
+                  <p className="text-sm text-gray-400 mt-0.5">Invoice # {invoice.invoice_number}</p>
                 )}
               </div>
               <div className="flex items-center gap-2">
@@ -138,14 +137,13 @@ export default function InvoiceDetailPage() {
                   className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full"
                   style={{ background: s.bg, color: s.color }}
                 >
-                  <span className="w-1.5 h-1.5 rounded-full" style={{ background: s.color }} />
+                  <span className="w-1.5 h-1.5 rounded-full" style={{ background: s.dot }} />
                   {s.label}
                 </span>
                 {!editing && (
                   <button
                     onClick={() => setEditing(true)}
-                    className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg border"
-                    style={{ color: '#9CA3AF', borderColor: '#374151', background: 'transparent' }}
+                    className="flex items-center gap-1.5 text-xs font-medium text-gray-500 border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition-colors"
                   >
                     <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                       <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
@@ -157,44 +155,43 @@ export default function InvoiceDetailPage() {
               </div>
             </div>
 
-            {/* Validation steps tracker */}
+            {/* Step tracker */}
             <div className="flex items-center gap-1 mb-5">
-              {['Rudy', 'Placide', 'Hitech', 'Done'].map((step, i) => {
+              {STEP_LABELS.map((step, i) => {
                 const done = invoice.status === 'approved' || (invoice.status !== 'rejected' && i < currentStep)
                 const active = i === currentStep && invoice.status !== 'approved' && invoice.status !== 'rejected'
+                const rejected = invoice.status === 'rejected' && i === currentStep
                 return (
                   <div key={step} className="flex items-center flex-1 min-w-0">
                     <div className="flex flex-col items-center min-w-0">
                       <div
                         className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold"
                         style={
-                          invoice.status === 'rejected' && i === currentStep
-                            ? { background: 'rgba(239,68,68,0.15)', color: '#EF4444' }
+                          rejected
+                            ? { background: '#FEE2E2', color: '#DC2626' }
                             : done || (invoice.status === 'approved' && i === 3)
-                            ? { background: '#10B981', color: '#fff' }
+                            ? { background: NAVY, color: '#fff' }
                             : active
-                            ? { background: 'rgba(245,158,11,0.15)', color: '#F59E0B', border: '1px solid #F59E0B' }
-                            : { background: '#1F2937', color: '#9CA3AF' }
+                            ? { background: '#FEF3C7', color: '#D97706', border: '2px solid #D97706' }
+                            : { background: '#F3F4F6', color: '#9CA3AF' }
                         }
                       >
                         {done || (invoice.status === 'approved' && i === 3) ? (
                           <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                             <polyline points="20 6 9 17 4 12" />
                           </svg>
-                        ) : invoice.status === 'rejected' && i === currentStep ? (
-                          '✕'
-                        ) : (
-                          i + 1
-                        )}
+                        ) : rejected ? '✕' : i + 1}
                       </div>
-                      <p className="text-xs mt-1 text-center truncate w-full" style={{ color: active ? '#F59E0B' : done ? '#10B981' : '#9CA3AF' }}>
+                      <p className="text-xs mt-1 text-center truncate w-full" style={{
+                        color: active ? '#D97706' : done ? NAVY : '#9CA3AF'
+                      }}>
                         {step}
                       </p>
                     </div>
                     {i < 3 && (
                       <div
                         className="flex-1 h-px mx-1 mb-4"
-                        style={{ background: done ? '#10B981' : '#1F2937' }}
+                        style={{ background: done ? NAVY : '#E5E7EB' }}
                       />
                     )}
                   </div>
@@ -205,39 +202,38 @@ export default function InvoiceDetailPage() {
             {editing ? (
               <div className="space-y-3">
                 <div className="grid grid-cols-2 gap-3">
-                  <DarkEditField label="Subcontractor" value={editData.subcontractor_name || ''} onChange={v => setEditData(p => ({ ...p, subcontractor_name: v }))} />
-                  <DarkEditField label="Invoice #" value={editData.invoice_number || ''} onChange={v => setEditData(p => ({ ...p, invoice_number: v }))} />
-                  <DarkEditField label="Date" value={editData.invoice_date || ''} onChange={v => setEditData(p => ({ ...p, invoice_date: v }))} type="date" />
+                  <Field label="Subcontractor" value={editData.subcontractor_name || ''} onChange={v => setEditData(p => ({ ...p, subcontractor_name: v }))} />
+                  <Field label="Invoice #" value={editData.invoice_number || ''} onChange={v => setEditData(p => ({ ...p, invoice_number: v }))} />
+                  <Field label="Date" value={editData.invoice_date || ''} onChange={v => setEditData(p => ({ ...p, invoice_date: v }))} type="date" />
                   <div>
-                    <label className="text-xs font-medium block mb-1" style={{ color: '#9CA3AF' }}>Category</label>
+                    <label className="text-xs font-medium text-gray-500 block mb-1">Category</label>
                     <select
                       value={editData.category || ''}
                       onChange={e => setEditData(p => ({ ...p, category: e.target.value as Invoice['category'] }))}
-                      className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none"
-                      style={{ background: '#0A0F1E', border: '1px solid #374151', color: '#F9FAFB' }}
+                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 bg-white"
+                      style={{ '--tw-ring-color': NAVY } as React.CSSProperties}
                     >
                       {['Subcontracting','Travel','Accommodation','Meals','Equipment','Other'].map(c => (
                         <option key={c} value={c}>{c}</option>
                       ))}
                     </select>
                   </div>
-                  <DarkEditField label="Amount excl. VAT (€)" value={String(editData.amount_ht || '')} onChange={v => setEditData(p => ({ ...p, amount_ht: parseFloat(v) }))} type="number" />
-                  <DarkEditField label="VAT rate (%)" value={String(editData.vat_rate || '')} onChange={v => setEditData(p => ({ ...p, vat_rate: parseFloat(v) }))} type="number" />
-                  <DarkEditField label="VAT amount (€)" value={String(editData.amount_tva || '')} onChange={v => setEditData(p => ({ ...p, amount_tva: parseFloat(v) }))} type="number" />
-                  <DarkEditField label="Total incl. VAT (€)" value={String(editData.amount_ttc || '')} onChange={v => setEditData(p => ({ ...p, amount_ttc: parseFloat(v) }))} type="number" />
+                  <Field label="Amount excl. VAT (€)" value={String(editData.amount_ht || '')} onChange={v => setEditData(p => ({ ...p, amount_ht: parseFloat(v) }))} type="number" />
+                  <Field label="VAT rate (%)" value={String(editData.vat_rate || '')} onChange={v => setEditData(p => ({ ...p, vat_rate: parseFloat(v) }))} type="number" />
+                  <Field label="VAT amount (€)" value={String(editData.amount_tva || '')} onChange={v => setEditData(p => ({ ...p, amount_tva: parseFloat(v) }))} type="number" />
+                  <Field label="Total incl. VAT (€)" value={String(editData.amount_ttc || '')} onChange={v => setEditData(p => ({ ...p, amount_ttc: parseFloat(v) }))} type="number" />
                 </div>
                 <div className="flex gap-2 pt-1">
                   <button
                     onClick={handleSaveEdit}
                     className="flex-1 text-white text-sm font-semibold py-2.5 rounded-xl"
-                    style={{ background: '#10B981' }}
+                    style={{ background: NAVY }}
                   >
                     Save changes
                   </button>
                   <button
                     onClick={() => { setEditing(false); setEditData(invoice) }}
-                    className="px-4 py-2.5 text-sm rounded-xl border"
-                    style={{ color: '#9CA3AF', borderColor: '#374151' }}
+                    className="px-4 py-2.5 text-sm text-gray-500 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
                   >
                     Cancel
                   </button>
@@ -245,49 +241,49 @@ export default function InvoiceDetailPage() {
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-4 text-sm">
-                <DarkInfoField label="Invoice date" value={formatDate(invoice.invoice_date)} />
-                <DarkInfoField label="Category" value={invoice.category || '—'} />
-                <DarkInfoField label="VAT rate" value={invoice.vat_rate ? `${invoice.vat_rate}%` : '—'} />
-                <DarkInfoField label="Submitted" value={formatDate(invoice.submitted_at)} />
+                <InfoField label="Invoice date" value={formatDate(invoice.invoice_date)} />
+                <InfoField label="Category" value={invoice.category || '—'} />
+                <InfoField label="VAT rate" value={invoice.vat_rate ? `${invoice.vat_rate}%` : '—'} />
+                <InfoField label="Submitted" value={formatDate(invoice.submitted_at)} />
                 {invoice.description && (
                   <div className="col-span-2">
-                    <p className="text-xs mb-1" style={{ color: '#9CA3AF' }}>Description</p>
-                    <p style={{ color: '#F9FAFB' }}>{invoice.description}</p>
+                    <p className="text-xs text-gray-400 mb-0.5">Description</p>
+                    <p className="text-gray-700">{invoice.description}</p>
                   </div>
                 )}
               </div>
             )}
           </div>
 
-          {/* Amounts card */}
-          <div className="rounded-2xl border p-6" style={{ background: '#111827', borderColor: '#1F2937' }}>
-            <h2 className="text-sm font-semibold mb-4" style={{ color: '#F9FAFB' }}>Amounts</h2>
+          {/* Amounts */}
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+            <h2 className="text-sm font-semibold mb-4" style={{ color: NAVY }}>Amounts</h2>
             <div className="space-y-2.5">
               <div className="flex justify-between text-sm">
-                <span style={{ color: '#9CA3AF' }}>Excl. VAT</span>
-                <span className="font-medium" style={{ color: '#F9FAFB' }}>{formatCurrency(invoice.amount_ht)}</span>
+                <span className="text-gray-500">Excl. VAT</span>
+                <span className="font-medium text-gray-800">{formatCurrency(invoice.amount_ht)}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span style={{ color: '#9CA3AF' }}>VAT ({invoice.vat_rate || 0}%)</span>
-                <span className="font-medium" style={{ color: '#F9FAFB' }}>{formatCurrency(invoice.amount_tva)}</span>
+                <span className="text-gray-500">VAT ({invoice.vat_rate || 0}%)</span>
+                <span className="font-medium text-gray-800">{formatCurrency(invoice.amount_tva)}</span>
               </div>
-              <div className="flex justify-between pt-3 border-t" style={{ borderColor: '#1F2937' }}>
-                <span className="font-semibold" style={{ color: '#F9FAFB' }}>Total incl. VAT</span>
-                <span className="text-xl font-bold" style={{ color: '#10B981' }}>{formatCurrency(invoice.amount_ttc)}</span>
+              <div className="flex justify-between pt-3 border-t border-gray-100">
+                <span className="font-semibold text-gray-800">Total incl. VAT</span>
+                <span className="text-xl font-bold" style={{ color: NAVY }}>{formatCurrency(invoice.amount_ttc)}</span>
               </div>
             </div>
           </div>
 
           {/* Line items */}
           {lineItems.length > 0 && (
-            <div className="rounded-2xl border overflow-hidden" style={{ background: '#111827', borderColor: '#1F2937' }}>
-              <div className="px-6 py-4 border-b" style={{ borderColor: '#1F2937' }}>
-                <h2 className="text-sm font-semibold" style={{ color: '#F9FAFB' }}>Line Items</h2>
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-100">
+                <h2 className="text-sm font-semibold" style={{ color: NAVY }}>Line Items</h2>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="text-xs font-semibold uppercase tracking-wide border-b" style={{ background: '#0A0F1E', color: '#9CA3AF', borderColor: '#1F2937' }}>
+                    <tr className="bg-gray-50 text-xs font-semibold text-gray-400 uppercase tracking-wide">
                       <th className="text-left px-6 py-3">Description</th>
                       <th className="text-right px-4 py-3">Qty</th>
                       <th className="text-right px-4 py-3">Unit HT</th>
@@ -296,15 +292,15 @@ export default function InvoiceDetailPage() {
                       <th className="text-right px-6 py-3">Total TTC</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y" style={{ borderColor: '#1F2937' }}>
+                  <tbody className="divide-y divide-gray-50">
                     {lineItems.map((item) => (
-                      <tr key={item.id}>
-                        <td className="px-6 py-3" style={{ color: '#F9FAFB' }}>{item.description || '—'}</td>
-                        <td className="px-4 py-3 text-right" style={{ color: '#9CA3AF' }}>{item.quantity ?? '—'}</td>
-                        <td className="px-4 py-3 text-right" style={{ color: '#9CA3AF' }}>{formatCurrency(item.unit_price)}</td>
-                        <td className="px-4 py-3 text-right" style={{ color: '#F9FAFB' }}>{formatCurrency(item.total_ht)}</td>
-                        <td className="px-4 py-3 text-right" style={{ color: '#9CA3AF' }}>{item.vat_rate ? `${item.vat_rate}%` : '—'}</td>
-                        <td className="px-6 py-3 text-right font-semibold" style={{ color: '#10B981' }}>{formatCurrency(item.total_ttc)}</td>
+                      <tr key={item.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-3 text-gray-700">{item.description || '—'}</td>
+                        <td className="px-4 py-3 text-right text-gray-500">{item.quantity ?? '—'}</td>
+                        <td className="px-4 py-3 text-right text-gray-500">{formatCurrency(item.unit_price)}</td>
+                        <td className="px-4 py-3 text-right text-gray-700">{formatCurrency(item.total_ht)}</td>
+                        <td className="px-4 py-3 text-right text-gray-400">{item.vat_rate ? `${item.vat_rate}%` : '—'}</td>
+                        <td className="px-6 py-3 text-right font-semibold" style={{ color: NAVY }}>{formatCurrency(item.total_ttc)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -315,8 +311,8 @@ export default function InvoiceDetailPage() {
 
           {/* Validation history */}
           {validations.length > 0 && (
-            <div className="rounded-2xl border p-6" style={{ background: '#111827', borderColor: '#1F2937' }}>
-              <h2 className="text-sm font-semibold mb-4" style={{ color: '#F9FAFB' }}>Validation History</h2>
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+              <h2 className="text-sm font-semibold mb-4" style={{ color: NAVY }}>Validation History</h2>
               <div className="space-y-3">
                 {validations.map((v) => (
                   <div
@@ -324,92 +320,83 @@ export default function InvoiceDetailPage() {
                     className="rounded-xl p-4 text-sm border"
                     style={
                       v.decision === 'approved'
-                        ? { background: 'rgba(16,185,129,0.08)', borderColor: 'rgba(16,185,129,0.25)' }
-                        : { background: 'rgba(239,68,68,0.08)', borderColor: 'rgba(239,68,68,0.25)' }
+                        ? { background: '#F0FDF4', borderColor: '#BBF7D0' }
+                        : { background: '#FFF5F5', borderColor: '#FECACA' }
                     }
                   >
                     <div className="flex items-center justify-between mb-1">
-                      <span className="font-semibold capitalize" style={{ color: '#F9FAFB' }}>{v.validator_name}</span>
-                      <span className="text-xs font-semibold" style={{ color: v.decision === 'approved' ? '#10B981' : '#EF4444' }}>
+                      <span className="font-semibold text-gray-800 capitalize">{v.validator_name}</span>
+                      <span className="text-xs font-semibold" style={{ color: v.decision === 'approved' ? '#059669' : '#DC2626' }}>
                         {v.decision === 'approved' ? '✓ Approved' : '✗ Rejected'}
                       </span>
                     </div>
-                    {v.comment && (
-                      <p className="text-xs mt-1 italic" style={{ color: '#9CA3AF' }}>&ldquo;{v.comment}&rdquo;</p>
-                    )}
-                    <p className="text-xs mt-1.5" style={{ color: '#9CA3AF' }}>{formatDate(v.validated_at)}</p>
+                    {v.comment && <p className="text-xs text-gray-500 mt-1 italic">&ldquo;{v.comment}&rdquo;</p>}
+                    <p className="text-xs text-gray-400 mt-1.5">{formatDate(v.validated_at)}</p>
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          {/* Validation action panel */}
+          {/* Validation panel */}
           {canValidate && (
-            <div
-              className="rounded-2xl border-2 p-6"
-              style={{ background: '#111827', borderColor: 'rgba(245,158,11,0.4)' }}
-            >
+            <div className="bg-white rounded-2xl border-2 p-6 shadow-sm" style={{ borderColor: '#D97706' }}>
               <div className="flex items-center gap-2 mb-1">
-                <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: '#F59E0B' }} />
-                <h2 className="text-sm font-semibold" style={{ color: '#F9FAFB' }}>
+                <div className="w-2 h-2 bg-amber-400 rounded-full animate-pulse" />
+                <h2 className="text-sm font-semibold" style={{ color: '#111928' }}>
                   Action required — {validatorLabel}
                 </h2>
               </div>
-              <p className="text-xs mb-5" style={{ color: '#9CA3AF' }}>
+              <p className="text-xs text-gray-400 mb-5">
                 Compare the extracted data with the original PDF before validating.
               </p>
               <div className="space-y-3">
                 <div>
-                  <label className="text-xs font-semibold block mb-1.5" style={{ color: '#9CA3AF' }}>Your name</label>
+                  <label className="text-xs font-semibold text-gray-600 block mb-1.5">Your name</label>
                   <input
                     type="text"
                     value={validatorName}
-                    onChange={(e) => setValidatorName(e.target.value)}
+                    onChange={e => setValidatorName(e.target.value)}
                     placeholder={validatorLabel}
-                    className="w-full rounded-xl px-4 py-2.5 text-sm focus:outline-none"
-                    style={{ background: '#0A0F1E', border: '1px solid #374151', color: '#F9FAFB' }}
+                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold block mb-1.5" style={{ color: '#9CA3AF' }}>Comment (optional)</label>
+                  <label className="text-xs font-semibold text-gray-600 block mb-1.5">Comment (optional)</label>
                   <textarea
                     value={comment}
-                    onChange={(e) => setComment(e.target.value)}
+                    onChange={e => setComment(e.target.value)}
                     rows={2}
                     placeholder="Add a note…"
-                    className="w-full rounded-xl px-4 py-2.5 text-sm focus:outline-none resize-none"
-                    style={{ background: '#0A0F1E', border: '1px solid #374151', color: '#F9FAFB' }}
+                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                   />
                 </div>
-
                 {message && (
                   <div
                     className="text-sm font-medium px-4 py-3 rounded-xl"
                     style={
                       message.ok
-                        ? { background: 'rgba(16,185,129,0.1)', color: '#10B981', border: '1px solid rgba(16,185,129,0.3)' }
-                        : { background: 'rgba(239,68,68,0.1)', color: '#EF4444', border: '1px solid rgba(239,68,68,0.3)' }
+                        ? { background: '#F0FDF4', color: '#059669', border: '1px solid #BBF7D0' }
+                        : { background: '#FFF5F5', color: '#DC2626', border: '1px solid #FECACA' }
                     }
                   >
                     {message.text}
                   </div>
                 )}
-
                 <div className="grid grid-cols-2 gap-3 pt-1">
                   <button
                     onClick={() => handleValidation('approved')}
                     disabled={submitting}
-                    className="font-semibold py-3 rounded-xl text-sm text-white disabled:opacity-50"
-                    style={{ background: '#10B981' }}
+                    className="text-white font-semibold py-3 rounded-xl text-sm disabled:opacity-50"
+                    style={{ background: '#059669' }}
                   >
                     {submitting ? '…' : '✓ Approve'}
                   </button>
                   <button
                     onClick={() => setShowRejectModal(true)}
                     disabled={submitting}
-                    className="font-semibold py-3 rounded-xl text-sm text-white disabled:opacity-50"
-                    style={{ background: '#EF4444' }}
+                    className="text-white font-semibold py-3 rounded-xl text-sm disabled:opacity-50"
+                    style={{ background: '#DC2626' }}
                   >
                     ✕ Reject
                   </button>
@@ -419,23 +406,20 @@ export default function InvoiceDetailPage() {
           )}
         </div>
 
-        {/* RIGHT COLUMN — PDF */}
-        <div
-          className="rounded-2xl border overflow-hidden sticky top-24 self-start"
-          style={{ background: '#111827', borderColor: '#1F2937' }}
-        >
-          <div className="px-6 py-4 border-b flex items-center justify-between" style={{ borderColor: '#1F2937' }}>
+        {/* RIGHT — PDF */}
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden sticky top-24 self-start">
+          <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
             <div>
-              <h2 className="text-sm font-semibold" style={{ color: '#F9FAFB' }}>Original Invoice</h2>
-              <p className="text-xs mt-0.5" style={{ color: '#9CA3AF' }}>PDF document</p>
+              <h2 className="text-sm font-semibold" style={{ color: NAVY }}>Original Invoice</h2>
+              <p className="text-xs text-gray-400 mt-0.5">PDF document</p>
             </div>
             {invoice.pdf_url && (
               <a
                 href={invoice.pdf_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-xs font-medium flex items-center gap-1"
-                style={{ color: '#10B981' }}
+                className="text-xs font-medium flex items-center gap-1 hover:underline"
+                style={{ color: NAVY }}
               >
                 Open
                 <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -454,12 +438,12 @@ export default function InvoiceDetailPage() {
               title="Invoice PDF"
             />
           ) : (
-            <div className="flex flex-col items-center justify-center h-64" style={{ color: '#9CA3AF' }}>
-              <svg width="40" height="40" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24" className="mb-3 opacity-40">
+            <div className="flex flex-col items-center justify-center h-64 text-gray-300">
+              <svg width="40" height="40" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24" className="mb-3">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                 <polyline points="14 2 14 8 20 8" />
               </svg>
-              <p className="text-sm">No PDF available</p>
+              <p className="text-sm text-gray-400">No PDF available</p>
             </div>
           )}
         </div>
@@ -469,55 +453,51 @@ export default function InvoiceDetailPage() {
       {showRejectModal && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ background: 'rgba(0,0,0,0.7)' }}
+          style={{ background: 'rgba(0,0,0,0.4)' }}
           onClick={() => setShowRejectModal(false)}
         >
           <div
-            className="rounded-2xl border p-6 w-full max-w-md"
-            style={{ background: '#111827', borderColor: '#374151' }}
+            className="bg-white rounded-2xl border border-gray-100 shadow-xl p-6 w-full max-w-md"
             onClick={e => e.stopPropagation()}
           >
-            <h3 className="text-base font-bold mb-1" style={{ color: '#F9FAFB' }}>Reject Invoice</h3>
-            <p className="text-sm mb-5" style={{ color: '#9CA3AF' }}>Please provide a reason for rejecting this invoice.</p>
+            <h3 className="text-base font-bold mb-1" style={{ color: '#111928' }}>Reject Invoice</h3>
+            <p className="text-sm text-gray-400 mb-5">Please provide a reason for rejecting this invoice.</p>
             <div className="space-y-3">
               <div>
-                <label className="text-xs font-semibold block mb-1.5" style={{ color: '#9CA3AF' }}>Your name</label>
+                <label className="text-xs font-semibold text-gray-600 block mb-1.5">Your name</label>
                 <input
                   type="text"
                   value={validatorName}
                   onChange={e => setValidatorName(e.target.value)}
                   placeholder={validatorLabel}
-                  className="w-full rounded-xl px-4 py-2.5 text-sm focus:outline-none"
-                  style={{ background: '#0A0F1E', border: '1px solid #374151', color: '#F9FAFB' }}
+                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-400"
                 />
               </div>
               <div>
-                <label className="text-xs font-semibold block mb-1.5" style={{ color: '#9CA3AF' }}>Reason for rejection</label>
+                <label className="text-xs font-semibold text-gray-600 block mb-1.5">Reason for rejection</label>
                 <textarea
                   value={comment}
                   onChange={e => setComment(e.target.value)}
                   rows={3}
                   placeholder="Explain why this invoice is rejected…"
-                  className="w-full rounded-xl px-4 py-2.5 text-sm focus:outline-none resize-none"
-                  style={{ background: '#0A0F1E', border: '1px solid #374151', color: '#F9FAFB' }}
+                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-400 resize-none"
                 />
               </div>
               {message && !message.ok && (
-                <p className="text-sm" style={{ color: '#EF4444' }}>{message.text}</p>
+                <p className="text-sm text-red-600">{message.text}</p>
               )}
               <div className="flex gap-3 pt-1">
                 <button
                   onClick={() => handleValidation('rejected')}
                   disabled={submitting}
-                  className="flex-1 font-semibold py-2.5 rounded-xl text-sm text-white disabled:opacity-50"
-                  style={{ background: '#EF4444' }}
+                  className="flex-1 text-white font-semibold py-2.5 rounded-xl text-sm disabled:opacity-50"
+                  style={{ background: '#DC2626' }}
                 >
                   {submitting ? '…' : 'Confirm Rejection'}
                 </button>
                 <button
                   onClick={() => setShowRejectModal(false)}
-                  className="px-5 py-2.5 text-sm rounded-xl border"
-                  style={{ color: '#9CA3AF', borderColor: '#374151' }}
+                  className="px-5 py-2.5 text-sm text-gray-500 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
                 >
                   Cancel
                 </button>
@@ -530,27 +510,26 @@ export default function InvoiceDetailPage() {
   )
 }
 
-function DarkInfoField({ label, value }: { label: string; value: string }) {
+function InfoField({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="text-xs mb-0.5" style={{ color: '#9CA3AF' }}>{label}</p>
-      <p className="font-medium" style={{ color: '#F9FAFB' }}>{value}</p>
+      <p className="text-xs text-gray-400 mb-0.5">{label}</p>
+      <p className="font-medium text-gray-800">{value}</p>
     </div>
   )
 }
 
-function DarkEditField({ label, value, onChange, type = 'text' }: {
+function Field({ label, value, onChange, type = 'text' }: {
   label: string; value: string; onChange: (v: string) => void; type?: string
 }) {
   return (
     <div>
-      <label className="text-xs font-medium block mb-1" style={{ color: '#9CA3AF' }}>{label}</label>
+      <label className="text-xs font-medium text-gray-500 block mb-1">{label}</label>
       <input
         type={type}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none"
-        style={{ background: '#0A0F1E', border: '1px solid #374151', color: '#F9FAFB' }}
+        onChange={e => onChange(e.target.value)}
+        className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
       />
     </div>
   )

@@ -12,7 +12,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body>
         <TopNav />
-        <main className="min-h-screen" style={{ background: '#0A0F1E' }}>
+        <main className="min-h-screen" style={{ background: '#F4F6FA' }}>
           {children}
         </main>
       </body>
