@@ -39,6 +39,7 @@ export interface Invoice {
   subcontractor_name: string | null
   invoice_number: string | null
   invoice_date: string | null
+  currency: string | null
   amount_ht: number | null
   amount_tva: number | null
   amount_ttc: number | null
