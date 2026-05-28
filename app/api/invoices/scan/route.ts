@@ -33,9 +33,9 @@ Rules:
 - Return ONLY the JSON, nothing else`
 
 export async function POST(request: NextRequest) {
-  const apiKey = process.env.GEMINI_API_KEY
+  const apiKey = process.env.GROQ_API_KEY
   if (!apiKey) {
-    return NextResponse.json({ error: 'GEMINI_API_KEY is not configured in Vercel environment variables' }, { status: 500 })
+    return NextResponse.json({ error: 'GROQ_API_KEY is not configured in environment variables' }, { status: 500 })
   }
 
   try {
@@ -45,50 +45,58 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 })
     }
 
+    // Extract text from PDF
     const bytes = await file.arrayBuffer()
-    const base64 = Buffer.from(bytes).toString('base64')
+    const buffer = Buffer.from(bytes)
 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`
+    // Dynamic import to avoid Next.js build issues with pdf-parse
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const pdfParse = require('pdf-parse/lib/pdf-parse.js')
+    const pdfData = await pdfParse(buffer)
+    const pdfText = pdfData.text?.trim()
 
-    const body = {
-      contents: [
-        {
-          parts: [
-            {
-              inline_data: {
-                mime_type: 'application/pdf',
-                data: base64,
-              },
-            },
-            {
-              text: PROMPT,
-            },
-          ],
-        },
-      ],
-      generationConfig: {
-        temperature: 0.1,
-        maxOutputTokens: 2048,
-      },
+    if (!pdfText) {
+      return NextResponse.json(
+        { error: 'Could not extract text from this PDF. It may be a scanned image — please try a text-based PDF.' },
+        { status: 400 }
+      )
     }
 
-    const res = await fetch(url, {
+    // Send extracted text to Groq
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages: [
+          {
+            role: 'system',
+            content: 'You are an invoice data extraction specialist. Extract invoice data and return ONLY valid JSON with no markdown formatting.',
+          },
+          {
+            role: 'user',
+            content: `${PROMPT}\n\nInvoice text:\n${pdfText}`,
+          },
+        ],
+        temperature: 0.1,
+        max_tokens: 2048,
+      }),
     })
 
-    const geminiResponse = await res.json()
+    const groqResponse = await res.json()
 
     if (!res.ok) {
-      const errMsg = geminiResponse?.error?.message || JSON.stringify(geminiResponse)
-      console.error('Gemini API error:', errMsg)
-      return NextResponse.json({ error: `Gemini error: ${errMsg}` }, { status: 500 })
+      const errMsg = groqResponse?.error?.message || JSON.stringify(groqResponse)
+      console.error('Groq API error:', errMsg)
+      return NextResponse.json({ error: `Groq error: ${errMsg}` }, { status: 500 })
     }
 
-    const raw = geminiResponse?.candidates?.[0]?.content?.parts?.[0]?.text ?? ''
+    const raw = groqResponse?.choices?.[0]?.message?.content ?? ''
     if (!raw) {
-      return NextResponse.json({ error: 'Gemini returned empty response' }, { status: 500 })
+      return NextResponse.json({ error: 'Groq returned empty response' }, { status: 500 })
     }
 
     const cleaned = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
