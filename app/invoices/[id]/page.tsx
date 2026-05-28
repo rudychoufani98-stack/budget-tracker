@@ -26,6 +26,7 @@ export default function InvoiceDetailPage() {
   const [lineItems, setLineItems] = useState<InvoiceLineItem[]>([])
   const [validations, setValidations] = useState<Validation[]>([])
   const [currency, setCurrency] = useState('EUR')
+  const [savingCurrency, setSavingCurrency] = useState(false)
   const [loading, setLoading] = useState(true)
   const [validatorName, setValidatorName] = useState('')
   const [comment, setComment] = useState('')
@@ -49,6 +50,13 @@ export default function InvoiceDetailPage() {
   }
 
   useEffect(() => { load() }, [id])
+
+  async function saveCurrency(newCurrency: string) {
+    setSavingCurrency(true)
+    setCurrency(newCurrency)
+    await supabase.from('invoice_currency').upsert({ invoice_id: id, currency: newCurrency }, { onConflict: 'invoice_id' })
+    setSavingCurrency(false)
+  }
 
   async function handleValidation(decision: 'approved' | 'rejected') {
     if (!validatorName.trim()) {
@@ -260,7 +268,22 @@ export default function InvoiceDetailPage() {
 
           {/* Amounts */}
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-            <h2 className="text-sm font-semibold mb-4" style={{ color: NAVY }}>Amounts</h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-sm font-semibold" style={{ color: NAVY }}>Amounts</h2>
+              <div className="flex items-center gap-2">
+                {savingCurrency && <span className="text-xs text-gray-400">Saving…</span>}
+                <select
+                  value={currency}
+                  onChange={e => saveCurrency(e.target.value)}
+                  className="text-xs font-semibold border border-gray-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                  style={{ color: NAVY }}
+                >
+                  {['EUR','USD','GBP','CHF','MAD','XOF','NGN','CAD','AED','JPY'].map(c => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
             <div className="space-y-2.5">
               <div className="flex justify-between text-sm">
                 <span className="text-gray-500">Excl. VAT</span>
