@@ -7,6 +7,7 @@ Required format:
   "subcontractor_name": "Company name that issued the invoice",
   "invoice_number": "Invoice reference number",
   "invoice_date": "YYYY-MM-DD format",
+  "currency": "ISO 4217 currency code, e.g. EUR, USD, GBP, CHF, MAD, XOF, NGN",
   "amount_ht": 1000.00,
   "amount_tva": 200.00,
   "amount_ttc": 1200.00,
@@ -28,6 +29,7 @@ Required format:
 Rules:
 - All monetary amounts must be numbers (not strings)
 - If a value is not found, use null
+- For currency: detect from symbols (€=EUR, $=USD, £=GBP, Fr=CHF, DH/MAD=MAD, FCFA=XOF, ₦=NGN) or explicit text. Default to EUR if unclear.
 - For category: consulting/services = Subcontracting, flights/trains/taxi = Travel, hotel = Accommodation, restaurants = Meals, hardware/software = Equipment
 - invoice_date must be YYYY-MM-DD or null
 - Return ONLY the JSON, nothing else`

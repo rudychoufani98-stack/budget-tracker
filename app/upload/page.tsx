@@ -8,6 +8,7 @@ interface ScannedData {
   subcontractor_name: string
   invoice_number: string
   invoice_date: string
+  currency: string
   amount_ht: number | null
   amount_tva: number | null
   amount_ttc: number | null
@@ -26,6 +27,7 @@ interface ScannedData {
 
 const NAVY = '#0C1F52'
 const CATEGORIES = ['Subcontracting', 'Travel', 'Accommodation', 'Meals', 'Equipment', 'Other']
+const CURRENCIES = ['EUR', 'USD', 'GBP', 'CHF', 'MAD', 'XOF', 'NGN', 'CAD', 'AED', 'JPY', 'Other']
 
 export default function UploadPage() {
   const router = useRouter()
@@ -98,6 +100,7 @@ export default function UploadPage() {
           subcontractor_name: scanned.subcontractor_name,
           invoice_number: scanned.invoice_number,
           invoice_date: scanned.invoice_date || null,
+          currency: scanned.currency || 'EUR',
           amount_ht: scanned.amount_ht,
           amount_tva: scanned.amount_tva,
           amount_ttc: scanned.amount_ttc,
@@ -168,6 +171,16 @@ export default function UploadPage() {
               <LightField label="Subcontractor Name" value={scanned.subcontractor_name} onChange={v => updateField('subcontractor_name', v)} />
               <LightField label="Invoice Number" value={scanned.invoice_number} onChange={v => updateField('invoice_number', v)} />
               <LightField label="Invoice Date" value={scanned.invoice_date} onChange={v => updateField('invoice_date', v)} type="date" />
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-wide text-gray-400 block mb-1.5">Currency</label>
+                <select
+                  value={scanned.currency || 'EUR'}
+                  onChange={e => updateField('currency', e.target.value)}
+                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                >
+                  {CURRENCIES.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </div>
               <div>
                 <label className="text-xs font-semibold uppercase tracking-wide text-gray-400 block mb-1.5">Category</label>
                 <select
