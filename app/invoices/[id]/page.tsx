@@ -229,10 +229,10 @@ export default function InvoiceDetailPage() {
                       ))}
                     </select>
                   </div>
-                  <Field label="Amount excl. VAT (€)" value={String(editData.amount_ht || '')} onChange={v => setEditData(p => ({ ...p, amount_ht: parseFloat(v) }))} type="number" />
+                  <Field label={`Amount excl. VAT (${currency})`} value={String(editData.amount_ht || '')} onChange={v => setEditData(p => ({ ...p, amount_ht: parseFloat(v) }))} type="number" />
                   <Field label="VAT rate (%)" value={String(editData.vat_rate || '')} onChange={v => setEditData(p => ({ ...p, vat_rate: parseFloat(v) }))} type="number" />
-                  <Field label="VAT amount (€)" value={String(editData.amount_tva || '')} onChange={v => setEditData(p => ({ ...p, amount_tva: parseFloat(v) }))} type="number" />
-                  <Field label="Total incl. VAT (€)" value={String(editData.amount_ttc || '')} onChange={v => setEditData(p => ({ ...p, amount_ttc: parseFloat(v) }))} type="number" />
+                  <Field label={`VAT amount (${currency})`} value={String(editData.amount_tva || '')} onChange={v => setEditData(p => ({ ...p, amount_tva: parseFloat(v) }))} type="number" />
+                  <Field label={`Total incl. VAT (${currency})`} value={String(editData.amount_ttc || '')} onChange={v => setEditData(p => ({ ...p, amount_ttc: parseFloat(v) }))} type="number" />
                 </div>
                 <div className="flex gap-2 pt-1">
                   <button
