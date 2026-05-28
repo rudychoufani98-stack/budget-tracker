@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { GoogleGenerativeAI } from '@google/generative-ai'
 
 const PROMPT = `Extract all data from this invoice and return ONLY a valid JSON object with no markdown, no explanation, just raw JSON.
 
@@ -29,20 +28,19 @@ Required format:
 Rules:
 - All monetary amounts must be numbers (not strings)
 - If a value is not found, use null
-- For category, infer from the content: consulting/services = Subcontracting, flights/trains/taxi = Travel, hotel = Accommodation, restaurants = Meals, hardware/software = Equipment
+- For category: consulting/services = Subcontracting, flights/trains/taxi = Travel, hotel = Accommodation, restaurants = Meals, hardware/software = Equipment
 - invoice_date must be YYYY-MM-DD or null
 - Return ONLY the JSON, nothing else`
 
 export async function POST(request: NextRequest) {
   const apiKey = process.env.GEMINI_API_KEY
   if (!apiKey) {
-    return NextResponse.json({ error: 'GEMINI_API_KEY is not set in environment variables' }, { status: 500 })
+    return NextResponse.json({ error: 'GEMINI_API_KEY is not configured in Vercel environment variables' }, { status: 500 })
   }
 
   try {
     const formData = await request.formData()
     const file = formData.get('file') as File | null
-
     if (!file) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 })
     }
@@ -50,28 +48,53 @@ export async function POST(request: NextRequest) {
     const bytes = await file.arrayBuffer()
     const base64 = Buffer.from(bytes).toString('base64')
 
-    const genAI = new GoogleGenerativeAI(apiKey)
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`
 
-    const result = await model.generateContent([
-      {
-        inlineData: {
-          mimeType: 'application/pdf',
-          data: base64,
+    const body = {
+      contents: [
+        {
+          parts: [
+            {
+              inline_data: {
+                mime_type: 'application/pdf',
+                data: base64,
+              },
+            },
+            {
+              text: PROMPT,
+            },
+          ],
         },
+      ],
+      generationConfig: {
+        temperature: 0.1,
+        maxOutputTokens: 2048,
       },
-      PROMPT,
-    ])
+    }
 
-    const raw = result.response.text()
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    })
 
-    const cleaned = raw
-      .replace(/```json\n?/g, '')
-      .replace(/```\n?/g, '')
-      .trim()
+    const geminiResponse = await res.json()
 
+    if (!res.ok) {
+      const errMsg = geminiResponse?.error?.message || JSON.stringify(geminiResponse)
+      console.error('Gemini API error:', errMsg)
+      return NextResponse.json({ error: `Gemini error: ${errMsg}` }, { status: 500 })
+    }
+
+    const raw = geminiResponse?.candidates?.[0]?.content?.parts?.[0]?.text ?? ''
+    if (!raw) {
+      return NextResponse.json({ error: 'Gemini returned empty response' }, { status: 500 })
+    }
+
+    const cleaned = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
     const parsed = JSON.parse(cleaned)
     return NextResponse.json(parsed)
+
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : String(error)
     console.error('Scan error:', message)
