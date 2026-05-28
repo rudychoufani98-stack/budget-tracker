@@ -1,38 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import Anthropic from '@anthropic-ai/sdk'
+import { GoogleGenerativeAI } from '@google/generative-ai'
 
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
 
-export async function POST(request: NextRequest) {
-  try {
-    const formData = await request.formData()
-    const file = formData.get('file') as File | null
-
-    if (!file) {
-      return NextResponse.json({ error: 'No file provided' }, { status: 400 })
-    }
-
-    const bytes = await file.arrayBuffer()
-    const base64 = Buffer.from(bytes).toString('base64')
-
-    const message = await client.messages.create({
-      model: 'claude-sonnet-4-5',
-      max_tokens: 2000,
-      messages: [
-        {
-          role: 'user',
-          content: [
-            {
-              type: 'document',
-              source: {
-                type: 'base64',
-                media_type: 'application/pdf',
-                data: base64,
-              },
-            },
-            {
-              type: 'text',
-              text: `Extract all data from this invoice and return ONLY a valid JSON object with no markdown, no explanation, just raw JSON.
+const PROMPT = `Extract all data from this invoice and return ONLY a valid JSON object with no markdown, no explanation, just raw JSON.
 
 Required format:
 {
@@ -62,16 +33,34 @@ Rules:
 - If a value is not found, use null
 - For category, infer from the content: consulting/services = Subcontracting, flights/trains/taxi = Travel, hotel = Accommodation, restaurants = Meals, hardware/software = Equipment
 - invoice_date must be YYYY-MM-DD or null
-- Return ONLY the JSON, nothing else`,
-            },
-          ],
+- Return ONLY the JSON, nothing else`
+
+export async function POST(request: NextRequest) {
+  try {
+    const formData = await request.formData()
+    const file = formData.get('file') as File | null
+
+    if (!file) {
+      return NextResponse.json({ error: 'No file provided' }, { status: 400 })
+    }
+
+    const bytes = await file.arrayBuffer()
+    const base64 = Buffer.from(bytes).toString('base64')
+
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
+
+    const result = await model.generateContent([
+      {
+        inlineData: {
+          mimeType: 'application/pdf',
+          data: base64,
         },
-      ],
-    })
+      },
+      PROMPT,
+    ])
 
-    const raw = message.content[0].type === 'text' ? message.content[0].text : ''
+    const raw = result.response.text()
 
-    // Strip any markdown code blocks if present
     const cleaned = raw
       .replace(/```json\n?/g, '')
       .replace(/```\n?/g, '')
