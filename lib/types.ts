@@ -36,12 +36,26 @@ export interface ServiceProvider {
   created_at: string
 }
 
+export interface Project {
+  id: string
+  name: string
+  description: string | null
+  budget: number | null
+  currency: string
+  start_date: string | null
+  end_date: string | null
+  status: 'active' | 'completed' | 'on_hold'
+  created_at: string
+  updated_at: string | null
+}
+
 export interface Contract {
   id: string
   contract_name: string
   client_name: string
   service_provider_id: string | null
   project: string | null
+  project_id: string | null
   category: EsgCategory | null
   description: string | null
   contract_amount: number | null
