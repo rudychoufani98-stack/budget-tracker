@@ -16,7 +16,7 @@ interface ScannedData {
   line_items: { description:string; quantity:number|null; unit_price:number|null; total_ht:number|null; vat_rate:number|null; total_ttc:number|null }[]
 }
 
-export const CATEGORIES: { label:string; icon:string; color:string }[] = [
+const CATEGORIES: { label:string; icon:string; color:string }[] = [
   { label:'Subcontracting',   icon:'🤝', color:'#3B82F6' },
   { label:'Consulting',       icon:'💼', color:'#8B5CF6' },
   { label:'Travel',           icon:'✈️', color:'#06B6D4' },
