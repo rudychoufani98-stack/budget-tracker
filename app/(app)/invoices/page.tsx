@@ -94,10 +94,8 @@ export default async function InvoicesPage() {
           return (
             <Link
               key={inv.id} href={`/invoices/${inv.id}`}
-              className="grid px-6 py-4 items-center transition-colors"
+              className="grid px-6 py-4 items-center transition-colors hover:bg-slate-50"
               style={{ borderBottom:'1px solid #F8FAFC', gridTemplateColumns:'0.8fr 1.8fr 1.4fr 0.8fr 1fr 1fr 1.5fr' }}
-              onMouseEnter={e=>(e.currentTarget as HTMLElement).style.background='#F8FAFC'}
-              onMouseLeave={e=>(e.currentTarget as HTMLElement).style.background='transparent'}
             >
               {/* Invoice # */}
               <div className="font-mono text-xs px-2 py-1 rounded-lg inline-block" style={{ background:'#F1F5F9', color:'#64748B' }}>

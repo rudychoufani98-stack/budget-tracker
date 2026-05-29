@@ -237,10 +237,8 @@ export default async function DashboardPage() {
             const st = INV_STATUS[inv.status] || INV_STATUS.pending_review
             return (
               <Link key={inv.id} href={`/invoices/${inv.id}`}
-                className="flex items-center justify-between px-6 py-3.5 transition-colors"
+                className="flex items-center justify-between px-6 py-3.5 transition-colors hover:bg-slate-50"
                 style={{ borderBottom:'1px solid #F8FAFC' }}
-                onMouseEnter={e=>(e.currentTarget as HTMLElement).style.background='#F8FAFC'}
-                onMouseLeave={e=>(e.currentTarget as HTMLElement).style.background='transparent'}
               >
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-xl flex items-center justify-center text-sm" style={{ background:`${st.color}15` }}>

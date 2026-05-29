@@ -99,10 +99,8 @@ export default async function ContractsPage() {
           return (
             <Link
               key={c.id} href={`/contracts/${c.id}`}
-              className="grid px-6 py-4 items-center transition-colors"
+              className="grid px-6 py-4 items-center transition-colors hover:bg-slate-50"
               style={{ borderBottom:'1px solid #F8FAFC', gridTemplateColumns:'2.2fr 1.4fr 0.6fr 1fr 1fr 1fr 1.4fr 0.5fr' }}
-              onMouseEnter={e=>(e.currentTarget as HTMLElement).style.background='#F8FAFC'}
-              onMouseLeave={e=>(e.currentTarget as HTMLElement).style.background='transparent'}
             >
               {/* Contract name + provider */}
               <div className="flex items-center gap-3 min-w-0">
