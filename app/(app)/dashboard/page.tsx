@@ -5,7 +5,7 @@ import { DashboardCharts } from './DashboardCharts'
 
 export const revalidate = 0
 
-const C = { bg: '#1A1F35', card: '#222A42', border: '#323D5E', green: '#10B981', amber: '#F59E0B', red: '#EF4444', blue: '#3B82F6', muted: '#6B7280' }
+const C = { bg: '#F8FAFC', card: '#FFFFFF', border: '#E2E8F0', green: '#10B981', amber: '#F59E0B', red: '#EF4444', blue: '#3B82F6', muted: '#6B7280' }
 
 async function getData() {
   const [tranchesRes, invoicesRes, allInvRes] = await Promise.all([
@@ -71,7 +71,7 @@ export default async function DashboardPage() {
       <div className="flex items-center justify-between">
         <div>
           <p className="text-xs font-medium uppercase tracking-widest mb-1" style={{ color: C.muted }}>Overview</p>
-          <h1 className="text-2xl font-medium" style={{ color: '#F9FAFB' }}>Dashboard</h1>
+          <h1 className="text-2xl font-medium" style={{ color: '#0F172A' }}>Dashboard</h1>
         </div>
         <Link href="/upload" className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-xl" style={{ background: '#3B82F6', color: '#fff' }}>
           + Upload Invoice
@@ -82,27 +82,27 @@ export default async function DashboardPage() {
           <div key={k.label} className="rounded-2xl p-5" style={{ background: C.card, border: `1px solid ${C.border}` }}>
             <p className="text-xs font-medium mb-3" style={{ color: C.muted }}>{k.label}</p>
             <p className="text-xl font-medium" style={{ color: k.color }}>{k.value}</p>
-            <p className="text-xs mt-1" style={{ color: '#5A6A8A' }}>{k.sub}</p>
+            <p className="text-xs mt-1" style={{ color: '#94A3B8' }}>{k.sub}</p>
           </div>
         ))}
       </div>
       <div className="rounded-2xl p-5" style={{ background: C.card, border: `1px solid ${C.border}` }}>
         <div className="flex items-center justify-between mb-3">
-          <p className="text-sm font-medium" style={{ color: '#F9FAFB' }}>Overall Payment Rate</p>
+          <p className="text-sm font-medium" style={{ color: '#0F172A' }}>Overall Payment Rate</p>
           <p className="text-2xl font-medium" style={{ color: d.payment_rate >= 80 ? C.green : d.payment_rate >= 40 ? C.amber : C.red }}>{d.payment_rate}%</p>
         </div>
-        <div className="h-2 rounded-full" style={{ background: '#323D5E' }}>
+        <div className="h-2 rounded-full" style={{ background: '#E2E8F0' }}>
           <div className="h-2 rounded-full" style={{ width: `${d.payment_rate}%`, background: d.payment_rate >= 80 ? C.green : d.payment_rate >= 40 ? C.amber : C.red }} />
         </div>
       </div>
       <div className="grid grid-cols-3 gap-4">
         <div className="col-span-2 rounded-2xl p-5" style={{ background: C.card, border: `1px solid ${C.border}` }}>
-          <p className="text-sm font-medium mb-4" style={{ color: '#F9FAFB' }}>Monthly Payments (last 6 months)</p>
+          <p className="text-sm font-medium mb-4" style={{ color: '#0F172A' }}>Monthly Payments (last 6 months)</p>
           <DashboardCharts monthlyData={d.monthlyData} trancheCounts={d.trancheCounts} />
         </div>
         <div className="space-y-4">
           <div className="rounded-2xl p-5" style={{ background: C.card, border: `1px solid ${C.border}` }}>
-            <p className="text-sm font-medium mb-4" style={{ color: '#F9FAFB' }}>Validation Queue</p>
+            <p className="text-sm font-medium mb-4" style={{ color: '#0F172A' }}>Validation Queue</p>
             <div className="space-y-3">
               {[
                 { label: 'Awaiting Rudy',    count: d.pending_rudy,    color: '#F97316' },
@@ -115,11 +115,11 @@ export default async function DashboardPage() {
                 </div>
               ))}
             </div>
-            <Link href="/validations" className="block mt-4 text-xs text-center py-2 rounded-lg" style={{ color: C.blue, border: `1px solid #323D5E` }}>View all</Link>
+            <Link href="/validations" className="block mt-4 text-xs text-center py-2 rounded-lg" style={{ color: C.blue, border: `1px solid #E2E8F0` }}>View all</Link>
           </div>
           {d.alerts.length > 0 && (
             <div className="rounded-2xl p-5" style={{ background: C.card, border: `1px solid ${C.border}` }}>
-              <p className="text-sm font-medium mb-3" style={{ color: '#F9FAFB' }}>Alerts</p>
+              <p className="text-sm font-medium mb-3" style={{ color: '#0F172A' }}>Alerts</p>
               <div className="space-y-2">
                 {d.alerts.slice(0,4).map((a,i) => (
                   <div key={i} className="text-xs p-2.5 rounded-lg" style={{ background: a.type === 'overdue' ? 'rgba(239,68,68,0.08)' : 'rgba(245,158,11,0.08)', color: a.type === 'overdue' ? C.red : C.amber }}>{a.message}</div>
@@ -131,7 +131,7 @@ export default async function DashboardPage() {
       </div>
       <div className="rounded-2xl overflow-hidden" style={{ background: C.card, border: `1px solid ${C.border}` }}>
         <div className="px-6 py-4" style={{ borderBottom: `1px solid ${C.border}` }}>
-          <p className="text-sm font-medium" style={{ color: '#F9FAFB' }}>Recent Activity</p>
+          <p className="text-sm font-medium" style={{ color: '#0F172A' }}>Recent Activity</p>
         </div>
         {d.recentInvoices.length === 0 ? (
           <p className="text-sm text-center py-8" style={{ color: C.muted }}>No invoices yet</p>
@@ -143,11 +143,11 @@ export default async function DashboardPage() {
               return (
                 <Link key={inv.id} href={`/invoices/${inv.id}`} className="flex items-center justify-between px-6 py-3 hover:bg-white/5 transition-colors" style={{ borderBottom: `1px solid ${C.border}` }}>
                   <div>
-                    <p className="text-sm" style={{ color: '#F9FAFB' }}>{inv.subcontractor_name || 'Unknown'}</p>
+                    <p className="text-sm" style={{ color: '#0F172A' }}>{inv.subcontractor_name || 'Unknown'}</p>
                     <p className="text-xs mt-0.5" style={{ color: C.muted }}>{new Date(inv.created_at || inv.submitted_at).toLocaleDateString('fr-FR')}</p>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="text-sm" style={{ color: '#F9FAFB' }}>{formatCurrency(inv.amount_ttc)}</span>
+                    <span className="text-sm" style={{ color: '#0F172A' }}>{formatCurrency(inv.amount_ttc)}</span>
                     <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: `${sc}20`, color: sc }}>{sl}</span>
                   </div>
                 </Link>

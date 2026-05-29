@@ -4,7 +4,7 @@ import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { formatCurrency } from '@/lib/format'
 
-const C = { card:'#222A42', border:'#323D5E', green:'#10B981', amber:'#F59E0B', red:'#EF4444', blue:'#3B82F6', muted:'#6B7280' }
+const C = { card:'#FFFFFF', border:'#E2E8F0', green:'#10B981', amber:'#F59E0B', red:'#EF4444', blue:'#3B82F6', muted:'#6B7280' }
 
 export default function ProviderDetailPage() {
   const { id } = useParams<{ id:string }>()
@@ -28,11 +28,11 @@ export default function ProviderDetailPage() {
       <div className="flex items-center gap-2 text-sm mb-6" style={{ color:C.muted }}>
         <Link href="/providers" style={{ color:C.muted }}>Providers</Link>
         <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-        <span style={{ color:'#F9FAFB' }}>{provider.name}</span>
+        <span style={{ color:'#0F172A' }}>{provider.name}</span>
       </div>
       <div className="flex items-start gap-6 mb-6">
         <div className="flex-1">
-          <h1 className="text-2xl font-medium mb-1" style={{ color:'#F9FAFB' }}>{provider.name}</h1>
+          <h1 className="text-2xl font-medium mb-1" style={{ color:'#0F172A' }}>{provider.name}</h1>
           <p style={{ color:C.muted }}>{provider.email||'No email'} · {provider.country||'—'}</p>
         </div>
       </div>
@@ -51,7 +51,7 @@ export default function ProviderDetailPage() {
       {contracts.length > 0 && (
         <div className="rounded-2xl overflow-hidden mb-6" style={{ background:C.card, border:`1px solid ${C.border}` }}>
           <div className="px-6 py-4" style={{ borderBottom:`1px solid ${C.border}` }}>
-            <p className="text-sm font-medium" style={{ color:'#F9FAFB' }}>Contracts ({contracts.length})</p>
+            <p className="text-sm font-medium" style={{ color:'#0F172A' }}>Contracts ({contracts.length})</p>
           </div>
           {contracts.map((c:any) => {
             const t = c.contract_tranches||[]
@@ -61,12 +61,12 @@ export default function ProviderDetailPage() {
             return (
               <Link key={c.id} href={`/contracts/${c.id}`} className="flex items-center justify-between px-6 py-3 hover:bg-white/5" style={{ borderBottom:`1px solid ${C.border}` }}>
                 <div>
-                  <p className="text-sm" style={{ color:'#F9FAFB' }}>{c.contract_name}</p>
+                  <p className="text-sm" style={{ color:'#0F172A' }}>{c.contract_name}</p>
                   <p className="text-xs mt-0.5" style={{ color:C.muted }}>{c.project||'—'} · {c.category||'—'}</p>
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="text-right">
-                    <p className="text-sm font-medium" style={{ color:'#F9FAFB' }}>{formatCurrency(budget)}</p>
+                    <p className="text-sm font-medium" style={{ color:'#0F172A' }}>{formatCurrency(budget)}</p>
                     <p className="text-xs" style={{ color:C.green }}>{formatCurrency(paid)} paid</p>
                   </div>
                   <span className="text-sm font-medium" style={{ color:rate>=80?C.green:rate>=40?C.amber:C.muted }}>{rate}%</span>
@@ -79,18 +79,18 @@ export default function ProviderDetailPage() {
       {invoices.length > 0 && (
         <div className="rounded-2xl overflow-hidden" style={{ background:C.card, border:`1px solid ${C.border}` }}>
           <div className="px-6 py-4" style={{ borderBottom:`1px solid ${C.border}` }}>
-            <p className="text-sm font-medium" style={{ color:'#F9FAFB' }}>Invoices ({invoices.length})</p>
+            <p className="text-sm font-medium" style={{ color:'#0F172A' }}>Invoices ({invoices.length})</p>
           </div>
           {invoices.map((inv:any) => {
             const sc = inv.status==='approved'?C.green:inv.status==='rejected'?C.red:C.amber
             return (
               <Link key={inv.id} href={`/invoices/${inv.id}`} className="flex items-center justify-between px-6 py-3 hover:bg-white/5" style={{ borderBottom:`1px solid ${C.border}` }}>
                 <div>
-                  <p className="text-sm" style={{ color:'#F9FAFB' }}>#{inv.invoice_number||'N/A'}</p>
+                  <p className="text-sm" style={{ color:'#0F172A' }}>#{inv.invoice_number||'N/A'}</p>
                   <p className="text-xs mt-0.5" style={{ color:C.muted }}>{inv.invoice_date||'—'}</p>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="text-sm" style={{ color:'#F9FAFB' }}>{formatCurrency(inv.amount_ttc)}</span>
+                  <span className="text-sm" style={{ color:'#0F172A' }}>{formatCurrency(inv.amount_ttc)}</span>
                   <span className="text-xs px-2 py-0.5 rounded-full" style={{ background:`${sc}20`, color:sc }}>{inv.status}</span>
                 </div>
               </Link>

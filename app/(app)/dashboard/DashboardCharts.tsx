@@ -22,7 +22,7 @@ export function DashboardCharts({ monthlyData, trancheCounts }: {
           <BarChart data={monthlyData} margin={{ top: 4, right: 4, bottom: 4, left: 4 }}>
             <XAxis dataKey="month" tick={{ fill: '#6B7280', fontSize: 11 }} axisLine={false} tickLine={false} />
             <YAxis tick={{ fill: '#6B7280', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={fmt} />
-            <Tooltip contentStyle={{ background: '#323D5E', border: '1px solid #404F74', borderRadius: 8, color: '#F9FAFB' }} formatter={(v: any) => [fmt(Number(v)), 'Amount']} />
+            <Tooltip contentStyle={{ background: '#E2E8F0', border: '1px solid #CBD5E1', borderRadius: 8, color: '#0F172A' }} formatter={(v: any) => [fmt(Number(v)), 'Amount']} />
             <Bar dataKey="amount" fill="#3B82F6" radius={[4,4,0,0]} />
           </BarChart>
         </ResponsiveContainer>
@@ -35,11 +35,11 @@ export function DashboardCharts({ monthlyData, trancheCounts }: {
                 {pieData.map((_,i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
               </Pie>
               <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 11, color: '#9CA3AF' }} />
-              <Tooltip contentStyle={{ background: '#323D5E', border: '1px solid #404F74', borderRadius: 8, color: '#F9FAFB' }} />
+              <Tooltip contentStyle={{ background: '#E2E8F0', border: '1px solid #CBD5E1', borderRadius: 8, color: '#0F172A' }} />
             </PieChart>
           </ResponsiveContainer>
         ) : (
-          <div className="flex items-center justify-center h-full" style={{ color: '#5A6A8A', fontSize: 13 }}>No tranche data yet</div>
+          <div className="flex items-center justify-center h-full" style={{ color: '#94A3B8', fontSize: 13 }}>No tranche data yet</div>
         )}
       </div>
     </div>

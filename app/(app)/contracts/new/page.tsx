@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
-const C = { card: '#222A42', border: '#323D5E', blue: '#3B82F6', muted: '#6B7280' }
+const C = { card: '#FFFFFF', border: '#E2E8F0', blue: '#3B82F6', muted: '#6B7280' }
 const TRANCHE_NAMES = ['T1','T2','T3','T4','One-Shot']
 
 export default function NewContractPage() {
@@ -35,17 +35,17 @@ export default function NewContractPage() {
   }
 
   const inp = "w-full px-3 py-2.5 text-sm rounded-xl"
-  const inpStyle = { background:'#323D5E', border:'1px solid #404F74', color:'#F9FAFB' }
+  const inpStyle = { background:'#E2E8F0', border:'1px solid #CBD5E1', color:'#0F172A' }
 
   return (
     <div className="px-6 py-8 max-w-3xl mx-auto">
       <div className="flex items-center gap-3 mb-6">
         <Link href="/contracts" className="text-sm" style={{ color: C.muted }}>Contracts</Link>
         <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-        <span className="text-sm" style={{ color: '#F9FAFB' }}>New Contract</span>
+        <span className="text-sm" style={{ color: '#0F172A' }}>New Contract</span>
       </div>
       <div className="rounded-2xl p-6" style={{ background: C.card, border: `1px solid ${C.border}` }}>
-        <h1 className="text-lg font-medium mb-6" style={{ color: '#F9FAFB' }}>New Contract</h1>
+        <h1 className="text-lg font-medium mb-6" style={{ color: '#0F172A' }}>New Contract</h1>
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="grid grid-cols-2 gap-4">
             <div className="col-span-2">
@@ -91,13 +91,13 @@ export default function NewContractPage() {
 
           <div>
             <div className="flex items-center justify-between mb-3">
-              <p className="text-sm font-medium" style={{ color: '#F9FAFB' }}>Payment Tranches</p>
+              <p className="text-sm font-medium" style={{ color: '#0F172A' }}>Payment Tranches</p>
               <button type="button" onClick={addTranche} className="text-xs px-3 py-1.5 rounded-lg" style={{ background:'rgba(59,130,246,0.15)', color: C.blue }}>+ Add Tranche</button>
             </div>
-            {tranches.length === 0 && <p className="text-sm" style={{ color: '#5A6A8A' }}>No tranches added. Click above to add payment schedule.</p>}
+            {tranches.length === 0 && <p className="text-sm" style={{ color: '#94A3B8' }}>No tranches added. Click above to add payment schedule.</p>}
             <div className="space-y-2">
               {tranches.map((t,i) => (
-                <div key={i} className="grid grid-cols-3 gap-3 p-3 rounded-xl" style={{ background:'#2A3354', border:'1px solid #323D5E' }}>
+                <div key={i} className="grid grid-cols-3 gap-3 p-3 rounded-xl" style={{ background:'#F1F5F9', border:'1px solid #E2E8F0' }}>
                   <select className={inp} style={inpStyle} value={t.name} onChange={e=>setTranches(p=>p.map((x,j)=>j===i?{...x,name:e.target.value}:x))}>
                     {TRANCHE_NAMES.map(n=><option key={n} value={n}>{n}</option>)}
                   </select>
@@ -110,14 +110,14 @@ export default function NewContractPage() {
               ))}
             </div>
             {tranches.length > 0 && (
-              <p className="text-sm mt-2" style={{ color: C.muted }}>Total: <span style={{ color:'#F9FAFB', fontWeight:500 }}>{tranches.reduce((s,t)=>s+(parseFloat(t.amount)||0),0).toLocaleString()} {form.currency}</span></p>
+              <p className="text-sm mt-2" style={{ color: C.muted }}>Total: <span style={{ color:'#0F172A', fontWeight:500 }}>{tranches.reduce((s,t)=>s+(parseFloat(t.amount)||0),0).toLocaleString()} {form.currency}</span></p>
             )}
           </div>
 
           {error && <p className="text-sm px-4 py-3 rounded-xl" style={{ background:'rgba(239,68,68,0.1)', color:'#EF4444' }}>{error}</p>}
           <div className="flex gap-3 pt-2">
             <button type="submit" disabled={saving} className="flex-1 py-3 rounded-xl text-sm font-medium disabled:opacity-50" style={{ background: C.blue, color: '#fff' }}>{saving ? 'Creating...' : 'Create Contract'}</button>
-            <Link href="/contracts" className="px-5 py-3 rounded-xl text-sm" style={{ background:'#323D5E', color: C.muted }}>Cancel</Link>
+            <Link href="/contracts" className="px-5 py-3 rounded-xl text-sm" style={{ background:'#E2E8F0', color: C.muted }}>Cancel</Link>
           </div>
         </form>
       </div>

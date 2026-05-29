@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { formatCurrency } from '@/lib/format'
 
-const C = { card:'#222A42', card2:'#2A3354', border:'#323D5E', border2:'#404F74', green:'#10B981', amber:'#F59E0B', red:'#EF4444', blue:'#3B82F6', muted:'#6B7280' }
+const C = { card:'#FFFFFF', card2:'#F1F5F9', border:'#E2E8F0', border2:'#CBD5E1', green:'#10B981', amber:'#F59E0B', red:'#EF4444', blue:'#3B82F6', muted:'#6B7280' }
 const TRANCHES = ['T1','T2','T3','T4','One-Shot']
 const ESG_COLORS: Record<string,string> = { E:'#10B981', S:'#3B82F6', G:'#F59E0B', Other:'#6B7280' }
 
@@ -64,13 +64,13 @@ export default function PaymentRegisterPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <p className="text-xs font-medium uppercase tracking-widest mb-1" style={{ color:C.muted }}>Finance</p>
-          <h1 className="text-2xl font-medium" style={{ color:'#F9FAFB' }}>Payment Register</h1>
+          <h1 className="text-2xl font-medium" style={{ color:'#0F172A' }}>Payment Register</h1>
         </div>
         <div className="flex gap-3">
-          <button onClick={exportCSV} className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-xl" style={{ background:'#323D5E', border:'1px solid #404F74', color:'#F9FAFB' }}>
+          <button onClick={exportCSV} className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-xl" style={{ background:'#E2E8F0', border:'1px solid #CBD5E1', color:'#0F172A' }}>
             Export CSV
           </button>
-          <button onClick={()=>window.print()} className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-xl" style={{ background:'#323D5E', border:'1px solid #404F74', color:'#F9FAFB' }}>
+          <button onClick={()=>window.print()} className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-xl" style={{ background:'#E2E8F0', border:'1px solid #CBD5E1', color:'#0F172A' }}>
             Print / PDF
           </button>
         </div>
@@ -80,7 +80,7 @@ export default function PaymentRegisterPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm" style={{ minWidth:1600 }}>
             <thead>
-              <tr style={{ borderBottom:`1px solid ${C.border}`, background:'#161B30' }}>
+              <tr style={{ borderBottom:`1px solid ${C.border}`, background:'#F1F5F9' }}>
                 <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-widest" style={{ color:C.muted, width:180 }}>Provider</th>
                 <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-widest" style={{ color:C.muted, width:100 }}>Cat</th>
                 <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-widest" style={{ color:C.muted, width:160 }}>Contract</th>
@@ -91,10 +91,10 @@ export default function PaymentRegisterPage() {
                 <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-widest" style={{ color:C.muted }}>Balance</th>
                 <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-widest" style={{ color:C.muted }}>%</th>
               </tr>
-              <tr style={{ borderBottom:`2px solid ${C.border}`, background:'#161B30' }}>
+              <tr style={{ borderBottom:`2px solid ${C.border}`, background:'#F1F5F9' }}>
                 <th colSpan={3} />
                 {TRANCHES.map(t=>(
-                  <th key={t} colSpan={1} className="px-2 py-2 text-left text-xs" style={{ color:'#5A6A8A', borderLeft:`1px solid ${C.border}` }}>Amt</th>
+                  <th key={t} colSpan={1} className="px-2 py-2 text-left text-xs" style={{ color:'#94A3B8', borderLeft:`1px solid ${C.border}` }}>Amt</th>
                 ))}
                 <th colSpan={2} /><th />
               </tr>
@@ -113,13 +113,13 @@ export default function PaymentRegisterPage() {
                 return (
                   <tr key={c.id} style={{ borderBottom:`1px solid ${C.border}`, background:rowBg }} className="hover:bg-white/5">
                     <td className="px-4 py-3">
-                      <p style={{ color:'#F9FAFB' }}>{c.service_providers?.name || c.client_name || '—'}</p>
+                      <p style={{ color:'#0F172A' }}>{c.service_providers?.name || c.client_name || '—'}</p>
                       <p className="text-xs mt-0.5" style={{ color:C.muted }}>{c.contract_name}</p>
                     </td>
                     <td className="px-4 py-3">
                       {c.category && <span className="text-xs px-2 py-0.5 rounded-full" style={{ background:`${ESG_COLORS[c.category]||C.muted}20`, color:ESG_COLORS[c.category]||C.muted }}>{c.category}</span>}
                     </td>
-                    <td className="px-4 py-3 text-sm" style={{ color:'#D1D5DB' }}>{c.project || '—'}</td>
+                    <td className="px-4 py-3 text-sm" style={{ color:'#374151' }}>{c.project || '—'}</td>
                     {TRANCHES.map(name => {
                       const tr = trancheByName(t, name)
                       const isPaid = tr?.status === 'paid'
@@ -128,9 +128,9 @@ export default function PaymentRegisterPage() {
                           {tr ? (
                             <div>
                               <p className="text-xs font-medium" style={{ color: isPaid?C.green:tr.status==='scheduled'?C.amber:C.muted }}>{formatCurrency(tr.amount)}</p>
-                              <p className="text-xs mt-0.5" style={{ color:'#5A6A8A' }}>{tr.scheduled_date||'—'}</p>
-                              {tr.pop_reference && <p className="text-xs mt-0.5 font-mono" style={{ color:'#5A6A8A' }}>{tr.pop_reference}</p>}
-                              <span className="text-xs" style={{ color: isPaid?C.green:tr.status==='scheduled'?C.amber:'#5A6A8A' }}>{isPaid?'✓ Paid':tr.status==='scheduled'?'Sched':'Unpaid'}</span>
+                              <p className="text-xs mt-0.5" style={{ color:'#94A3B8' }}>{tr.scheduled_date||'—'}</p>
+                              {tr.pop_reference && <p className="text-xs mt-0.5 font-mono" style={{ color:'#94A3B8' }}>{tr.pop_reference}</p>}
+                              <span className="text-xs" style={{ color: isPaid?C.green:tr.status==='scheduled'?C.amber:'#94A3B8' }}>{isPaid?'✓ Paid':tr.status==='scheduled'?'Sched':'Unpaid'}</span>
                             </div>
                           ) : <span style={{ color:'#2D3748' }}>—</span>}
                         </td>

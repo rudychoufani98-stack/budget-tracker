@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { formatCurrency, formatDate } from '@/lib/format'
 
-const C = { card:'#222A42', card2:'#2A3354', border:'#323D5E', border2:'#404F74', green:'#10B981', amber:'#F59E0B', red:'#EF4444', blue:'#3B82F6', muted:'#6B7280', muted2:'#9CA3AF', text:'#F9FAFB' }
+const C = { card:'#FFFFFF', card2:'#F1F5F9', border:'#E2E8F0', border2:'#CBD5E1', green:'#10B981', amber:'#F59E0B', red:'#EF4444', blue:'#3B82F6', muted:'#6B7280', muted2:'#9CA3AF', text:'#0F172A' }
 
 const TRANCHE_ORDER = ['T1','T2','T3','T4','One-Shot']
 
@@ -62,7 +62,7 @@ export default function ContractDetailPage() {
   }
 
   if (loading) return (
-    <div className="flex items-center justify-center h-screen" style={{ background: '#1A1F35' }}>
+    <div className="flex items-center justify-center h-screen" style={{ background: '#F8FAFC' }}>
       <p className="text-sm" style={{ color: C.muted }}>Loading…</p>
     </div>
   )
@@ -171,7 +171,7 @@ export default function ContractDetailPage() {
                           onChange={e => setPopRefs(p => ({ ...p, [t.id]: e.target.value }))}
                           placeholder="POP reference…"
                           className="text-xs px-3 py-1.5 rounded-lg w-48"
-                          style={{ background:'#323D5E', color: C.text, border:`1px solid ${C.border2}` }}
+                          style={{ background:'#E2E8F0', color: C.text, border:`1px solid ${C.border2}` }}
                         />
                         <button
                           onClick={() => markPaid(t.id)}

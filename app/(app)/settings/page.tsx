@@ -1,7 +1,7 @@
 ﻿'use client'
 import { useState, useEffect } from 'react'
 
-const C = { card:'#222A42', card2:'#2A3354', border:'#323D5E', border2:'#404F74', green:'#10B981', amber:'#F59E0B', red:'#EF4444', blue:'#3B82F6', muted:'#6B7280' }
+const C = { card:'#FFFFFF', card2:'#F1F5F9', border:'#E2E8F0', border2:'#CBD5E1', green:'#10B981', amber:'#F59E0B', red:'#EF4444', blue:'#3B82F6', muted:'#6B7280' }
 const ROLES = ['admin','rudy','placide','hitech','viewer']
 const ROLE_COLORS: Record<string,string> = { admin:'#3B82F6', rudy:'#F97316', placide:'#D97706', hitech:'#FACC15', viewer:'#6B7280' }
 
@@ -45,7 +45,7 @@ export default function SettingsPage() {
   }
 
   const inp = "w-full px-3 py-2.5 text-sm rounded-xl"
-  const inpStyle = { background:'#323D5E', border:'1px solid #404F74', color:'#F9FAFB' }
+  const inpStyle = { background:'#E2E8F0', border:'1px solid #CBD5E1', color:'#0F172A' }
 
   const tabs = [
     { key:'users', label:'User Management' },
@@ -58,12 +58,12 @@ export default function SettingsPage() {
     <div className="px-6 py-8 max-w-4xl mx-auto">
       <div className="mb-6">
         <p className="text-xs font-medium uppercase tracking-widest mb-1" style={{ color:C.muted }}>Administration</p>
-        <h1 className="text-2xl font-medium" style={{ color:'#F9FAFB' }}>Settings</h1>
+        <h1 className="text-2xl font-medium" style={{ color:'#0F172A' }}>Settings</h1>
       </div>
 
-      <div className="flex gap-1 mb-6 p-1 rounded-xl" style={{ background:'#222A42', border:'1px solid #323D5E' }}>
+      <div className="flex gap-1 mb-6 p-1 rounded-xl" style={{ background:'#FFFFFF', border:'1px solid #E2E8F0' }}>
         {tabs.map(t=>(
-          <button key={t.key} onClick={()=>setTab(t.key as any)} className="flex-1 py-2 text-xs font-medium rounded-lg transition-all" style={tab===t.key ? { background:'#323D5E', color:'#F9FAFB' } : { color:C.muted }}>
+          <button key={t.key} onClick={()=>setTab(t.key as any)} className="flex-1 py-2 text-xs font-medium rounded-lg transition-all" style={tab===t.key ? { background:'#E2E8F0', color:'#0F172A' } : { color:C.muted }}>
             {t.label}
           </button>
         ))}
@@ -78,7 +78,7 @@ export default function SettingsPage() {
           {success && <div className="mb-4 text-sm px-4 py-3 rounded-xl" style={{ background:'rgba(16,185,129,0.1)', color:C.green, border:'1px solid rgba(16,185,129,0.2)' }}>{success}</div>}
           {showForm && (
             <div className="rounded-2xl p-5 mb-4" style={{ background:C.card, border:`1px solid ${C.border}` }}>
-              <h2 className="text-sm font-medium mb-4" style={{ color:'#F9FAFB' }}>New Account</h2>
+              <h2 className="text-sm font-medium mb-4" style={{ color:'#0F172A' }}>New Account</h2>
               <form onSubmit={createUser} className="grid grid-cols-2 gap-4">
                 <div><label className="text-xs font-medium mb-1.5 block" style={{ color:C.muted }}>Full Name</label><input className={inp} style={inpStyle} value={form.name} onChange={e=>setForm(p=>({...p,name:e.target.value}))} required placeholder="Full name" /></div>
                 <div><label className="text-xs font-medium mb-1.5 block" style={{ color:C.muted }}>Email</label><input type="email" className={inp} style={inpStyle} value={form.email} onChange={e=>setForm(p=>({...p,email:e.target.value}))} required placeholder="user@skykapital.com" /></div>
@@ -91,7 +91,7 @@ export default function SettingsPage() {
                 {error && <div className="col-span-2 text-sm px-4 py-3 rounded-xl" style={{ background:'rgba(239,68,68,0.1)', color:C.red }}>{error}</div>}
                 <div className="col-span-2 flex gap-3">
                   <button type="submit" disabled={saving} className="flex-1 py-3 rounded-xl text-sm font-medium disabled:opacity-50" style={{ background:C.blue, color:'#fff' }}>{saving?'Creating...':'Create Account'}</button>
-                  <button type="button" onClick={()=>setShowForm(false)} className="px-5 py-3 rounded-xl text-sm" style={{ background:'#323D5E', color:C.muted }}>Cancel</button>
+                  <button type="button" onClick={()=>setShowForm(false)} className="px-5 py-3 rounded-xl text-sm" style={{ background:'#E2E8F0', color:C.muted }}>Cancel</button>
                 </div>
               </form>
             </div>
@@ -104,9 +104,9 @@ export default function SettingsPage() {
                 return (
                   <div key={u.id} className="flex items-center justify-between px-5 py-3" style={{ borderBottom:`1px solid ${C.border}` }}>
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium" style={{ background:'#323D5E', color:'#F9FAFB' }}>{initials||'?'}</div>
+                      <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium" style={{ background:'#E2E8F0', color:'#0F172A' }}>{initials||'?'}</div>
                       <div>
-                        <p className="text-sm font-medium" style={{ color:'#F9FAFB' }}>{u.name||'—'}</p>
+                        <p className="text-sm font-medium" style={{ color:'#0F172A' }}>{u.name||'—'}</p>
                         <p className="text-xs" style={{ color:C.muted }}>{u.email}</p>
                       </div>
                     </div>
@@ -124,7 +124,7 @@ export default function SettingsPage() {
 
       {tab === 'notifications' && (
         <div className="rounded-2xl p-6" style={{ background:C.card, border:`1px solid ${C.border}` }}>
-          <p className="text-sm font-medium mb-4" style={{ color:'#F9FAFB' }}>Email Notification Preferences</p>
+          <p className="text-sm font-medium mb-4" style={{ color:'#0F172A' }}>Email Notification Preferences</p>
           <div className="space-y-4">
             {[
               { label:'New invoice uploaded', sub:'Notify Rudy when a new invoice is submitted', enabled:true },
@@ -136,10 +136,10 @@ export default function SettingsPage() {
             ].map(n=>(
               <div key={n.label} className="flex items-center justify-between py-3" style={{ borderBottom:`1px solid ${C.border}` }}>
                 <div>
-                  <p className="text-sm" style={{ color:'#F9FAFB' }}>{n.label}</p>
+                  <p className="text-sm" style={{ color:'#0F172A' }}>{n.label}</p>
                   <p className="text-xs mt-0.5" style={{ color:C.muted }}>{n.sub}</p>
                 </div>
-                <div className="w-10 h-5 rounded-full flex items-center px-0.5" style={{ background:n.enabled?C.blue:'#404F74' }}>
+                <div className="w-10 h-5 rounded-full flex items-center px-0.5" style={{ background:n.enabled?C.blue:'#CBD5E1' }}>
                   <div className="w-4 h-4 rounded-full bg-white" style={{ marginLeft:n.enabled?20:0, transition:'margin 0.2s' }} />
                 </div>
               </div>
@@ -150,21 +150,21 @@ export default function SettingsPage() {
 
       {tab === 'categories' && (
         <div className="rounded-2xl p-6" style={{ background:C.card, border:`1px solid ${C.border}` }}>
-          <p className="text-sm font-medium mb-4" style={{ color:'#F9FAFB' }}>ESG Categories & Invoice Types</p>
+          <p className="text-sm font-medium mb-4" style={{ color:'#0F172A' }}>ESG Categories & Invoice Types</p>
           <div className="grid grid-cols-2 gap-6">
             <div>
               <p className="text-xs font-medium mb-3 uppercase tracking-widest" style={{ color:C.muted }}>ESG Categories</p>
               {['E — Environmental','S — Social','G — Governance','Other'].map(c=>(
                 <div key={c} className="flex items-center gap-2 py-2" style={{ borderBottom:`1px solid ${C.border}` }}>
                   <div className="w-1.5 h-1.5 rounded-full" style={{ background:c.startsWith('E')?'#10B981':c.startsWith('S')?'#3B82F6':c.startsWith('G')?'#F59E0B':'#6B7280' }} />
-                  <span className="text-sm" style={{ color:'#F9FAFB' }}>{c}</span>
+                  <span className="text-sm" style={{ color:'#0F172A' }}>{c}</span>
                 </div>
               ))}
             </div>
             <div>
               <p className="text-xs font-medium mb-3 uppercase tracking-widest" style={{ color:C.muted }}>Invoice Categories</p>
               {['Subcontracting','Travel','Accommodation','Meals','Equipment','Other'].map(c=>(
-                <div key={c} className="py-2 text-sm" style={{ borderBottom:`1px solid ${C.border}`, color:'#F9FAFB' }}>{c}</div>
+                <div key={c} className="py-2 text-sm" style={{ borderBottom:`1px solid ${C.border}`, color:'#0F172A' }}>{c}</div>
               ))}
             </div>
           </div>
@@ -173,7 +173,7 @@ export default function SettingsPage() {
 
       {tab === 'validation' && (
         <div className="rounded-2xl p-6" style={{ background:C.card, border:`1px solid ${C.border}` }}>
-          <p className="text-sm font-medium mb-4" style={{ color:'#F9FAFB' }}>Validation Chain Configuration</p>
+          <p className="text-sm font-medium mb-4" style={{ color:'#0F172A' }}>Validation Chain Configuration</p>
           <div className="space-y-3">
             {[
               { step:1, role:'rudy/admin',  label:'Step 1 — Rudy',    desc:'Checks invoice accuracy and matching with contract', color:'#F97316' },
@@ -183,7 +183,7 @@ export default function SettingsPage() {
               <div key={s.step} className="flex items-center gap-4 p-4 rounded-xl" style={{ background:C.card2, border:`1px solid ${C.border}` }}>
                 <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium shrink-0" style={{ background:`${s.color}20`, color:s.color }}>{s.step}</div>
                 <div className="flex-1">
-                  <p className="text-sm font-medium" style={{ color:'#F9FAFB' }}>{s.label}</p>
+                  <p className="text-sm font-medium" style={{ color:'#0F172A' }}>{s.label}</p>
                   <p className="text-xs mt-0.5" style={{ color:C.muted }}>{s.desc}</p>
                 </div>
                 <span className="text-xs px-2.5 py-1 rounded-full" style={{ background:`${s.color}20`, color:s.color }}>{s.role}</span>

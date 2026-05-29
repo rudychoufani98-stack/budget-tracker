@@ -5,7 +5,7 @@ import { createClient } from '@/utils/supabase/client'
 import Link from 'next/link'
 import { formatCurrency } from '@/lib/format'
 
-const C = { card:'#222A42', card2:'#2A3354', border:'#323D5E', green:'#10B981', amber:'#F59E0B', red:'#EF4444', blue:'#3B82F6', muted:'#6B7280' }
+const C = { card:'#FFFFFF', card2:'#F1F5F9', border:'#E2E8F0', green:'#10B981', amber:'#F59E0B', red:'#EF4444', blue:'#3B82F6', muted:'#6B7280' }
 
 const COLUMNS = [
   { key:'pending_review',  label:'Awaiting Rudy',    role:['rudy','admin'], color:'#F97316' },
@@ -60,7 +60,7 @@ export default function ValidationsPage() {
     <div className="px-6 py-8 max-w-7xl mx-auto">
       <div className="mb-6">
         <p className="text-xs font-medium uppercase tracking-widest mb-1" style={{ color:C.muted }}>Workflow</p>
-        <h1 className="text-2xl font-medium" style={{ color:'#F9FAFB' }}>Validations</h1>
+        <h1 className="text-2xl font-medium" style={{ color:'#0F172A' }}>Validations</h1>
       </div>
 
       <div className="grid grid-cols-3 gap-4 mb-8">
@@ -72,7 +72,7 @@ export default function ValidationsPage() {
               <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom:`1px solid ${C.border}` }}>
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full" style={{ background:col.color }} />
-                  <p className="text-sm font-medium" style={{ color:'#F9FAFB' }}>{col.label}</p>
+                  <p className="text-sm font-medium" style={{ color:'#0F172A' }}>{col.label}</p>
                 </div>
                 <span className="text-xs px-2 py-0.5 rounded-full" style={{ background:`${col.color}20`, color:col.color }}>{colInvoices.length}</span>
               </div>
@@ -85,7 +85,7 @@ export default function ValidationsPage() {
                     <div key={inv.id} className="rounded-xl p-4" style={{ background:C.card2, border:`1px solid ${C.border}` }}>
                       <div className="flex items-start justify-between mb-2">
                         <div>
-                          <p className="text-sm font-medium" style={{ color:'#F9FAFB' }}>{inv.subcontractor_name || 'Unknown'}</p>
+                          <p className="text-sm font-medium" style={{ color:'#0F172A' }}>{inv.subcontractor_name || 'Unknown'}</p>
                           <p className="text-xs mt-0.5" style={{ color:C.muted }}>#{inv.invoice_number || 'N/A'}</p>
                         </div>
                         <span className="text-xs px-2 py-0.5 rounded-full" style={{ background:urgent?'rgba(239,68,68,0.15)':'rgba(107,114,128,0.15)', color:urgent?C.red:C.muted }}>{days}d</span>
@@ -94,7 +94,7 @@ export default function ValidationsPage() {
                       <Link href={`/invoices/${inv.id}`} className="block text-xs mb-3" style={{ color:C.blue }}>View details</Link>
                       {canAct && (
                         <div className="space-y-2">
-                          <textarea rows={1} placeholder="Comment (optional)" className="w-full text-xs px-3 py-2 rounded-lg resize-none" style={{ background:'#222A42', border:'1px solid #404F74', color:'#F9FAFB' }}
+                          <textarea rows={1} placeholder="Comment (optional)" className="w-full text-xs px-3 py-2 rounded-lg resize-none" style={{ background:'#FFFFFF', border:'1px solid #CBD5E1', color:'#0F172A' }}
                             value={comments[inv.id]||''} onChange={e=>setComments(p=>({...p,[inv.id]:e.target.value}))} />
                           <div className="grid grid-cols-2 gap-2">
                             <button onClick={()=>validate(inv.id,'approved')} disabled={submitting===inv.id} className="py-2 rounded-lg text-xs font-medium disabled:opacity-50" style={{ background:C.green, color:'#fff' }}>
@@ -118,13 +118,13 @@ export default function ValidationsPage() {
       {history.length > 0 && (
         <div className="rounded-2xl overflow-hidden" style={{ background:C.card, border:`1px solid ${C.border}` }}>
           <div className="px-6 py-4" style={{ borderBottom:`1px solid ${C.border}` }}>
-            <p className="text-sm font-medium" style={{ color:'#F9FAFB' }}>Validation History</p>
+            <p className="text-sm font-medium" style={{ color:'#0F172A' }}>Validation History</p>
           </div>
           <div>
             {history.map(v => (
               <div key={v.id} className="flex items-center justify-between px-6 py-3" style={{ borderBottom:`1px solid ${C.border}` }}>
                 <div>
-                  <p className="text-sm" style={{ color:'#F9FAFB' }}>{(v.invoices as any)?.subcontractor_name || 'Invoice'}</p>
+                  <p className="text-sm" style={{ color:'#0F172A' }}>{(v.invoices as any)?.subcontractor_name || 'Invoice'}</p>
                   <p className="text-xs mt-0.5" style={{ color:C.muted }}>{v.validator_name} · {new Date(v.validated_at).toLocaleDateString('fr-FR')}</p>
                   {v.comment && <p className="text-xs mt-0.5 italic" style={{ color:'#6B7280' }}>"{v.comment}"</p>}
                 </div>
@@ -139,13 +139,13 @@ export default function ValidationsPage() {
 
       {rejectModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background:'rgba(0,0,0,0.7)' }} onClick={()=>setRejectModal(null)}>
-          <div className="rounded-2xl p-6 w-full max-w-md" style={{ background:C.card, border:`1px solid #404F74` }} onClick={e=>e.stopPropagation()}>
-            <h3 className="text-base font-medium mb-4" style={{ color:'#F9FAFB' }}>Reject Invoice</h3>
-            <textarea rows={3} placeholder="Reason for rejection..." className="w-full text-sm px-4 py-3 rounded-xl resize-none mb-4" style={{ background:'#323D5E', border:'1px solid #404F74', color:'#F9FAFB' }}
+          <div className="rounded-2xl p-6 w-full max-w-md" style={{ background:C.card, border:`1px solid #CBD5E1` }} onClick={e=>e.stopPropagation()}>
+            <h3 className="text-base font-medium mb-4" style={{ color:'#0F172A' }}>Reject Invoice</h3>
+            <textarea rows={3} placeholder="Reason for rejection..." className="w-full text-sm px-4 py-3 rounded-xl resize-none mb-4" style={{ background:'#E2E8F0', border:'1px solid #CBD5E1', color:'#0F172A' }}
               value={comments[rejectModal]||''} onChange={e=>setComments(p=>({...p,[rejectModal]:e.target.value}))} />
             <div className="flex gap-3">
               <button onClick={()=>validate(rejectModal,'rejected')} className="flex-1 py-2.5 rounded-xl text-sm font-medium" style={{ background:C.red, color:'#fff' }}>Confirm Rejection</button>
-              <button onClick={()=>setRejectModal(null)} className="px-5 py-2.5 rounded-xl text-sm" style={{ background:'#323D5E', color:C.muted }}>Cancel</button>
+              <button onClick={()=>setRejectModal(null)} className="px-5 py-2.5 rounded-xl text-sm" style={{ background:'#E2E8F0', color:C.muted }}>Cancel</button>
             </div>
           </div>
         </div>

@@ -4,7 +4,7 @@ import { formatCurrency } from '@/lib/format'
 import type { ContractTranche } from '@/lib/types'
 
 export const revalidate = 0
-const C = { card: '#222A42', border: '#323D5E', green: '#10B981', amber: '#F59E0B', red: '#EF4444', blue: '#3B82F6', muted: '#6B7280' }
+const C = { card: '#FFFFFF', border: '#E2E8F0', green: '#10B981', amber: '#F59E0B', red: '#EF4444', blue: '#3B82F6', muted: '#6B7280' }
 
 const ESG_COLORS: Record<string, string> = { E: '#10B981', S: '#3B82F6', G: '#F59E0B', Other: '#6B7280' }
 
@@ -20,7 +20,7 @@ export default async function ContractsPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <p className="text-xs font-medium uppercase tracking-widest mb-1" style={{ color: C.muted }}>Management</p>
-          <h1 className="text-2xl font-medium" style={{ color: '#F9FAFB' }}>Contracts</h1>
+          <h1 className="text-2xl font-medium" style={{ color: '#0F172A' }}>Contracts</h1>
         </div>
         <Link href="/contracts/new" className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-xl" style={{ background: '#3B82F6', color: '#fff' }}>
           + New Contract
@@ -45,19 +45,19 @@ export default async function ContractsPage() {
               return (
                 <Link key={c.id} href={`/contracts/${c.id}`} className="grid px-6 py-4 hover:bg-white/5 transition-colors items-center" style={{ borderBottom: `1px solid ${C.border}`, gridTemplateColumns: '2fr 1.5fr 0.7fr 1fr 1fr 1fr 1.2fr 0.5fr' }}>
                   <div>
-                    <p className="text-sm font-medium" style={{ color: '#F9FAFB' }}>{c.service_providers?.name || c.client_name || '—'}</p>
+                    <p className="text-sm font-medium" style={{ color: '#0F172A' }}>{c.service_providers?.name || c.client_name || '—'}</p>
                     <p className="text-xs mt-0.5" style={{ color: C.muted }}>{c.contract_name}</p>
                   </div>
-                  <div className="text-sm" style={{ color: '#D1D5DB' }}>{c.project || '—'}</div>
+                  <div className="text-sm" style={{ color: '#374151' }}>{c.project || '—'}</div>
                   <div>
                     {c.category && <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: `${ESG_COLORS[c.category] || C.muted}20`, color: ESG_COLORS[c.category] || C.muted }}>{c.category}</span>}
                   </div>
-                  <div className="text-sm font-medium" style={{ color: '#F9FAFB' }}>{formatCurrency(budget)}</div>
+                  <div className="text-sm font-medium" style={{ color: '#0F172A' }}>{formatCurrency(budget)}</div>
                   <div className="text-sm" style={{ color: C.green }}>{formatCurrency(paid)}</div>
                   <div className="text-sm" style={{ color: balance > 0 ? C.amber : C.muted }}>{formatCurrency(balance)}</div>
                   <div className="pr-4">
                     <div className="flex items-center gap-2">
-                      <div className="flex-1 h-1.5 rounded-full" style={{ background: '#323D5E' }}>
+                      <div className="flex-1 h-1.5 rounded-full" style={{ background: '#E2E8F0' }}>
                         <div className="h-1.5 rounded-full" style={{ width: `${rate}%`, background: rate >= 80 ? C.green : rate >= 40 ? C.amber : C.blue }} />
                       </div>
                       <span className="text-xs" style={{ color: C.muted }}>{rate}%</span>

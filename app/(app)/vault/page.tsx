@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
-const C = { card:'#222A42', card2:'#2A3354', border:'#323D5E', green:'#10B981', amber:'#F59E0B', red:'#EF4444', blue:'#3B82F6', muted:'#6B7280' }
+const C = { card:'#FFFFFF', card2:'#F1F5F9', border:'#E2E8F0', green:'#10B981', amber:'#F59E0B', red:'#EF4444', blue:'#3B82F6', muted:'#6B7280' }
 
 const FILE_TYPE_COLORS: Record<string,string> = {
   invoice:'#3B82F6', proof_of_payment:'#10B981', contract:'#F59E0B', other:'#6B7280'
@@ -59,25 +59,25 @@ export default function VaultPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <p className="text-xs font-medium uppercase tracking-widest mb-1" style={{ color:C.muted }}>Storage</p>
-          <h1 className="text-2xl font-medium" style={{ color:'#F9FAFB' }}>Document Vault</h1>
+          <h1 className="text-2xl font-medium" style={{ color:'#0F172A' }}>Document Vault</h1>
         </div>
         <div className="flex gap-3">
-          <input type="text" value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search files..." className="text-sm px-4 py-2 rounded-xl" style={{ background:'#323D5E', border:'1px solid #404F74', color:'#F9FAFB', width:240 }} />
+          <input type="text" value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search files..." className="text-sm px-4 py-2 rounded-xl" style={{ background:'#E2E8F0', border:'1px solid #CBD5E1', color:'#0F172A', width:240 }} />
           <button onClick={()=>setShowUpload(true)} className="text-sm font-medium px-4 py-2 rounded-xl" style={{ background:C.blue, color:'#fff' }}>+ Upload</button>
         </div>
       </div>
 
       {showUpload && (
         <div className="rounded-2xl p-5 mb-6" style={{ background:C.card, border:`1px solid ${C.border}` }}>
-          <h2 className="text-sm font-medium mb-4" style={{ color:'#F9FAFB' }}>Upload Document</h2>
+          <h2 className="text-sm font-medium mb-4" style={{ color:'#0F172A' }}>Upload Document</h2>
           <form onSubmit={uploadDoc} className="grid grid-cols-3 gap-4">
             <div className="col-span-2">
               <label className="text-xs font-medium mb-1.5 block" style={{ color:C.muted }}>File</label>
-              <input id="vault-file" type="file" accept=".pdf,.png,.jpg,.docx,.xlsx" required className="w-full text-sm px-3 py-2 rounded-xl" style={{ background:'#323D5E', border:'1px solid #404F74', color:'#F9FAFB' }} />
+              <input id="vault-file" type="file" accept=".pdf,.png,.jpg,.docx,.xlsx" required className="w-full text-sm px-3 py-2 rounded-xl" style={{ background:'#E2E8F0', border:'1px solid #CBD5E1', color:'#0F172A' }} />
             </div>
             <div>
               <label className="text-xs font-medium mb-1.5 block" style={{ color:C.muted }}>Type</label>
-              <select className="w-full text-sm px-3 py-2.5 rounded-xl" style={{ background:'#323D5E', border:'1px solid #404F74', color:'#F9FAFB' }} value={uploadForm.file_type} onChange={e=>setUploadForm(p=>({...p,file_type:e.target.value}))}>
+              <select className="w-full text-sm px-3 py-2.5 rounded-xl" style={{ background:'#E2E8F0', border:'1px solid #CBD5E1', color:'#0F172A' }} value={uploadForm.file_type} onChange={e=>setUploadForm(p=>({...p,file_type:e.target.value}))}>
                 <option value="invoice">Invoice</option>
                 <option value="proof_of_payment">Proof of Payment</option>
                 <option value="contract">Contract</option>
@@ -86,14 +86,14 @@ export default function VaultPage() {
             </div>
             <div>
               <label className="text-xs font-medium mb-1.5 block" style={{ color:C.muted }}>Link to Contract</label>
-              <select className="w-full text-sm px-3 py-2.5 rounded-xl" style={{ background:'#323D5E', border:'1px solid #404F74', color:'#F9FAFB' }} value={uploadForm.contract_id} onChange={e=>setUploadForm(p=>({...p,contract_id:e.target.value}))}>
+              <select className="w-full text-sm px-3 py-2.5 rounded-xl" style={{ background:'#E2E8F0', border:'1px solid #CBD5E1', color:'#0F172A' }} value={uploadForm.contract_id} onChange={e=>setUploadForm(p=>({...p,contract_id:e.target.value}))}>
                 <option value="">None</option>
                 {contracts.map((c:any)=><option key={c.id} value={c.id}>{c.contract_name}</option>)}
               </select>
             </div>
             <div className="col-span-2 flex gap-3 items-end">
               <button type="submit" disabled={uploading} className="flex-1 py-2.5 rounded-xl text-sm font-medium disabled:opacity-50" style={{ background:C.blue, color:'#fff' }}>{uploading?'Uploading...':'Upload'}</button>
-              <button type="button" onClick={()=>setShowUpload(false)} className="px-4 py-2.5 rounded-xl text-sm" style={{ background:'#323D5E', color:C.muted }}>Cancel</button>
+              <button type="button" onClick={()=>setShowUpload(false)} className="px-4 py-2.5 rounded-xl text-sm" style={{ background:'#E2E8F0', color:C.muted }}>Cancel</button>
             </div>
           </form>
         </div>
@@ -105,7 +105,7 @@ export default function VaultPage() {
            Object.keys(grouped).length === 0 ? <p className="text-sm text-center py-12" style={{ color:C.muted }}>No documents yet.</p> :
            Object.entries(grouped).map(([contractName, contractDocs]) => (
             <div key={contractName} className="rounded-2xl overflow-hidden" style={{ background:C.card, border:`1px solid ${C.border}` }}>
-              <div className="px-5 py-3" style={{ borderBottom:`1px solid ${C.border}`, background:'#161B30' }}>
+              <div className="px-5 py-3" style={{ borderBottom:`1px solid ${C.border}`, background:'#F1F5F9' }}>
                 <p className="text-xs font-medium uppercase tracking-widest" style={{ color:C.muted }}>{contractName}</p>
               </div>
               {contractDocs.map(doc => (
@@ -116,7 +116,7 @@ export default function VaultPage() {
                       PDF
                     </div>
                     <div>
-                      <p className="text-sm" style={{ color:'#F9FAFB' }}>{doc.filename}</p>
+                      <p className="text-sm" style={{ color:'#0F172A' }}>{doc.filename}</p>
                       <p className="text-xs mt-0.5" style={{ color:C.muted }}>{new Date(doc.uploaded_at).toLocaleDateString('fr-FR')} · {doc.file_type}</p>
                     </div>
                   </div>
@@ -132,7 +132,7 @@ export default function VaultPage() {
         {preview && (
           <div className="rounded-2xl overflow-hidden sticky top-6 self-start" style={{ background:C.card, border:`1px solid ${C.border}` }}>
             <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom:`1px solid ${C.border}` }}>
-              <p className="text-sm font-medium truncate" style={{ color:'#F9FAFB' }}>{preview.filename}</p>
+              <p className="text-sm font-medium truncate" style={{ color:'#0F172A' }}>{preview.filename}</p>
               <button onClick={()=>setPreview(null)} style={{ color:C.muted }}>x</button>
             </div>
             <div>

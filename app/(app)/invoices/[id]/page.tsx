@@ -8,7 +8,7 @@ import { createClient } from '@/utils/supabase/client'
 import { formatCurrency, formatDate } from '@/lib/format'
 import type { Invoice, InvoiceLineItem, Validation } from '@/lib/types'
 
-const C = { card:'#222A42', border:'#323D5E', border2:'#404F74', green:'#10B981', amber:'#F59E0B', red:'#EF4444', blue:'#3B82F6', muted:'#6B7280', muted2:'#9CA3AF', text:'#F9FAFB' }
+const C = { card:'#FFFFFF', border:'#E2E8F0', border2:'#CBD5E1', green:'#10B981', amber:'#F59E0B', red:'#EF4444', blue:'#3B82F6', muted:'#6B7280', muted2:'#9CA3AF', text:'#0F172A' }
 
 const STATUS: Record<string, { label: string; color: string; bg: string; dot: string }> = {
   pending_review:  { label: 'Awaiting Rudy',    color: '#F97316', bg: 'rgba(249,115,22,0.12)',  dot: '#F97316' },
@@ -113,7 +113,7 @@ export default function InvoiceDetailPage() {
   }
 
   if (loading) return (
-    <div className="flex items-center justify-center h-screen" style={{ background: '#1A1F35' }}>
+    <div className="flex items-center justify-center h-screen" style={{ background: '#F8FAFC' }}>
       <div className="text-sm" style={{ color: C.muted }}>Loading…</div>
     </div>
   )
@@ -167,7 +167,7 @@ export default function InvoiceDetailPage() {
                       onClick={() => setEditing(true)}
                       className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
                       style={{ color: C.muted2, border: `1px solid ${C.border2}`, background: 'transparent' }}
-                      onMouseEnter={e=>(e.currentTarget as HTMLElement).style.background='#323D5E'}
+                      onMouseEnter={e=>(e.currentTarget as HTMLElement).style.background='#E2E8F0'}
                       onMouseLeave={e=>(e.currentTarget as HTMLElement).style.background='transparent'}
                     >
                       <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
@@ -204,7 +204,7 @@ export default function InvoiceDetailPage() {
                         rejected ? { background: 'rgba(239,68,68,0.2)', color: '#EF4444' }
                         : done || (invoice.status==='approved'&&i===3) ? { background: '#10B981', color: '#fff' }
                         : active ? { background: 'rgba(59,130,246,0.2)', color: '#3B82F6', border: '2px solid #3B82F6' }
-                        : { background: '#323D5E', color: '#6B7280' }
+                        : { background: '#E2E8F0', color: '#6B7280' }
                       }>
                         {done||(invoice.status==='approved'&&i===3) ? (
                           <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
@@ -230,7 +230,7 @@ export default function InvoiceDetailPage() {
                   <DField label="Date" value={editData.invoice_date||''} onChange={v=>setEditData(p=>({...p,invoice_date:v}))} type="date"/>
                   <div>
                     <label className="text-xs font-medium block mb-1" style={{ color: C.muted }}>Category</label>
-                    <select value={editData.category||''} onChange={e=>setEditData(p=>({...p,category:e.target.value as Invoice['category']}))} className="w-full rounded-lg px-3 py-2 text-sm" style={{ background:'#323D5E', color:C.text, border:`1px solid ${C.border2}` }}>
+                    <select value={editData.category||''} onChange={e=>setEditData(p=>({...p,category:e.target.value as Invoice['category']}))} className="w-full rounded-lg px-3 py-2 text-sm" style={{ background:'#E2E8F0', color:C.text, border:`1px solid ${C.border2}` }}>
                       {['Subcontracting','Travel','Accommodation','Meals','Equipment','Other'].map(c=>(
                         <option key={c} value={c}>{c}</option>
                       ))}
@@ -268,7 +268,7 @@ export default function InvoiceDetailPage() {
               <h2 className="text-sm font-semibold" style={{ color: C.text }}>Amounts</h2>
               <div className="flex items-center gap-2">
                 {savingCurrency && <span className="text-xs" style={{ color: C.muted }}>Saving…</span>}
-                <select value={currency} onChange={e=>saveCurrency(e.target.value)} className="text-xs font-semibold rounded-lg px-2 py-1.5" style={{ background:'#323D5E', color:C.text, border:`1px solid ${C.border2}` }}>
+                <select value={currency} onChange={e=>saveCurrency(e.target.value)} className="text-xs font-semibold rounded-lg px-2 py-1.5" style={{ background:'#E2E8F0', color:C.text, border:`1px solid ${C.border2}` }}>
                   {['EUR','USD','GBP','CHF','MAD','XOF','NGN','CAD','AED','JPY'].map(c=>(
                     <option key={c} value={c}>{c}</option>
                   ))}
@@ -373,11 +373,11 @@ export default function InvoiceDetailPage() {
               <div className="space-y-3">
                 <div>
                   <label className="text-xs font-semibold block mb-1.5" style={{ color: C.muted2 }}>Your name</label>
-                  <input type="text" value={validatorName} onChange={e=>setValidatorName(e.target.value)} placeholder={validatorLabel} className="w-full rounded-xl px-4 py-2.5 text-sm" style={{ background:'#323D5E', color:C.text, border:`1px solid ${C.border2}` }}/>
+                  <input type="text" value={validatorName} onChange={e=>setValidatorName(e.target.value)} placeholder={validatorLabel} className="w-full rounded-xl px-4 py-2.5 text-sm" style={{ background:'#E2E8F0', color:C.text, border:`1px solid ${C.border2}` }}/>
                 </div>
                 <div>
                   <label className="text-xs font-semibold block mb-1.5" style={{ color: C.muted2 }}>Comment (optional)</label>
-                  <textarea value={comment} onChange={e=>setComment(e.target.value)} rows={2} placeholder="Add a note…" className="w-full rounded-xl px-4 py-2.5 text-sm resize-none" style={{ background:'#323D5E', color:C.text, border:`1px solid ${C.border2}` }}/>
+                  <textarea value={comment} onChange={e=>setComment(e.target.value)} rows={2} placeholder="Add a note…" className="w-full rounded-xl px-4 py-2.5 text-sm resize-none" style={{ background:'#E2E8F0', color:C.text, border:`1px solid ${C.border2}` }}/>
                 </div>
                 {message && (
                   <div className="text-sm font-medium px-4 py-3 rounded-xl" style={
@@ -427,17 +427,17 @@ export default function InvoiceDetailPage() {
       {/* Reject modal */}
       {showRejectModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background:'rgba(0,0,0,0.6)' }} onClick={()=>setShowRejectModal(false)}>
-          <div className="rounded-2xl p-6 w-full max-w-md" style={{ background:'#2A3354', border:`1px solid ${C.border2}` }} onClick={e=>e.stopPropagation()}>
+          <div className="rounded-2xl p-6 w-full max-w-md" style={{ background:'#F1F5F9', border:`1px solid ${C.border2}` }} onClick={e=>e.stopPropagation()}>
             <h3 className="text-base font-semibold mb-1" style={{ color: C.text }}>Reject Invoice</h3>
             <p className="text-sm mb-5" style={{ color: C.muted }}>Please provide a reason for rejecting this invoice.</p>
             <div className="space-y-3">
               <div>
                 <label className="text-xs font-semibold block mb-1.5" style={{ color: C.muted2 }}>Your name</label>
-                <input type="text" value={validatorName} onChange={e=>setValidatorName(e.target.value)} placeholder={validatorLabel} className="w-full rounded-xl px-4 py-2.5 text-sm" style={{ background:'#323D5E', color:C.text, border:`1px solid ${C.border2}` }}/>
+                <input type="text" value={validatorName} onChange={e=>setValidatorName(e.target.value)} placeholder={validatorLabel} className="w-full rounded-xl px-4 py-2.5 text-sm" style={{ background:'#E2E8F0', color:C.text, border:`1px solid ${C.border2}` }}/>
               </div>
               <div>
                 <label className="text-xs font-semibold block mb-1.5" style={{ color: C.muted2 }}>Reason for rejection</label>
-                <textarea value={comment} onChange={e=>setComment(e.target.value)} rows={3} placeholder="Explain why this invoice is rejected…" className="w-full rounded-xl px-4 py-2.5 text-sm resize-none" style={{ background:'#323D5E', color:C.text, border:`1px solid ${C.border2}` }}/>
+                <textarea value={comment} onChange={e=>setComment(e.target.value)} rows={3} placeholder="Explain why this invoice is rejected…" className="w-full rounded-xl px-4 py-2.5 text-sm resize-none" style={{ background:'#E2E8F0', color:C.text, border:`1px solid ${C.border2}` }}/>
               </div>
               {message && !message.ok && (
                 <p className="text-sm" style={{ color: '#EF4444' }}>{message.text}</p>
@@ -462,7 +462,7 @@ function DInfo({ label, value }: { label: string; value: string }) {
   return (
     <div>
       <p className="text-xs mb-0.5" style={{ color: '#6B7280' }}>{label}</p>
-      <p className="font-medium" style={{ color: '#F9FAFB' }}>{value}</p>
+      <p className="font-medium" style={{ color: '#0F172A' }}>{value}</p>
     </div>
   )
 }
@@ -471,7 +471,7 @@ function DField({ label, value, onChange, type = 'text' }: { label: string; valu
   return (
     <div>
       <label className="text-xs font-medium block mb-1" style={{ color: '#6B7280' }}>{label}</label>
-      <input type={type} value={value} onChange={e=>onChange(e.target.value)} className="w-full rounded-lg px-3 py-2 text-sm" style={{ background:'#323D5E', color:'#F9FAFB', border:'1px solid #404F74' }}/>
+      <input type={type} value={value} onChange={e=>onChange(e.target.value)} className="w-full rounded-lg px-3 py-2 text-sm" style={{ background:'#E2E8F0', color:'#0F172A', border:'1px solid #CBD5E1' }}/>
     </div>
   )
 }

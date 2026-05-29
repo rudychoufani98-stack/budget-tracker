@@ -3,9 +3,9 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
-const C = { card:'#222A42', border:'#323D5E', blue:'#3B82F6', muted:'#6B7280' }
+const C = { card:'#FFFFFF', border:'#E2E8F0', blue:'#3B82F6', muted:'#6B7280' }
 const inp = "w-full px-3 py-2.5 text-sm rounded-xl"
-const inpStyle = { background:'#323D5E', border:'1px solid #404F74', color:'#F9FAFB' }
+const inpStyle = { background:'#E2E8F0', border:'1px solid #CBD5E1', color:'#0F172A' }
 
 export default function NewProviderPage() {
   const router = useRouter()
@@ -26,10 +26,10 @@ export default function NewProviderPage() {
       <div className="flex items-center gap-2 text-sm mb-6" style={{ color:C.muted }}>
         <Link href="/providers" style={{ color:C.muted }}>Providers</Link>
         <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-        <span style={{ color:'#F9FAFB' }}>New Provider</span>
+        <span style={{ color:'#0F172A' }}>New Provider</span>
       </div>
       <div className="rounded-2xl p-6" style={{ background:C.card, border:`1px solid ${C.border}` }}>
-        <h1 className="text-lg font-medium mb-5" style={{ color:'#F9FAFB' }}>Add Service Provider</h1>
+        <h1 className="text-lg font-medium mb-5" style={{ color:'#0F172A' }}>Add Service Provider</h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div><label className="text-xs font-medium mb-1.5 block" style={{ color:C.muted }}>Name *</label><input className={inp} style={inpStyle} value={form.name} onChange={e=>setForm(p=>({...p,name:e.target.value}))} required placeholder="Company name" /></div>
           <div><label className="text-xs font-medium mb-1.5 block" style={{ color:C.muted }}>Email</label><input type="email" className={inp} style={inpStyle} value={form.email} onChange={e=>setForm(p=>({...p,email:e.target.value}))} placeholder="contact@company.com" /></div>
@@ -38,7 +38,7 @@ export default function NewProviderPage() {
           {error && <p className="text-sm px-3 py-2 rounded-xl" style={{ background:'rgba(239,68,68,0.1)', color:'#EF4444' }}>{error}</p>}
           <div className="flex gap-3 pt-2">
             <button type="submit" disabled={saving} className="flex-1 py-3 rounded-xl text-sm font-medium disabled:opacity-50" style={{ background:C.blue, color:'#fff' }}>{saving?'Adding...':'Add Provider'}</button>
-            <Link href="/providers" className="px-5 py-3 rounded-xl text-sm text-center" style={{ background:'#323D5E', color:C.muted }}>Cancel</Link>
+            <Link href="/providers" className="px-5 py-3 rounded-xl text-sm text-center" style={{ background:'#E2E8F0', color:C.muted }}>Cancel</Link>
           </div>
         </form>
       </div>

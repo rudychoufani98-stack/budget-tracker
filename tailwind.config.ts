@@ -9,11 +9,11 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        bg:     "#1A1F35",
-        card:   "#222A42",
-        card2:  "#2A3354",
-        bdr:    "#323D5E",
-        bdr2:   "#404F74",
+        bg:     "#F8FAFC",
+        card:   "#FFFFFF",
+        card2:  "#F1F5F9",
+        bdr:    "#E2E8F0",
+        bdr2:   "#CBD5E1",
         egreen: "#10B981",
         eamber: "#F59E0B",
         ered:   "#EF4444",

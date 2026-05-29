@@ -8,14 +8,14 @@ function tpl({ title, body, comment, link, linkLabel }: {
   title: string; body: string; comment?: string; link: string; linkLabel: string
 }) {
   return `
-  <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px;background:#1A1F35;color:#F9FAFB;border-radius:12px">
-    <div style="background:#222A42;border-radius:8px;padding:24px">
+  <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px;background:#F8FAFC;color:#F9FAFB;border-radius:12px">
+    <div style="background:#FFFFFF;border-radius:8px;padding:24px">
       <h2 style="color:#F9FAFB;margin:0 0 8px">${title}</h2>
       <p style="color:#9CA3AF;margin:0 0 16px">${body}</p>
-      ${comment ? `<div style="background:#323D5E;border-left:3px solid #3B82F6;padding:10px 14px;border-radius:4px;margin-bottom:16px"><p style="margin:0;color:#D1D5DB;font-style:italic">"${comment}"</p></div>` : ''}
+      ${comment ? `<div style="background:#E2E8F0;border-left:3px solid #3B82F6;padding:10px 14px;border-radius:4px;margin-bottom:16px"><p style="margin:0;color:#D1D5DB;font-style:italic">"${comment}"</p></div>` : ''}
       <a href="${link}" style="display:inline-block;background:#3B82F6;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:500;font-size:14px">${linkLabel}</a>
     </div>
-    <p style="color:#5A6A8A;font-size:12px;margin-top:20px;text-align:center">ESG Budget Tracker — SkyKapital Europe</p>
+    <p style="color:#94A3B8;font-size:12px;margin-top:20px;text-align:center">ESG Budget Tracker — SkyKapital Europe</p>
   </div>`
 }
 
