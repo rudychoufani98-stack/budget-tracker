@@ -339,10 +339,26 @@ export default function UploadPage() {
                   <span className="text-xs px-2.5 py-1 rounded-full font-semibold" style={{ background:'rgba(16,185,129,0.1)',color:'#10B981' }}>✓ AI Scanned</span>
                 </div>
                 <div className="space-y-3">
+                  {/* Consultant — dropdown, not free text */}
+                  <div>
+                    <label className="text-xs font-semibold uppercase tracking-widest mb-1.5 block" style={{ color:'#64748B' }}>Consultant</label>
+                    <select
+                      className={inp} style={inpSt}
+                      value={selectedProvider}
+                      onChange={e => {
+                        const prov = providers.find((p:any) => p.id === e.target.value)
+                        setSelectedProvider(e.target.value)
+                        if (prov) setScanned(p => p ? { ...p, subcontractor_name: prov.name } : p)
+                      }}
+                    >
+                      <option value="">Select consultant...</option>
+                      {providers.map((p:any) => <option key={p.id} value={p.id}>{p.name}</option>)}
+                    </select>
+                  </div>
+
                   {[
-                    { label:'Consultant', key:'subcontractor_name' },
-                    { label:'Invoice #',     key:'invoice_number' },
-                    { label:'Invoice Date',  key:'invoice_date', type:'date' },
+                    { label:'Invoice #',    key:'invoice_number' },
+                    { label:'Invoice Date', key:'invoice_date', type:'date' },
                   ].map(f=>(
                     <div key={f.key}>
                       <label className="text-xs font-semibold uppercase tracking-widest mb-1.5 block" style={{ color:'#64748B' }}>{f.label}</label>
