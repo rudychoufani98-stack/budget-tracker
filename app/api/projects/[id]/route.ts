@@ -2,21 +2,47 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 
 export async function GET(_: NextRequest, { params }: { params: { id: string } }) {
-  const { data, error } = await supabaseAdmin
-    .from('projects')
+  // Fetch project + sections + all contracts in parallel
+  const [projRes, sectionsRes, contractsRes] = await Promise.all([
+    supabaseAdmin.from('projects').select('*').eq('id', params.id).single(),
+    supabaseAdmin.from('project_sections').select('*').eq('project_id', params.id).order('created_at'),
+    supabaseAdmin.from('contracts').select(`
+      id, contract_name, category, start_date, end_date, contract_amount, currency, section_id, project_id, project,
+      service_providers(name),
+      contract_tranches(id, tranche_name, amount, status, scheduled_date, paid_date),
+      invoices(id, invoice_number, subcontractor_name, invoice_date, amount_ht, amount_ttc, status, category)
+    `).or(`project_id.eq.${params.id},project.eq.${encodeURIComponent('placeholder')}`).order('created_at'),
+  ])
+
+  if (projRes.error || !projRes.data) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  const project = projRes.data
+
+  // Also fetch contracts matched by project name text (for pre-migration contracts)
+  const { data: contractsByName } = await supabaseAdmin
+    .from('contracts')
     .select(`
-      *,
-      contracts(
-        id, contract_name, category, start_date, end_date, contract_amount, currency,
-        service_providers(name),
-        contract_tranches(id, tranche_name, amount, status, scheduled_date, paid_date),
-        invoices(id, invoice_number, subcontractor_name, invoice_date, amount_ht, amount_ttc, status, category)
-      )
+      id, contract_name, category, start_date, end_date, contract_amount, currency, section_id, project_id, project,
+      service_providers(name),
+      contract_tranches(id, tranche_name, amount, status, scheduled_date, paid_date),
+      invoices(id, invoice_number, subcontractor_name, invoice_date, amount_ht, amount_ttc, status, category)
     `)
-    .eq('id', params.id)
-    .single()
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json(data)
+    .eq('project', project.name)
+    .order('created_at')
+
+  // Merge contracts by ID (deduplicate)
+  const contractMap = new Map()
+  for (const c of [...(contractsRes.data||[]), ...(contractsByName||[])]) {
+    if (c.project_id === params.id || c.project === project.name) contractMap.set(c.id, c)
+  }
+  const allContracts = Array.from(contractMap.values())
+
+  const sections = (sectionsRes.data || []).map(s => ({
+    ...s,
+    contracts: allContracts.filter((c:any) => c.section_id === s.id),
+  }))
+  const directContracts = allContracts.filter((c:any) => !c.section_id)
+
+  return NextResponse.json({ ...project, sections, directContracts, allContracts })
 }
 
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
