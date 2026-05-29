@@ -24,10 +24,13 @@ export default function ValidationsPage() {
 
   async function load() {
     const [invRes, valRes] = await Promise.all([
-      supabase.from('invoices').select('*').in('status',['pending_review','pending_placide','pending_hitech']).order('submitted_at'),
+      supabase.from('invoices').select('*, invoice_currency(currency)').in('status',['pending_review','pending_placide','pending_hitech']).order('submitted_at'),
       supabase.from('validations').select('*, invoices(subcontractor_name)').order('validated_at', { ascending:false }).limit(50),
     ])
-    setInvoices(invRes.data || [])
+    setInvoices((invRes.data || []).map((inv: any) => ({
+      ...inv,
+      currency: inv.invoice_currency?.[0]?.currency || inv.currency || 'EUR',
+    })))
     setHistory(valRes.data || [])
     setLoading(false)
   }

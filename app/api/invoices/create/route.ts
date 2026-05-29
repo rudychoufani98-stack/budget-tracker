@@ -7,13 +7,10 @@ export async function POST(request: NextRequest) {
     const { invoice, line_items } = body
     const currency = invoice.currency || 'EUR'
 
-    // Remove currency from invoice object — stored separately to avoid schema cache issues
-    const { currency: _c, ...invoiceWithoutCurrency } = invoice
-
-    // Insert invoice (without currency column)
+    // Insert invoice — include currency directly now that schema cache is stable
     const { data: inv, error: invErr } = await supabaseAdmin
       .from('invoices')
-      .insert(invoiceWithoutCurrency)
+      .insert({ ...invoice, currency })
       .select()
       .single()
 

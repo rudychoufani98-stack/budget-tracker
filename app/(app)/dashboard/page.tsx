@@ -8,12 +8,15 @@ export const revalidate = 0
 async function getData() {
   const [tranchesRes, invoicesRes, allInvRes, contractsRes] = await Promise.all([
     supabaseAdmin.from('contract_tranches').select('*, contracts(contract_name, id, project, service_providers(name))'),
-    supabaseAdmin.from('invoices').select('*').order('created_at', { ascending: false }).limit(8),
+    supabaseAdmin.from('invoices').select('*, invoice_currency(currency)').order('created_at', { ascending: false }).limit(8),
     supabaseAdmin.from('invoices').select('id, status, subcontractor_name, submitted_at, amount_ttc'),
     supabaseAdmin.from('contracts').select('id, contract_name, project, status, contract_amount, service_providers(name), contract_tranches(amount, status)').order('created_at', { ascending: false }).limit(6),
   ])
   const tranches  = tranchesRes.data  || []
-  const invoices  = invoicesRes.data  || []
+  const invoices  = (invoicesRes.data || []).map((inv: any) => ({
+    ...inv,
+    currency: inv.invoice_currency?.[0]?.currency || inv.currency || 'EUR',
+  }))
   const allInv    = allInvRes.data    || []
   const contracts = contractsRes.data || []
 

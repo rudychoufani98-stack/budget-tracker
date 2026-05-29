@@ -7,10 +7,14 @@ export const revalidate = 0
 export default async function InvoicesPage() {
   const { data } = await supabaseAdmin
     .from('invoices')
-    .select('*, service_providers(name), contracts(contract_name, project)')
+    .select('*, service_providers(name), contracts(contract_name, project), invoice_currency(currency)')
     .order('created_at', { ascending: false })
 
-  const invoices = data || []
+  // Normalize: pull currency out of the joined invoice_currency row
+  const invoices = (data || []).map((inv: any) => ({
+    ...inv,
+    currency: inv.invoice_currency?.[0]?.currency || inv.currency || 'EUR',
+  }))
 
   return (
     <div className="px-6 py-8 max-w-7xl mx-auto">
