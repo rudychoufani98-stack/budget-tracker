@@ -196,10 +196,10 @@ export default async function ProjectsPage() {
                     ))}
                   </div>
 
-                  {/* Sub-sections (contracts) */}
+                  {/* Contracts (contracts) */}
                   {proj.sections && proj.sections.length > 0 && (
                     <div className="px-5 py-3" style={{ borderTop:'1px solid #F1F5F9', background:'#FAFBFC' }}>
-                      <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color:'#94A3B8' }}>Sub-sections</p>
+                      <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color:'#94A3B8' }}>Contracts</p>
                       <div className="flex flex-wrap gap-1.5">
                         {proj.sections.slice(0,5).map((s:any)=>(
                           <span key={s.id} className="text-xs px-2.5 py-1 rounded-full font-medium" style={{ background:`${proj.color}12`, color:proj.color, border:`1px solid ${proj.color}30` }}>

@@ -255,11 +255,11 @@ export default function UploadPage() {
                   )}
                 </div>
 
-                {/* Contract / Sub-section */}
+                {/* Contract */}
                 <div>
                   <label className="text-xs font-semibold uppercase tracking-widest mb-2 flex items-center gap-1.5" style={{ color:'#64748B' }}>
                     <span style={{ width:6,height:6,borderRadius:'50%',background:'#8B5CF6',display:'inline-block' }}/>
-                    Sub-section (Contract)
+                    Contract
                   </label>
                   <select className={inp} style={inpSt} value={selectedContract} onChange={e=>setSelectedContract(e.target.value)}>
                     <option value="">Select contract…</option>
@@ -268,7 +268,12 @@ export default function UploadPage() {
                     ))}
                   </select>
                   {selectedProject && filteredContracts.length===0 && (
-                    <p className="text-xs mt-1" style={{ color:'#F59E0B' }}>No contracts linked to this project yet</p>
+                    <div className="mt-2 px-3 py-2 rounded-xl" style={{ background:'rgba(245,158,11,0.08)', border:'1px solid rgba(245,158,11,0.3)' }}>
+                      <p className="text-xs font-medium mb-1" style={{ color:'#F59E0B' }}>No contracts linked to this project</p>
+                      <p className="text-xs" style={{ color:'#92400E' }}>
+                        Create a contract in the <strong>Contracts</strong> section and set its project to link it here.
+                      </p>
+                    </div>
                   )}
                 </div>
 

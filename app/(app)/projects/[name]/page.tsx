@@ -245,8 +245,8 @@ export default function ProjectDetailPage({ params }: { params: { name: string }
       {/* ── 2. SUB-SECTIONS ── */}
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h2 className="text-base font-bold" style={{ color:'#0F172A' }}>Sub-sections</h2>
-          <p className="text-xs mt-0.5" style={{ color:'#94A3B8' }}>Each sub-section is a contract with its own budget and invoices</p>
+          <h2 className="text-base font-bold" style={{ color:'#0F172A' }}>Contracts</h2>
+          <p className="text-xs mt-0.5" style={{ color:'#94A3B8' }}>Each contract has its own budget and linked invoices</p>
         </div>
         <button
           onClick={() => setShowAddSection(true)}
@@ -254,7 +254,7 @@ export default function ProjectDetailPage({ params }: { params: { name: string }
           style={{ background:'#3B82F6', color:'#fff' }}
         >
           <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Add Sub-section
+          Add Contract
         </button>
       </div>
 
@@ -264,7 +264,7 @@ export default function ProjectDetailPage({ params }: { params: { name: string }
           <p className="text-sm font-semibold mb-1" style={{ color:'#0F172A' }}>No sub-sections yet</p>
           <p className="text-sm mb-5" style={{ color:'#94A3B8' }}>Add your first sub-section to start tracking budgets and invoices.</p>
           <button onClick={() => setShowAddSection(true)} className="text-sm font-semibold px-5 py-2.5 rounded-xl" style={{ background:'#3B82F6', color:'#fff' }}>
-            + Add Sub-section
+            + Add Contract
           </button>
         </div>
       ) : (
@@ -355,10 +355,10 @@ export default function ProjectDetailPage({ params }: { params: { name: string }
           <div className="rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl" style={{ background:'#FFFFFF' }} onClick={e => e.stopPropagation()}>
             <div style={{ height:4, background:'linear-gradient(90deg,#3B82F6,#8B5CF6)' }}/>
             <div className="p-6">
-              <h3 className="text-lg font-bold mb-5" style={{ color:'#0F172A' }}>Add Sub-section to {project?.name}</h3>
+              <h3 className="text-lg font-bold mb-5" style={{ color:'#0F172A' }}>Add Contract to this Project</h3>
               <form onSubmit={handleAddSection} className="space-y-4">
                 <div>
-                  <label className="text-xs font-semibold uppercase tracking-widest mb-2 block" style={{ color:'#64748B' }}>Sub-section Name *</label>
+                  <label className="text-xs font-semibold uppercase tracking-widest mb-2 block" style={{ color:'#64748B' }}>Contract Name *</label>
                   <input
                     className="w-full px-3.5 py-2.5 text-sm rounded-xl outline-none"
                     style={{ background:'#F8FAFC', border:'1.5px solid #E2E8F0', color:'#0F172A' }}
@@ -409,7 +409,7 @@ export default function ProjectDetailPage({ params }: { params: { name: string }
                 </div>
                 <div className="flex gap-3 pt-1">
                   <button type="submit" disabled={addingSection} className="flex-1 py-3 rounded-xl text-sm font-semibold disabled:opacity-50" style={{ background:'#3B82F6', color:'#fff' }}>
-                    {addingSection ? 'Creating...' : 'Create Sub-section'}
+                    {addingSection ? 'Creating...' : 'Create Contract'}
                   </button>
                   <button type="button" onClick={() => setShowAddSection(false)} className="px-5 py-3 rounded-xl text-sm" style={{ background:'#F1F5F9', color:'#64748B' }}>
                     Cancel
