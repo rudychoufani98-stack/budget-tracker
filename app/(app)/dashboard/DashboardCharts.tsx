@@ -22,7 +22,7 @@ export function DashboardCharts({ monthlyData, trancheCounts }: {
           <BarChart data={monthlyData} margin={{ top: 4, right: 4, bottom: 4, left: 4 }}>
             <XAxis dataKey="month" tick={{ fill: '#6B7280', fontSize: 11 }} axisLine={false} tickLine={false} />
             <YAxis tick={{ fill: '#6B7280', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={fmt} />
-            <Tooltip contentStyle={{ background: '#1F2937', border: '1px solid #374151', borderRadius: 8, color: '#F9FAFB' }} formatter={(v: number) => [fmt(v), 'Amount']} />
+            <Tooltip contentStyle={{ background: '#1F2937', border: '1px solid #374151', borderRadius: 8, color: '#F9FAFB' }} formatter={(v: any) => [fmt(Number(v)), 'Amount']} />
             <Bar dataKey="amount" fill="#3B82F6" radius={[4,4,0,0]} />
           </BarChart>
         </ResponsiveContainer>
