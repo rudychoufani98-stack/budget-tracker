@@ -1,4 +1,4 @@
-ï»¿'use client'
+'use client'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -11,7 +11,7 @@ export default function NewContractPage() {
   const [providers, setProviders] = useState<any[]>([])
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
-  const [form, setForm] = useState({ contract_name:'', service_provider_id:'', project:'', category:'E', description:'', currency:'EUR', start_date:'', end_date:'', status:'active', notes:'' })
+  const [form, setForm] = useState({ contract_name:'', service_provider_id:'', project:'', category:'E', description:'', currency:'USD', start_date:'', end_date:'', status:'active', notes:'' })
   const [tranches, setTranches] = useState<{ name:string; amount:string; date:string }[]>([])
 
   useEffect(() => { fetch('/api/providers').then(r=>r.json()).then(setProviders) }, [])
@@ -62,7 +62,7 @@ export default function NewContractPage() {
             <div>
               <label className="text-xs font-medium mb-1.5 block" style={{ color: C.muted }}>ESG Category</label>
               <select className={inp} style={inpStyle} value={form.category} onChange={e=>setForm(p=>({...p,category:e.target.value}))}>
-                {['E','S','G','Other'].map(c=><option key={c} value={c}>{c === 'E' ? 'E â€” Environmental' : c === 'S' ? 'S â€” Social' : c === 'G' ? 'G â€” Governance' : 'Other'}</option>)}
+                {['E','S','G','Other'].map(c=><option key={c} value={c}>{c === 'E' ? 'E — Environmental' : c === 'S' ? 'S — Social' : c === 'G' ? 'G — Governance' : 'Other'}</option>)}
               </select>
             </div>
             <div>
@@ -72,7 +72,7 @@ export default function NewContractPage() {
             <div>
               <label className="text-xs font-medium mb-1.5 block" style={{ color: C.muted }}>Currency</label>
               <select className={inp} style={inpStyle} value={form.currency} onChange={e=>setForm(p=>({...p,currency:e.target.value}))}>
-                {['EUR','USD','GBP','CHF','MAD','XOF','NGN'].map(c=><option key={c} value={c}>{c}</option>)}
+                {['USD','USD','GBP','CHF','MAD','XOF','NGN'].map(c=><option key={c} value={c}>{c}</option>)}
               </select>
             </div>
             <div>

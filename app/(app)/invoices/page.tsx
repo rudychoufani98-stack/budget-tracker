@@ -21,7 +21,7 @@ export default async function InvoicesPage() {
 
   const invoices = (invoiceData || []).map((inv: any) => ({
     ...inv,
-    currency: currencyMap[inv.id] || inv.currency || 'EUR',
+    currency: currencyMap[inv.id] || inv.currency || 'USD',
   }))
 
   return (

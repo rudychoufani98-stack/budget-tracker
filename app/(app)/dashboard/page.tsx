@@ -17,7 +17,7 @@ async function getData() {
   const currencyMap: Record<string,string> = {}
   for (const c of currencyRes.data || []) currencyMap[c.invoice_id] = c.currency
   const invoices  = (invoicesRes.data || []).map((inv: any) => ({
-    ...inv, currency: currencyMap[inv.id] || inv.currency || 'EUR',
+    ...inv, currency: currencyMap[inv.id] || inv.currency || 'USD',
   }))
   const allInv    = allInvRes.data    || []
   const contracts = contractsRes.data || []

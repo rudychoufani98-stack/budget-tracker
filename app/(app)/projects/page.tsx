@@ -58,7 +58,7 @@ async function getProjects() {
     const pending   = ctrs.reduce((s,c)=>s+(c.invoices||[]).filter((i:any)=>!['approved','rejected'].includes(i.status)).length,0)
     const pct       = committed>0 ? Math.round((paid/committed)*100) : 0
     const sections  = ctrs.map((c:any) => ({ id:c.id, name:c.contract_name }))
-    return { id: encodeURIComponent(name), name, description:null, budget:null, currency:'EUR',
+    return { id: encodeURIComponent(name), name, description:null, budget:null, currency:'USD',
              start_date:null, end_date:null, status:'active',
              contractCount:ctrs.length, committed, paid, invoices, pending, pct, sections,
              color:PALETTE[i%PALETTE.length], isReal:false }
@@ -173,7 +173,7 @@ export default async function ProjectsPage() {
                       <div className="text-right shrink-0">
                         <p className="text-2xl font-bold" style={{ color:proj.color }}>{proj.pct}%</p>
                         {proj.budget
-                          ? <p className="text-xs mt-0.5" style={{ color:'#94A3B8' }}>of {formatCurrency(proj.budget, proj.currency||'EUR')}</p>
+                          ? <p className="text-xs mt-0.5" style={{ color:'#94A3B8' }}>of {formatCurrency(proj.budget, proj.currency||'USD')}</p>
                           : <p className="text-xs mt-0.5" style={{ color:'#94A3B8' }}>paid</p>
                         }
                       </div>
@@ -185,9 +185,9 @@ export default async function ProjectsPage() {
                   </div>
                   <div className="grid grid-cols-3 divide-x divide-[#F1F5F9]" style={{ borderTop:'1px solid #F1F5F9', background:'#FAFBFC' }}>
                     {[
-                      { label:'Committed', value:formatCurrency(proj.committed, proj.currency||'EUR'), color:'#0F172A' },
-                      { label:'Paid',      value:formatCurrency(proj.paid,      proj.currency||'EUR'), color:'#10B981' },
-                      { label:'Balance',   value:formatCurrency(proj.committed-proj.paid, proj.currency||'EUR'), color:proj.committed-proj.paid>0?'#F59E0B':'#94A3B8' },
+                      { label:'Committed', value:formatCurrency(proj.committed, proj.currency||'USD'), color:'#0F172A' },
+                      { label:'Paid',      value:formatCurrency(proj.paid,      proj.currency||'USD'), color:'#10B981' },
+                      { label:'Balance',   value:formatCurrency(proj.committed-proj.paid, proj.currency||'USD'), color:proj.committed-proj.paid>0?'#F59E0B':'#94A3B8' },
                     ].map(s=>(
                       <div key={s.label} className="px-4 py-3">
                         <p className="text-xs mb-0.5" style={{ color:'#94A3B8' }}>{s.label}</p>

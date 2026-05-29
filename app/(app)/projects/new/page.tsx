@@ -3,12 +3,12 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
-const CURRENCIES = ['EUR','USD','GBP','CHF','MAD','XOF','NGN','CAD','AED']
+const CURRENCIES = ['USD','USD','GBP','CHF','MAD','XOF','NGN','CAD','AED']
 
 export default function NewProjectPage() {
   const router = useRouter()
   const [form, setForm] = useState({
-    name:'', description:'', budget:'', currency:'EUR',
+    name:'', description:'', budget:'', currency:'USD',
     start_date:'', end_date:'', status:'active',
   })
   const [saving, setSaving] = useState(false)

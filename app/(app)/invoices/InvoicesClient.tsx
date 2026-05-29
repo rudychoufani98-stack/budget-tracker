@@ -24,14 +24,14 @@ export function InvoicesClient({ invoices }: { invoices: any[] }) {
 
   // All currencies present in the data
   const currencies = useMemo(() => {
-    const set = new Set(invoices.map(i => i.currency || 'EUR'))
+    const set = new Set(invoices.map(i => i.currency || 'USD'))
     return ['ALL', ...Array.from(set).sort()]
   }, [invoices])
 
   // Filtered list
   const filtered = useMemo(() => {
     return invoices.filter(i => {
-      const currOk = selectedCurrency === 'ALL' || (i.currency || 'EUR') === selectedCurrency
+      const currOk = selectedCurrency === 'ALL' || (i.currency || 'USD') === selectedCurrency
       const statOk = selectedStatus  === 'ALL'
         || (selectedStatus === 'pending' && ['pending_review','pending_placide','pending_hitech'].includes(i.status))
         || i.status === selectedStatus
@@ -51,7 +51,7 @@ export function InvoicesClient({ invoices }: { invoices: any[] }) {
   const currencyTotals = useMemo(() => {
     const map: Record<string,number> = {}
     filtered.forEach(i => {
-      const c = i.currency || 'EUR'
+      const c = i.currency || 'USD'
       map[c] = (map[c] || 0) + (i.amount_ttc || 0)
     })
     return Object.entries(map)
@@ -64,7 +64,7 @@ export function InvoicesClient({ invoices }: { invoices: any[] }) {
   const paidTotal = useMemo(() => {
     const map: Record<string,number> = {}
     filtered.filter(i=>i.status==='approved').forEach(i => {
-      const c = i.currency || 'EUR'
+      const c = i.currency || 'USD'
       map[c] = (map[c] || 0) + (i.amount_ttc || 0)
     })
     return Object.entries(map).map(([c,v]) => formatCurrency(v,c)).join(' + ') || '—'
@@ -73,7 +73,7 @@ export function InvoicesClient({ invoices }: { invoices: any[] }) {
   const pendingTotal = useMemo(() => {
     const map: Record<string,number> = {}
     filtered.filter(i=>['pending_review','pending_placide','pending_hitech'].includes(i.status)).forEach(i => {
-      const c = i.currency || 'EUR'
+      const c = i.currency || 'USD'
       map[c] = (map[c] || 0) + (i.amount_ttc || 0)
     })
     return Object.entries(map).map(([c,v]) => formatCurrency(v,c)).join(' + ') || '—'
@@ -156,7 +156,7 @@ export function InvoicesClient({ invoices }: { invoices: any[] }) {
         ) : filtered.map(inv => {
           const st      = STATUS_MAP[inv.status] || STATUS_MAP.pending_review
           const catIcon = CAT_ICONS[inv.category || 'Other'] || '📋'
-          const ccy     = inv.currency || 'EUR'
+          const ccy     = inv.currency || 'USD'
           const initial = ((inv.service_providers?.name || inv.subcontractor_name || '?')[0] || '?').toUpperCase()
 
           return (

@@ -5,7 +5,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     const { invoice, line_items } = body
-    const currency = invoice.currency || 'EUR'
+    const currency = invoice.currency || 'USD'
 
     // Remove currency — invoices table has no currency column, stored in invoice_currency
     const { currency: _c, ...invoiceWithoutCurrency } = invoice

@@ -30,7 +30,7 @@ export function MonthlySpendChart({ data }: Props) {
           formatter={(value) =>
             new Intl.NumberFormat('fr-FR', {
               style: 'currency',
-              currency: 'EUR',
+              currency: 'USD',
             }).format(Number(value))
           }
         />

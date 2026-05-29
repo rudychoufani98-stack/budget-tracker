@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
     project, project_id: project_id || null, category,
     description, contract_amount: contract_amount || 0,
     total_budget: contract_amount || 0,
-    currency: currency || 'EUR',
+    currency: currency || 'USD',
     start_date, end_date, status: status || 'active', notes,
   }).select().single()
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })

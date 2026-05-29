@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase-browser'
 import { createClient } from '@/utils/supabase/client'
@@ -32,7 +32,7 @@ export default function ValidationsPage() {
     for (const c of curRes.data || []) cmap[c.invoice_id] = c.currency
     setInvoices((invRes.data || []).map((inv: any) => ({
       ...inv,
-      currency: cmap[inv.id] || inv.currency || 'EUR',
+      currency: cmap[inv.id] || inv.currency || 'USD',
     })))
     setHistory(valRes.data || [])
     setLoading(false)
@@ -131,7 +131,7 @@ export default function ValidationsPage() {
               <div key={v.id} className="flex items-center justify-between px-6 py-3" style={{ borderBottom:`1px solid ${C.border}` }}>
                 <div>
                   <p className="text-sm" style={{ color:'#0F172A' }}>{(v.invoices as any)?.subcontractor_name || 'Invoice'}</p>
-                  <p className="text-xs mt-0.5" style={{ color:C.muted }}>{v.validator_name} · {new Date(v.validated_at).toLocaleDateString('fr-FR')}</p>
+                  <p className="text-xs mt-0.5" style={{ color:C.muted }}>{v.validator_name} � {new Date(v.validated_at).toLocaleDateString('fr-FR')}</p>
                   {v.comment && <p className="text-xs mt-0.5 italic" style={{ color:'#6B7280' }}>"{v.comment}"</p>}
                 </div>
                 <span className="text-xs px-2.5 py-1 rounded-full" style={{ background:v.decision==='approved'?'rgba(16,185,129,0.15)':'rgba(239,68,68,0.15)', color:v.decision==='approved'?C.green:C.red }}>
