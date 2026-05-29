@@ -35,9 +35,10 @@ async function getProjects() {
       const invoices  = linked.reduce((s:number,c:any)=>s+(c.invoices||[]).length,0)
       const pending   = linked.reduce((s:number,c:any)=>s+(c.invoices||[]).filter((i:any)=>!['approved','rejected'].includes(i.status)).length,0)
       const pct       = committed>0 ? Math.round((paid/committed)*100) : 0
+      const sections  = linked.map((c:any) => ({ id:c.id, name:c.contract_name }))
       return { id:p.id, name:p.name, description:p.description, budget:p.budget, currency:p.currency,
                start_date:p.start_date, end_date:p.end_date, status:p.status,
-               contractCount:linked.length, committed, paid, invoices, pending, pct,
+               contractCount:linked.length, committed, paid, invoices, pending, pct, sections,
                color:PALETTE[i%PALETTE.length], isReal:true }
     })
     return { projects, useIdLinks: true }
@@ -56,9 +57,10 @@ async function getProjects() {
     const invoices  = ctrs.reduce((s,c)=>s+(c.invoices||[]).length,0)
     const pending   = ctrs.reduce((s,c)=>s+(c.invoices||[]).filter((i:any)=>!['approved','rejected'].includes(i.status)).length,0)
     const pct       = committed>0 ? Math.round((paid/committed)*100) : 0
+    const sections  = ctrs.map((c:any) => ({ id:c.id, name:c.contract_name }))
     return { id: encodeURIComponent(name), name, description:null, budget:null, currency:'EUR',
              start_date:null, end_date:null, status:'active',
-             contractCount:ctrs.length, committed, paid, invoices, pending, pct,
+             contractCount:ctrs.length, committed, paid, invoices, pending, pct, sections,
              color:PALETTE[i%PALETTE.length], isReal:false }
   }).sort((a,b)=>b.committed-a.committed)
   return { projects, useIdLinks: false }
@@ -193,6 +195,25 @@ export default async function ProjectsPage() {
                       </div>
                     ))}
                   </div>
+
+                  {/* Sub-sections (contracts) */}
+                  {proj.sections && proj.sections.length > 0 && (
+                    <div className="px-5 py-3" style={{ borderTop:'1px solid #F1F5F9', background:'#FAFBFC' }}>
+                      <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color:'#94A3B8' }}>Sub-sections</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {proj.sections.slice(0,5).map((s:any)=>(
+                          <span key={s.id} className="text-xs px-2.5 py-1 rounded-full font-medium" style={{ background:`${proj.color}12`, color:proj.color, border:`1px solid ${proj.color}30` }}>
+                            {s.name}
+                          </span>
+                        ))}
+                        {proj.sections.length > 5 && (
+                          <span className="text-xs px-2.5 py-1 rounded-full" style={{ background:'#F1F5F9', color:'#94A3B8' }}>
+                            +{proj.sections.length - 5} more
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </Link>
             )

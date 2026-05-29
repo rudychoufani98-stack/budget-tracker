@@ -53,10 +53,11 @@ export default function UploadPage() {
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState('')
 
-  const [projects,  setProjects]  = useState<any[]>([])
-  const [providers, setProviders] = useState<any[]>([])
-  const [contracts, setContracts] = useState<any[]>([])
-  const [tranches,  setTranches]  = useState<any[]>([])
+  const [projects,         setProjects]         = useState<any[]>([])
+  const [providers,        setProviders]        = useState<any[]>([])
+  const [contracts,        setContracts]        = useState<any[]>([])
+  const [tranches,         setTranches]         = useState<any[]>([])
+  const [useRealProjects,  setUseRealProjects]  = useState(false)
 
   const [selectedProject,  setSelectedProject]  = useState('')
   const [selectedContract, setSelectedContract] = useState('')
@@ -71,13 +72,29 @@ export default function UploadPage() {
     ]).then(([p,c,proj])=>{
       setProviders(p||[])
       setContracts(c||[])
-      setProjects(Array.isArray(proj)?proj:[])
+      if (Array.isArray(proj) && proj.length > 0) {
+        // Projects table exists — use it
+        setProjects(proj)
+        setUseRealProjects(true)
+      } else {
+        // Fallback: derive unique project names from contracts.project text field
+        const seen = new Set<string>()
+        const derived: any[] = []
+        for (const contract of (c||[])) {
+          const name = (contract as any).project?.trim()
+          if (name && !seen.has(name)) { seen.add(name); derived.push({ id: name, name }) }
+        }
+        setProjects(derived)
+        setUseRealProjects(false)
+      }
     })
   },[])
 
-  // Filter contracts by selected project
+  // Filter contracts by selected project — works with or without migration
   const filteredContracts = selectedProject
-    ? contracts.filter((c:any)=>c.project_id===selectedProject)
+    ? useRealProjects
+      ? contracts.filter((c:any) => c.project_id === selectedProject)
+      : contracts.filter((c:any) => c.project?.trim() === selectedProject)
     : contracts
 
   // When contract changes: update tranches + auto-fill provider
@@ -224,8 +241,8 @@ export default function UploadPage() {
                     <option value="">All projects…</option>
                     {projects.map((p:any)=><option key={p.id} value={p.id}>{p.name}</option>)}
                   </select>
-                  {projects.length===0 && (
-                    <p className="text-xs mt-1" style={{ color:'#94A3B8' }}>Run migration_projects.sql to enable project filtering</p>
+                  {projects.length===0 && contracts.length>0 && (
+                    <p className="text-xs mt-1" style={{ color:'#94A3B8' }}>Add a project name to contracts to enable filtering</p>
                   )}
                 </div>
 
