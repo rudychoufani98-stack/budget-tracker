@@ -90,11 +90,15 @@ export default function UploadPage() {
     })
   },[])
 
-  // Filter contracts by selected project — works with or without migration
+  // Filter contracts by selected project — matches by project_id OR by project name text
   const filteredContracts = selectedProject
-    ? useRealProjects
-      ? contracts.filter((c:any) => c.project_id === selectedProject)
-      : contracts.filter((c:any) => c.project?.trim() === selectedProject)
+    ? (() => {
+        const projName = projects.find((p:any) => p.id === selectedProject)?.name || selectedProject
+        return contracts.filter((c:any) =>
+          c.project_id === selectedProject ||
+          c.project?.trim() === projName
+        )
+      })()
     : contracts
 
   // When contract changes: update tranches + auto-fill provider
