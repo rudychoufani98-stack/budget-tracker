@@ -1,106 +1,77 @@
+﻿import { supabaseAdmin } from '@/lib/supabase'
 import Link from 'next/link'
-import { getContracts } from '@/lib/queries'
-import { formatCurrency, formatDate, calcPercent } from '@/lib/format'
+import { formatCurrency } from '@/lib/format'
+import type { ContractTranche } from '@/lib/types'
 
 export const revalidate = 0
+const C = { card: '#111827', border: '#1F2937', green: '#10B981', amber: '#F59E0B', red: '#EF4444', blue: '#3B82F6', muted: '#6B7280' }
 
-const NAVY = '#0C1F52'
+const ESG_COLORS: Record<string, string> = { E: '#10B981', S: '#3B82F6', G: '#F59E0B', Other: '#6B7280' }
 
 export default async function ContractsPage() {
-  const contracts = await getContracts()
-  const active = contracts.filter((c) => c.status === 'active')
-  const closed = contracts.filter((c) => c.status === 'closed')
+  const { data } = await supabaseAdmin
+    .from('contracts')
+    .select('*, service_providers(name), contract_tranches(*)')
+    .order('created_at', { ascending: false })
+  const contracts = data || []
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="px-6 py-8 max-w-7xl mx-auto">
+      <div className="flex items-center justify-between mb-6">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: '#6B7280' }}>Management</p>
-          <h1 className="text-2xl font-bold" style={{ color: NAVY }}>Contracts</h1>
-          <p className="text-sm mt-1" style={{ color: '#6B7280' }}>
-            {active.length} active · {closed.length} closed
-          </p>
+          <p className="text-xs font-medium uppercase tracking-widest mb-1" style={{ color: C.muted }}>Management</p>
+          <h1 className="text-2xl font-medium" style={{ color: '#F9FAFB' }}>Contracts</h1>
         </div>
+        <Link href="/contracts/new" className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-xl" style={{ background: '#3B82F6', color: '#fff' }}>
+          + New Contract
+        </Link>
       </div>
 
-      {contracts.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-16 text-center">
-          <div className="w-14 h-14 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <svg width="24" height="24" fill="none" stroke="#9CA3AF" strokeWidth="2" viewBox="0 0 24 24">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-              <polyline points="14 2 14 8 20 8" />
-            </svg>
-          </div>
-          <p className="font-medium text-gray-600">No contracts</p>
-          <p className="text-sm text-gray-400 mt-1">Add contracts in your Supabase database</p>
+      <div className="rounded-2xl overflow-hidden" style={{ background: C.card, border: `1px solid ${C.border}` }}>
+        <div className="grid px-6 py-3 text-xs font-medium uppercase tracking-widest" style={{ color: C.muted, borderBottom: `1px solid ${C.border}`, gridTemplateColumns: '2fr 1.5fr 0.7fr 1fr 1fr 1fr 1.2fr 0.5fr' }}>
+          <div>Provider</div><div>Project</div><div>Cat</div><div>Amount</div><div>Paid</div><div>Balance</div><div>Progress</div><div></div>
         </div>
-      ) : (
-        <div className="space-y-4">
-          {contracts.map((contract) => {
-            const pct = calcPercent(contract.spent, contract.total_budget)
-            const remaining = contract.total_budget - contract.spent
-            const isOver = remaining < 0
-            const barColor = pct >= 90 ? '#DC2626' : pct >= 80 ? '#D97706' : NAVY
-
-            return (
-              <Link
-                key={contract.id}
-                href={`/contracts/${contract.id}`}
-                className="block bg-white rounded-2xl border border-gray-100 shadow-sm p-6 hover:border-blue-200 hover:shadow-md transition-all group"
-              >
-                <div className="flex items-start justify-between gap-6 mb-5">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2.5 flex-wrap mb-1">
-                      <h2 className="text-base font-semibold truncate group-hover:text-blue-700 transition-colors" style={{ color: '#111928' }}>
-                        {contract.contract_name}
-                      </h2>
-                      <span className="shrink-0 text-xs px-2.5 py-1 rounded-full font-medium bg-blue-50 text-blue-700">
-                        {contract.contract_type}
-                      </span>
-                      <span
-                        className="shrink-0 text-xs px-2.5 py-1 rounded-full font-medium"
-                        style={
-                          contract.status === 'active'
-                            ? { background: '#D1FAE5', color: '#065F46' }
-                            : { background: '#F3F4F6', color: '#6B7280' }
-                        }
-                      >
-                        {contract.status === 'active' ? 'Active' : 'Closed'}
-                      </span>
+        {contracts.length === 0 ? (
+          <p className="text-sm text-center py-12" style={{ color: C.muted }}>No contracts yet. Create your first contract.</p>
+        ) : (
+          <div>
+            {contracts.map((c: any) => {
+              const tranches: ContractTranche[] = c.contract_tranches || []
+              const budget   = c.contract_amount || c.total_budget || 0
+              const paid     = tranches.filter(t => t.status === 'paid').reduce((s, t) => s + t.amount, 0)
+              const balance  = budget - paid
+              const rate     = budget > 0 ? Math.round((paid / budget) * 100) : 0
+              const statusColor = c.status === 'active' ? C.green : c.status === 'completed' ? C.muted : C.red
+              return (
+                <Link key={c.id} href={`/contracts/${c.id}`} className="grid px-6 py-4 hover:bg-white/5 transition-colors items-center" style={{ borderBottom: `1px solid ${C.border}`, gridTemplateColumns: '2fr 1.5fr 0.7fr 1fr 1fr 1fr 1.2fr 0.5fr' }}>
+                  <div>
+                    <p className="text-sm font-medium" style={{ color: '#F9FAFB' }}>{c.service_providers?.name || c.client_name || '—'}</p>
+                    <p className="text-xs mt-0.5" style={{ color: C.muted }}>{c.contract_name}</p>
+                  </div>
+                  <div className="text-sm" style={{ color: '#D1D5DB' }}>{c.project || '—'}</div>
+                  <div>
+                    {c.category && <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: `${ESG_COLORS[c.category] || C.muted}20`, color: ESG_COLORS[c.category] || C.muted }}>{c.category}</span>}
+                  </div>
+                  <div className="text-sm font-medium" style={{ color: '#F9FAFB' }}>{formatCurrency(budget)}</div>
+                  <div className="text-sm" style={{ color: C.green }}>{formatCurrency(paid)}</div>
+                  <div className="text-sm" style={{ color: balance > 0 ? C.amber : C.muted }}>{formatCurrency(balance)}</div>
+                  <div className="pr-4">
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 h-1.5 rounded-full" style={{ background: '#1F2937' }}>
+                        <div className="h-1.5 rounded-full" style={{ width: `${rate}%`, background: rate >= 80 ? C.green : rate >= 40 ? C.amber : C.blue }} />
+                      </div>
+                      <span className="text-xs" style={{ color: C.muted }}>{rate}%</span>
                     </div>
-                    <p className="text-sm text-gray-400">
-                      {contract.client_name} · {formatDate(contract.start_date)} → {formatDate(contract.end_date)}
-                    </p>
                   </div>
-                  <div className="text-right shrink-0">
-                    <p className="text-xs text-gray-400 mb-0.5">Total budget</p>
-                    <p className="text-lg font-bold" style={{ color: '#111928' }}>
-                      {formatCurrency(contract.total_budget, contract.currency)}
-                    </p>
+                  <div className="flex justify-end">
+                    <svg className="text-gray-500" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
                   </div>
-                </div>
-
-                <div className="h-2 rounded-full overflow-hidden bg-gray-100 mb-3">
-                  <div
-                    className="h-full rounded-full transition-all"
-                    style={{ width: `${Math.min(pct, 100)}%`, background: barColor }}
-                  />
-                </div>
-
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-gray-400">
-                    Spent: <span className="font-semibold" style={{ color: '#111928' }}>{formatCurrency(contract.spent)}</span>
-                  </span>
-                  <span className="font-semibold" style={{ color: barColor }}>{pct}%</span>
-                  <span className="text-gray-400">
-                    Remaining: <span className="font-semibold" style={{ color: isOver ? '#DC2626' : '#059669' }}>{formatCurrency(remaining)}</span>
-                  </span>
-                </div>
-              </Link>
-            )
-          })}
-        </div>
-      )}
+                </Link>
+              )
+            })}
+          </div>
+        )}
+      </div>
     </div>
   )
 }
