@@ -687,3 +687,1182 @@ Import trace for requested module:
 <w>  at resolve commonjs C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
  ✓ Compiled in 107ms (332 modules)
  ✓ Compiled in 73ms (332 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, lstat 'C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js'
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Resolving '../../../../.next/server/app/upload/page' in C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server for build dependencies doesn't lead to expected result 'C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js', but to 'Error: Can't resolve '../../../../.next/server/app/upload/page' in 'C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server'' instead. Resolving dependencies are ignored for this path.
+<w>  at resolve commonjs file ../../../../.next/server/app/upload/page (expected C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js)
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\require.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\require.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\load-components.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\load-components.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\utils.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\utils.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-app-loader.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-app-loader.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\bundle5.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\bundle5.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\webpack.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\webpack.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\plugins\define-env-plugin.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\plugins\define-env-plugin.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\swc\index.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\swc\index.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at resolve commonjs C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+ ✓ Compiled in 120ms (332 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, lstat 'C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js'
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Resolving '../../../../.next/server/app/upload/page' in C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server for build dependencies doesn't lead to expected result 'C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js', but to 'Error: Can't resolve '../../../../.next/server/app/upload/page' in 'C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server'' instead. Resolving dependencies are ignored for this path.
+<w>  at resolve commonjs file ../../../../.next/server/app/upload/page (expected C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js)
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\require.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\require.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\load-components.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\load-components.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\utils.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\utils.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-app-loader.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-app-loader.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\bundle5.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\bundle5.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\webpack.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\webpack.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\plugins\define-env-plugin.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\plugins\define-env-plugin.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\swc\index.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\swc\index.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at resolve commonjs C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+ ✓ Compiled in 515ms (332 modules)
+ ✓ Compiled in 93ms (332 modules)
+ ✓ Compiled in 245ms (332 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, lstat 'C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js'
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Resolving '../../../../.next/server/app/upload/page' in C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server for build dependencies doesn't lead to expected result 'C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js', but to 'Error: Can't resolve '../../../../.next/server/app/upload/page' in 'C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server'' instead. Resolving dependencies are ignored for this path.
+<w>  at resolve commonjs file ../../../../.next/server/app/upload/page (expected C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js)
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\require.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\require.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\load-components.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\load-components.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\utils.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\utils.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-app-loader.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-app-loader.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\bundle5.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\bundle5.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\webpack.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\webpack.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\plugins\define-env-plugin.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\plugins\define-env-plugin.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\swc\index.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\swc\index.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at resolve commonjs C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+ ✓ Compiled in 86ms (332 modules)
+ ⨯ ./components/Sidebar.tsx
+Error: 
+  [31mx[0m Unexpected token `aside`. Expected jsx identifier
+    ,-[[36;1;4mC:\Users\roudy\Desktop\esg-tracker\components\Sidebar.tsx[0m:83:1]
+ [2m83[0m |   const initials = user?.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?'
+ [2m84[0m | 
+ [2m85[0m |   return (
+ [2m86[0m |     <aside className="w-56 min-h-screen flex flex-col shrink-0" style={{ background: BG, borderRight: '1px solid #1F2937' }}>
+    : [31;1m     ^^^^^[0m
+ [2m87[0m |       {/* Logo */}
+ [2m88[0m |       <div className="px-4 pt-5 pb-4" style={{ borderBottom: '1px solid #1F2937' }}>
+ [2m89[0m |         <div className="rounded-xl px-3 py-2.5 flex items-center justify-center" style={{ background: '#fff' }}>
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/Sidebar.tsx
+ ⨯ ./components/Sidebar.tsx
+Error: 
+  [31mx[0m Unexpected token `aside`. Expected jsx identifier
+    ,-[[36;1;4mC:\Users\roudy\Desktop\esg-tracker\components\Sidebar.tsx[0m:83:1]
+ [2m83[0m |   const initials = user?.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?'
+ [2m84[0m | 
+ [2m85[0m |   return (
+ [2m86[0m |     <aside className="w-56 min-h-screen flex flex-col shrink-0" style={{ background: BG, borderRight: '1px solid #1F2937' }}>
+    : [31;1m     ^^^^^[0m
+ [2m87[0m |       {/* Logo */}
+ [2m88[0m |       <div className="px-4 pt-5 pb-4" style={{ borderBottom: '1px solid #1F2937' }}>
+ [2m89[0m |         <div className="rounded-xl px-3 py-2.5 flex items-center justify-center" style={{ background: '#fff' }}>
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/Sidebar.tsx
+ ⨯ ./components/Sidebar.tsx
+Error: 
+  [31mx[0m Unexpected token `aside`. Expected jsx identifier
+    ,-[[36;1;4mC:\Users\roudy\Desktop\esg-tracker\components\Sidebar.tsx[0m:83:1]
+ [2m83[0m |   const initials = user?.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?'
+ [2m84[0m | 
+ [2m85[0m |   return (
+ [2m86[0m |     <aside className="w-56 min-h-screen flex flex-col shrink-0" style={{ background: BG, borderRight: '1px solid #1F2937' }}>
+    : [31;1m     ^^^^^[0m
+ [2m87[0m |       {/* Logo */}
+ [2m88[0m |       <div className="px-4 pt-5 pb-4" style={{ borderBottom: '1px solid #1F2937' }}>
+ [2m89[0m |         <div className="rounded-xl px-3 py-2.5 flex items-center justify-center" style={{ background: '#fff' }}>
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/Sidebar.tsx
+ ⨯ ./components/Sidebar.tsx
+Error: 
+  [31mx[0m Unexpected token `aside`. Expected jsx identifier
+    ,-[[36;1;4mC:\Users\roudy\Desktop\esg-tracker\components\Sidebar.tsx[0m:83:1]
+ [2m83[0m |   const initials = user?.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?'
+ [2m84[0m | 
+ [2m85[0m |   return (
+ [2m86[0m |     <aside className="w-56 min-h-screen flex flex-col shrink-0" style={{ background: BG, borderRight: '1px solid #1F2937' }}>
+    : [31;1m     ^^^^^[0m
+ [2m87[0m |       {/* Logo */}
+ [2m88[0m |       <div className="px-4 pt-5 pb-4" style={{ borderBottom: '1px solid #1F2937' }}>
+ [2m89[0m |         <div className="rounded-xl px-3 py-2.5 flex items-center justify-center" style={{ background: '#fff' }}>
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/Sidebar.tsx
+ ⨯ ./components/Sidebar.tsx
+Error: 
+  [31mx[0m Unexpected token `aside`. Expected jsx identifier
+    ,-[[36;1;4mC:\Users\roudy\Desktop\esg-tracker\components\Sidebar.tsx[0m:83:1]
+ [2m83[0m |   const initials = user?.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?'
+ [2m84[0m | 
+ [2m85[0m |   return (
+ [2m86[0m |     <aside className="w-56 min-h-screen flex flex-col shrink-0" style={{ background: BG, borderRight: '1px solid #1F2937' }}>
+    : [31;1m     ^^^^^[0m
+ [2m87[0m |       {/* Logo */}
+ [2m88[0m |       <div className="px-4 pt-5 pb-4" style={{ borderBottom: '1px solid #1F2937' }}>
+ [2m89[0m |         <div className="rounded-xl px-3 py-2.5 flex items-center justify-center" style={{ background: '#fff' }}>
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/Sidebar.tsx
+ ⨯ ./components/Sidebar.tsx
+Error: 
+  [31mx[0m Unexpected token `aside`. Expected jsx identifier
+    ,-[[36;1;4mC:\Users\roudy\Desktop\esg-tracker\components\Sidebar.tsx[0m:83:1]
+ [2m83[0m |   const initials = user?.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?'
+ [2m84[0m | 
+ [2m85[0m |   return (
+ [2m86[0m |     <aside className="w-56 min-h-screen flex flex-col shrink-0" style={{ background: BG, borderRight: '1px solid #1F2937' }}>
+    : [31;1m     ^^^^^[0m
+ [2m87[0m |       {/* Logo */}
+ [2m88[0m |       <div className="px-4 pt-5 pb-4" style={{ borderBottom: '1px solid #1F2937' }}>
+ [2m89[0m |         <div className="rounded-xl px-3 py-2.5 flex items-center justify-center" style={{ background: '#fff' }}>
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/Sidebar.tsx
+ ⨯ ./components/Sidebar.tsx
+Error: 
+  [31mx[0m Unexpected token `aside`. Expected jsx identifier
+    ,-[[36;1;4mC:\Users\roudy\Desktop\esg-tracker\components\Sidebar.tsx[0m:83:1]
+ [2m83[0m |   const initials = user?.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?'
+ [2m84[0m | 
+ [2m85[0m |   return (
+ [2m86[0m |     <aside className="w-56 min-h-screen flex flex-col shrink-0" style={{ background: BG, borderRight: '1px solid #1F2937' }}>
+    : [31;1m     ^^^^^[0m
+ [2m87[0m |       {/* Logo */}
+ [2m88[0m |       <div className="px-4 pt-5 pb-4" style={{ borderBottom: '1px solid #1F2937' }}>
+ [2m89[0m |         <div className="rounded-xl px-3 py-2.5 flex items-center justify-center" style={{ background: '#fff' }}>
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/Sidebar.tsx
+ ⨯ ./components/Sidebar.tsx
+Error: 
+  [31mx[0m Unexpected token `aside`. Expected jsx identifier
+    ,-[[36;1;4mC:\Users\roudy\Desktop\esg-tracker\components\Sidebar.tsx[0m:83:1]
+ [2m83[0m |   const initials = user?.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?'
+ [2m84[0m | 
+ [2m85[0m |   return (
+ [2m86[0m |     <aside className="w-56 min-h-screen flex flex-col shrink-0" style={{ background: BG, borderRight: '1px solid #1F2937' }}>
+    : [31;1m     ^^^^^[0m
+ [2m87[0m |       {/* Logo */}
+ [2m88[0m |       <div className="px-4 pt-5 pb-4" style={{ borderBottom: '1px solid #1F2937' }}>
+ [2m89[0m |         <div className="rounded-xl px-3 py-2.5 flex items-center justify-center" style={{ background: '#fff' }}>
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/Sidebar.tsx
+ ⨯ ./components/Sidebar.tsx
+Error: 
+  [31mx[0m Unexpected token `aside`. Expected jsx identifier
+    ,-[[36;1;4mC:\Users\roudy\Desktop\esg-tracker\components\Sidebar.tsx[0m:83:1]
+ [2m83[0m |   const initials = user?.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?'
+ [2m84[0m | 
+ [2m85[0m |   return (
+ [2m86[0m |     <aside className="w-56 min-h-screen flex flex-col shrink-0" style={{ background: BG, borderRight: '1px solid #1F2937' }}>
+    : [31;1m     ^^^^^[0m
+ [2m87[0m |       {/* Logo */}
+ [2m88[0m |       <div className="px-4 pt-5 pb-4" style={{ borderBottom: '1px solid #1F2937' }}>
+ [2m89[0m |         <div className="rounded-xl px-3 py-2.5 flex items-center justify-center" style={{ background: '#fff' }}>
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/Sidebar.tsx
+ ⨯ ./components/Sidebar.tsx
+Error: 
+  [31mx[0m Unexpected token `aside`. Expected jsx identifier
+    ,-[[36;1;4mC:\Users\roudy\Desktop\esg-tracker\components\Sidebar.tsx[0m:83:1]
+ [2m83[0m |   const initials = user?.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?'
+ [2m84[0m | 
+ [2m85[0m |   return (
+ [2m86[0m |     <aside className="w-56 min-h-screen flex flex-col shrink-0" style={{ background: BG, borderRight: '1px solid #1F2937' }}>
+    : [31;1m     ^^^^^[0m
+ [2m87[0m |       {/* Logo */}
+ [2m88[0m |       <div className="px-4 pt-5 pb-4" style={{ borderBottom: '1px solid #1F2937' }}>
+ [2m89[0m |         <div className="rounded-xl px-3 py-2.5 flex items-center justify-center" style={{ background: '#fff' }}>
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/Sidebar.tsx
+ ⨯ ./components/Sidebar.tsx
+Error: 
+  [31mx[0m Unexpected token `aside`. Expected jsx identifier
+    ,-[[36;1;4mC:\Users\roudy\Desktop\esg-tracker\components\Sidebar.tsx[0m:83:1]
+ [2m83[0m |   const initials = user?.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?'
+ [2m84[0m | 
+ [2m85[0m |   return (
+ [2m86[0m |     <aside className="w-56 min-h-screen flex flex-col shrink-0" style={{ background: BG, borderRight: '1px solid #1F2937' }}>
+    : [31;1m     ^^^^^[0m
+ [2m87[0m |       {/* Logo */}
+ [2m88[0m |       <div className="px-4 pt-5 pb-4" style={{ borderBottom: '1px solid #1F2937' }}>
+ [2m89[0m |         <div className="rounded-xl px-3 py-2.5 flex items-center justify-center" style={{ background: '#fff' }}>
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/Sidebar.tsx
+ ⨯ ./components/Sidebar.tsx
+Error: 
+  [31mx[0m Unexpected token `aside`. Expected jsx identifier
+    ,-[[36;1;4mC:\Users\roudy\Desktop\esg-tracker\components\Sidebar.tsx[0m:83:1]
+ [2m83[0m |   const initials = user?.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?'
+ [2m84[0m | 
+ [2m85[0m |   return (
+ [2m86[0m |     <aside className="w-56 min-h-screen flex flex-col shrink-0" style={{ background: BG, borderRight: '1px solid #1F2937' }}>
+    : [31;1m     ^^^^^[0m
+ [2m87[0m |       {/* Logo */}
+ [2m88[0m |       <div className="px-4 pt-5 pb-4" style={{ borderBottom: '1px solid #1F2937' }}>
+ [2m89[0m |         <div className="rounded-xl px-3 py-2.5 flex items-center justify-center" style={{ background: '#fff' }}>
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/Sidebar.tsx
+ ⨯ ./components/Sidebar.tsx
+Error: 
+  [31mx[0m Unexpected token `aside`. Expected jsx identifier
+    ,-[[36;1;4mC:\Users\roudy\Desktop\esg-tracker\components\Sidebar.tsx[0m:83:1]
+ [2m83[0m |   const initials = user?.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?'
+ [2m84[0m | 
+ [2m85[0m |   return (
+ [2m86[0m |     <aside className="w-56 min-h-screen flex flex-col shrink-0" style={{ background: BG, borderRight: '1px solid #1F2937' }}>
+    : [31;1m     ^^^^^[0m
+ [2m87[0m |       {/* Logo */}
+ [2m88[0m |       <div className="px-4 pt-5 pb-4" style={{ borderBottom: '1px solid #1F2937' }}>
+ [2m89[0m |         <div className="rounded-xl px-3 py-2.5 flex items-center justify-center" style={{ background: '#fff' }}>
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/Sidebar.tsx
+ ⨯ ./components/Sidebar.tsx
+Error: 
+  [31mx[0m Unexpected token `aside`. Expected jsx identifier
+    ,-[[36;1;4mC:\Users\roudy\Desktop\esg-tracker\components\Sidebar.tsx[0m:83:1]
+ [2m83[0m |   const initials = user?.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?'
+ [2m84[0m | 
+ [2m85[0m |   return (
+ [2m86[0m |     <aside className="w-56 min-h-screen flex flex-col shrink-0" style={{ background: BG, borderRight: '1px solid #1F2937' }}>
+    : [31;1m     ^^^^^[0m
+ [2m87[0m |       {/* Logo */}
+ [2m88[0m |       <div className="px-4 pt-5 pb-4" style={{ borderBottom: '1px solid #1F2937' }}>
+ [2m89[0m |         <div className="rounded-xl px-3 py-2.5 flex items-center justify-center" style={{ background: '#fff' }}>
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/Sidebar.tsx
+ ⨯ ./components/Sidebar.tsx
+Error: 
+  [31mx[0m Unexpected token `aside`. Expected jsx identifier
+    ,-[[36;1;4mC:\Users\roudy\Desktop\esg-tracker\components\Sidebar.tsx[0m:83:1]
+ [2m83[0m |   const initials = user?.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?'
+ [2m84[0m | 
+ [2m85[0m |   return (
+ [2m86[0m |     <aside className="w-56 min-h-screen flex flex-col shrink-0" style={{ background: BG, borderRight: '1px solid #1F2937' }}>
+    : [31;1m     ^^^^^[0m
+ [2m87[0m |       {/* Logo */}
+ [2m88[0m |       <div className="px-4 pt-5 pb-4" style={{ borderBottom: '1px solid #1F2937' }}>
+ [2m89[0m |         <div className="rounded-xl px-3 py-2.5 flex items-center justify-center" style={{ background: '#fff' }}>
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/Sidebar.tsx
+ ⨯ ./components/Sidebar.tsx
+Error: 
+  [31mx[0m Unexpected token `aside`. Expected jsx identifier
+    ,-[[36;1;4mC:\Users\roudy\Desktop\esg-tracker\components\Sidebar.tsx[0m:83:1]
+ [2m83[0m |   const initials = user?.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?'
+ [2m84[0m | 
+ [2m85[0m |   return (
+ [2m86[0m |     <aside className="w-56 min-h-screen flex flex-col shrink-0" style={{ background: BG, borderRight: '1px solid #1F2937' }}>
+    : [31;1m     ^^^^^[0m
+ [2m87[0m |       {/* Logo */}
+ [2m88[0m |       <div className="px-4 pt-5 pb-4" style={{ borderBottom: '1px solid #1F2937' }}>
+ [2m89[0m |         <div className="rounded-xl px-3 py-2.5 flex items-center justify-center" style={{ background: '#fff' }}>
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/Sidebar.tsx
+ ⨯ ./components/Sidebar.tsx
+Error: 
+  [31mx[0m Unexpected token `aside`. Expected jsx identifier
+    ,-[[36;1;4mC:\Users\roudy\Desktop\esg-tracker\components\Sidebar.tsx[0m:83:1]
+ [2m83[0m |   const initials = user?.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?'
+ [2m84[0m | 
+ [2m85[0m |   return (
+ [2m86[0m |     <aside className="w-56 min-h-screen flex flex-col shrink-0" style={{ background: BG, borderRight: '1px solid #1F2937' }}>
+    : [31;1m     ^^^^^[0m
+ [2m87[0m |       {/* Logo */}
+ [2m88[0m |       <div className="px-4 pt-5 pb-4" style={{ borderBottom: '1px solid #1F2937' }}>
+ [2m89[0m |         <div className="rounded-xl px-3 py-2.5 flex items-center justify-center" style={{ background: '#fff' }}>
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/Sidebar.tsx
+ ⨯ ./components/Sidebar.tsx
+Error: 
+  [31mx[0m Unexpected token `aside`. Expected jsx identifier
+    ,-[[36;1;4mC:\Users\roudy\Desktop\esg-tracker\components\Sidebar.tsx[0m:83:1]
+ [2m83[0m |   const initials = user?.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?'
+ [2m84[0m | 
+ [2m85[0m |   return (
+ [2m86[0m |     <aside className="w-56 min-h-screen flex flex-col shrink-0" style={{ background: BG, borderRight: '1px solid #1F2937' }}>
+    : [31;1m     ^^^^^[0m
+ [2m87[0m |       {/* Logo */}
+ [2m88[0m |       <div className="px-4 pt-5 pb-4" style={{ borderBottom: '1px solid #1F2937' }}>
+ [2m89[0m |         <div className="rounded-xl px-3 py-2.5 flex items-center justify-center" style={{ background: '#fff' }}>
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/Sidebar.tsx
+ ⨯ ./components/Sidebar.tsx
+Error: 
+  [31mx[0m Unexpected token `aside`. Expected jsx identifier
+    ,-[[36;1;4mC:\Users\roudy\Desktop\esg-tracker\components\Sidebar.tsx[0m:83:1]
+ [2m83[0m |   const initials = user?.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?'
+ [2m84[0m | 
+ [2m85[0m |   return (
+ [2m86[0m |     <aside className="w-56 min-h-screen flex flex-col shrink-0" style={{ background: BG, borderRight: '1px solid #1F2937' }}>
+    : [31;1m     ^^^^^[0m
+ [2m87[0m |       {/* Logo */}
+ [2m88[0m |       <div className="px-4 pt-5 pb-4" style={{ borderBottom: '1px solid #1F2937' }}>
+ [2m89[0m |         <div className="rounded-xl px-3 py-2.5 flex items-center justify-center" style={{ background: '#fff' }}>
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/Sidebar.tsx
+ ⨯ ./components/Sidebar.tsx
+Error: 
+  [31mx[0m Unexpected token `aside`. Expected jsx identifier
+    ,-[[36;1;4mC:\Users\roudy\Desktop\esg-tracker\components\Sidebar.tsx[0m:83:1]
+ [2m83[0m |   const initials = user?.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?'
+ [2m84[0m | 
+ [2m85[0m |   return (
+ [2m86[0m |     <aside className="w-56 min-h-screen flex flex-col shrink-0" style={{ background: BG, borderRight: '1px solid #1F2937' }}>
+    : [31;1m     ^^^^^[0m
+ [2m87[0m |       {/* Logo */}
+ [2m88[0m |       <div className="px-4 pt-5 pb-4" style={{ borderBottom: '1px solid #1F2937' }}>
+ [2m89[0m |         <div className="rounded-xl px-3 py-2.5 flex items-center justify-center" style={{ background: '#fff' }}>
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/Sidebar.tsx
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, lstat 'C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js'
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Resolving '../../../../.next/server/app/upload/page' in C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server for build dependencies doesn't lead to expected result 'C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js', but to 'Error: Can't resolve '../../../../.next/server/app/upload/page' in 'C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server'' instead. Resolving dependencies are ignored for this path.
+<w>  at resolve commonjs file ../../../../.next/server/app/upload/page (expected C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js)
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\require.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\require.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\load-components.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\load-components.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\utils.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\utils.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\handle-externals.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\handle-externals.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at resolve commonjs C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+ ⨯ ./components/Sidebar.tsx
+Error: 
+  [31mx[0m Unexpected token `aside`. Expected jsx identifier
+    ,-[[36;1;4mC:\Users\roudy\Desktop\esg-tracker\components\Sidebar.tsx[0m:83:1]
+ [2m83[0m |   const initials = user?.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?'
+ [2m84[0m | 
+ [2m85[0m |   return (
+ [2m86[0m |     <aside className="w-56 min-h-screen flex flex-col shrink-0" style={{ background: BG, borderRight: '1px solid #1F2937' }}>
+    : [31;1m     ^^^^^[0m
+ [2m87[0m |       {/* Logo */}
+ [2m88[0m |       <div className="px-4 pt-5 pb-4" style={{ borderBottom: '1px solid #1F2937' }}>
+ [2m89[0m |         <div className="rounded-xl px-3 py-2.5 flex items-center justify-center" style={{ background: '#fff' }}>
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/Sidebar.tsx
+ ⨯ ./components/Sidebar.tsx
+Error: 
+  [31mx[0m Unexpected token `aside`. Expected jsx identifier
+    ,-[[36;1;4mC:\Users\roudy\Desktop\esg-tracker\components\Sidebar.tsx[0m:83:1]
+ [2m83[0m |   const initials = user?.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?'
+ [2m84[0m | 
+ [2m85[0m |   return (
+ [2m86[0m |     <aside className="w-56 min-h-screen flex flex-col shrink-0" style={{ background: BG, borderRight: '1px solid #1F2937' }}>
+    : [31;1m     ^^^^^[0m
+ [2m87[0m |       {/* Logo */}
+ [2m88[0m |       <div className="px-4 pt-5 pb-4" style={{ borderBottom: '1px solid #1F2937' }}>
+ [2m89[0m |         <div className="rounded-xl px-3 py-2.5 flex items-center justify-center" style={{ background: '#fff' }}>
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/Sidebar.tsx
+ ⨯ ./components/Sidebar.tsx
+Error: 
+  [31mx[0m Unexpected token `aside`. Expected jsx identifier
+    ,-[[36;1;4mC:\Users\roudy\Desktop\esg-tracker\components\Sidebar.tsx[0m:83:1]
+ [2m83[0m |   const initials = user?.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?'
+ [2m84[0m | 
+ [2m85[0m |   return (
+ [2m86[0m |     <aside className="w-56 min-h-screen flex flex-col shrink-0" style={{ background: BG, borderRight: '1px solid #1F2937' }}>
+    : [31;1m     ^^^^^[0m
+ [2m87[0m |       {/* Logo */}
+ [2m88[0m |       <div className="px-4 pt-5 pb-4" style={{ borderBottom: '1px solid #1F2937' }}>
+ [2m89[0m |         <div className="rounded-xl px-3 py-2.5 flex items-center justify-center" style={{ background: '#fff' }}>
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/Sidebar.tsx
+ ⨯ ./components/Sidebar.tsx
+Error: 
+  [31mx[0m Unexpected token `aside`. Expected jsx identifier
+    ,-[[36;1;4mC:\Users\roudy\Desktop\esg-tracker\components\Sidebar.tsx[0m:83:1]
+ [2m83[0m |   const initials = user?.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?'
+ [2m84[0m | 
+ [2m85[0m |   return (
+ [2m86[0m |     <aside className="w-56 min-h-screen flex flex-col shrink-0" style={{ background: BG, borderRight: '1px solid #1F2937' }}>
+    : [31;1m     ^^^^^[0m
+ [2m87[0m |       {/* Logo */}
+ [2m88[0m |       <div className="px-4 pt-5 pb-4" style={{ borderBottom: '1px solid #1F2937' }}>
+ [2m89[0m |         <div className="rounded-xl px-3 py-2.5 flex items-center justify-center" style={{ background: '#fff' }}>
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/Sidebar.tsx
+ ⨯ ./components/Sidebar.tsx
+Error: 
+  [31mx[0m Unexpected token `aside`. Expected jsx identifier
+    ,-[[36;1;4mC:\Users\roudy\Desktop\esg-tracker\components\Sidebar.tsx[0m:83:1]
+ [2m83[0m |   const initials = user?.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?'
+ [2m84[0m | 
+ [2m85[0m |   return (
+ [2m86[0m |     <aside className="w-56 min-h-screen flex flex-col shrink-0" style={{ background: BG, borderRight: '1px solid #1F2937' }}>
+    : [31;1m     ^^^^^[0m
+ [2m87[0m |       {/* Logo */}
+ [2m88[0m |       <div className="px-4 pt-5 pb-4" style={{ borderBottom: '1px solid #1F2937' }}>
+ [2m89[0m |         <div className="rounded-xl px-3 py-2.5 flex items-center justify-center" style={{ background: '#fff' }}>
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/Sidebar.tsx
+ ⨯ ./components/Sidebar.tsx
+Error: 
+  [31mx[0m Unexpected token `aside`. Expected jsx identifier
+    ,-[[36;1;4mC:\Users\roudy\Desktop\esg-tracker\components\Sidebar.tsx[0m:83:1]
+ [2m83[0m |   const initials = user?.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?'
+ [2m84[0m | 
+ [2m85[0m |   return (
+ [2m86[0m |     <aside className="w-56 min-h-screen flex flex-col shrink-0" style={{ background: BG, borderRight: '1px solid #1F2937' }}>
+    : [31;1m     ^^^^^[0m
+ [2m87[0m |       {/* Logo */}
+ [2m88[0m |       <div className="px-4 pt-5 pb-4" style={{ borderBottom: '1px solid #1F2937' }}>
+ [2m89[0m |         <div className="rounded-xl px-3 py-2.5 flex items-center justify-center" style={{ background: '#fff' }}>
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/Sidebar.tsx
+ ⨯ ./components/Sidebar.tsx
+Error: 
+  [31mx[0m Unexpected token `aside`. Expected jsx identifier
+    ,-[[36;1;4mC:\Users\roudy\Desktop\esg-tracker\components\Sidebar.tsx[0m:83:1]
+ [2m83[0m |   const initials = user?.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?'
+ [2m84[0m | 
+ [2m85[0m |   return (
+ [2m86[0m |     <aside className="w-56 min-h-screen flex flex-col shrink-0" style={{ background: BG, borderRight: '1px solid #1F2937' }}>
+    : [31;1m     ^^^^^[0m
+ [2m87[0m |       {/* Logo */}
+ [2m88[0m |       <div className="px-4 pt-5 pb-4" style={{ borderBottom: '1px solid #1F2937' }}>
+ [2m89[0m |         <div className="rounded-xl px-3 py-2.5 flex items-center justify-center" style={{ background: '#fff' }}>
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/Sidebar.tsx
+ ⨯ ./components/Sidebar.tsx
+Error: 
+  [31mx[0m Unexpected token `aside`. Expected jsx identifier
+    ,-[[36;1;4mC:\Users\roudy\Desktop\esg-tracker\components\Sidebar.tsx[0m:83:1]
+ [2m83[0m |   const initials = user?.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?'
+ [2m84[0m | 
+ [2m85[0m |   return (
+ [2m86[0m |     <aside className="w-56 min-h-screen flex flex-col shrink-0" style={{ background: BG, borderRight: '1px solid #1F2937' }}>
+    : [31;1m     ^^^^^[0m
+ [2m87[0m |       {/* Logo */}
+ [2m88[0m |       <div className="px-4 pt-5 pb-4" style={{ borderBottom: '1px solid #1F2937' }}>
+ [2m89[0m |         <div className="rounded-xl px-3 py-2.5 flex items-center justify-center" style={{ background: '#fff' }}>
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/Sidebar.tsx
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, lstat 'C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js'
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Resolving '../../../../.next/server/app/upload/page' in C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server for build dependencies doesn't lead to expected result 'C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js', but to 'Error: Can't resolve '../../../../.next/server/app/upload/page' in 'C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server'' instead. Resolving dependencies are ignored for this path.
+<w>  at resolve commonjs file ../../../../.next/server/app/upload/page (expected C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js)
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\require.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\require.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\load-components.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\load-components.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\utils.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\utils.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\handle-externals.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\handle-externals.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at resolve commonjs C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+ ⨯ ./components/Sidebar.tsx
+Error: 
+  [31mx[0m Unexpected token `aside`. Expected jsx identifier
+    ,-[[36;1;4mC:\Users\roudy\Desktop\esg-tracker\components\Sidebar.tsx[0m:83:1]
+ [2m83[0m |   const initials = user?.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?'
+ [2m84[0m | 
+ [2m85[0m |   return (
+ [2m86[0m |     <aside className="w-56 min-h-screen flex flex-col shrink-0" style={{ background: BG, borderRight: '1px solid #1F2937' }}>
+    : [31;1m     ^^^^^[0m
+ [2m87[0m |       {/* Logo */}
+ [2m88[0m |       <div className="px-4 pt-5 pb-4" style={{ borderBottom: '1px solid #1F2937' }}>
+ [2m89[0m |         <div className="rounded-xl px-3 py-2.5 flex items-center justify-center" style={{ background: '#fff' }}>
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/Sidebar.tsx
+ ⨯ ./components/Sidebar.tsx
+Error: 
+  [31mx[0m Unexpected token `aside`. Expected jsx identifier
+    ,-[[36;1;4mC:\Users\roudy\Desktop\esg-tracker\components\Sidebar.tsx[0m:83:1]
+ [2m83[0m |   const initials = user?.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?'
+ [2m84[0m | 
+ [2m85[0m |   return (
+ [2m86[0m |     <aside className="w-56 min-h-screen flex flex-col shrink-0" style={{ background: BG, borderRight: '1px solid #1F2937' }}>
+    : [31;1m     ^^^^^[0m
+ [2m87[0m |       {/* Logo */}
+ [2m88[0m |       <div className="px-4 pt-5 pb-4" style={{ borderBottom: '1px solid #1F2937' }}>
+ [2m89[0m |         <div className="rounded-xl px-3 py-2.5 flex items-center justify-center" style={{ background: '#fff' }}>
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/Sidebar.tsx
+ ⨯ ./components/Sidebar.tsx
+Error: 
+  [31mx[0m Unexpected token `aside`. Expected jsx identifier
+    ,-[[36;1;4mC:\Users\roudy\Desktop\esg-tracker\components\Sidebar.tsx[0m:83:1]
+ [2m83[0m |   const initials = user?.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?'
+ [2m84[0m | 
+ [2m85[0m |   return (
+ [2m86[0m |     <aside className="w-56 min-h-screen flex flex-col shrink-0" style={{ background: BG, borderRight: '1px solid #1F2937' }}>
+    : [31;1m     ^^^^^[0m
+ [2m87[0m |       {/* Logo */}
+ [2m88[0m |       <div className="px-4 pt-5 pb-4" style={{ borderBottom: '1px solid #1F2937' }}>
+ [2m89[0m |         <div className="rounded-xl px-3 py-2.5 flex items-center justify-center" style={{ background: '#fff' }}>
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/Sidebar.tsx
+ ⨯ ./components/Sidebar.tsx
+Error: 
+  [31mx[0m Unexpected token `aside`. Expected jsx identifier
+    ,-[[36;1;4mC:\Users\roudy\Desktop\esg-tracker\components\Sidebar.tsx[0m:83:1]
+ [2m83[0m |   const initials = user?.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?'
+ [2m84[0m | 
+ [2m85[0m |   return (
+ [2m86[0m |     <aside className="w-56 min-h-screen flex flex-col shrink-0" style={{ background: BG, borderRight: '1px solid #1F2937' }}>
+    : [31;1m     ^^^^^[0m
+ [2m87[0m |       {/* Logo */}
+ [2m88[0m |       <div className="px-4 pt-5 pb-4" style={{ borderBottom: '1px solid #1F2937' }}>
+ [2m89[0m |         <div className="rounded-xl px-3 py-2.5 flex items-center justify-center" style={{ background: '#fff' }}>
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/Sidebar.tsx
+ ⨯ ./components/Sidebar.tsx
+Error: 
+  [31mx[0m Unexpected token `aside`. Expected jsx identifier
+    ,-[[36;1;4mC:\Users\roudy\Desktop\esg-tracker\components\Sidebar.tsx[0m:83:1]
+ [2m83[0m |   const initials = user?.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?'
+ [2m84[0m | 
+ [2m85[0m |   return (
+ [2m86[0m |     <aside className="w-56 min-h-screen flex flex-col shrink-0" style={{ background: BG, borderRight: '1px solid #1F2937' }}>
+    : [31;1m     ^^^^^[0m
+ [2m87[0m |       {/* Logo */}
+ [2m88[0m |       <div className="px-4 pt-5 pb-4" style={{ borderBottom: '1px solid #1F2937' }}>
+ [2m89[0m |         <div className="rounded-xl px-3 py-2.5 flex items-center justify-center" style={{ background: '#fff' }}>
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/Sidebar.tsx
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, lstat 'C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js'
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Resolving '../../../../.next/server/app/upload/page' in C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server for build dependencies doesn't lead to expected result 'C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js', but to 'Error: Can't resolve '../../../../.next/server/app/upload/page' in 'C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server'' instead. Resolving dependencies are ignored for this path.
+<w>  at resolve commonjs file ../../../../.next/server/app/upload/page (expected C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js)
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\require.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\require.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\load-components.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\load-components.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\utils.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\utils.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-app-loader.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-app-loader.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\bundle5.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\bundle5.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\webpack.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\webpack.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\plugins\define-env-plugin.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\plugins\define-env-plugin.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\swc\index.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\swc\index.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at resolve commonjs C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+ ⨯ ./components/Sidebar.tsx
+Error: 
+  [31mx[0m Unexpected token `aside`. Expected jsx identifier
+    ,-[[36;1;4mC:\Users\roudy\Desktop\esg-tracker\components\Sidebar.tsx[0m:83:1]
+ [2m83[0m |   const initials = user?.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?'
+ [2m84[0m | 
+ [2m85[0m |   return (
+ [2m86[0m |     <aside className="w-56 min-h-screen flex flex-col shrink-0" style={{ background: BG, borderRight: '1px solid #1F2937' }}>
+    : [31;1m     ^^^^^[0m
+ [2m87[0m |       {/* Logo */}
+ [2m88[0m |       <div className="px-4 pt-5 pb-4" style={{ borderBottom: '1px solid #1F2937' }}>
+ [2m89[0m |         <div className="rounded-xl px-3 py-2.5 flex items-center justify-center" style={{ background: '#fff' }}>
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/Sidebar.tsx
+ ⨯ ./components/Sidebar.tsx
+Error: 
+  [31mx[0m Unexpected token `aside`. Expected jsx identifier
+    ,-[[36;1;4mC:\Users\roudy\Desktop\esg-tracker\components\Sidebar.tsx[0m:83:1]
+ [2m83[0m |   const initials = user?.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?'
+ [2m84[0m | 
+ [2m85[0m |   return (
+ [2m86[0m |     <aside className="w-56 min-h-screen flex flex-col shrink-0" style={{ background: BG, borderRight: '1px solid #1F2937' }}>
+    : [31;1m     ^^^^^[0m
+ [2m87[0m |       {/* Logo */}
+ [2m88[0m |       <div className="px-4 pt-5 pb-4" style={{ borderBottom: '1px solid #1F2937' }}>
+ [2m89[0m |         <div className="rounded-xl px-3 py-2.5 flex items-center justify-center" style={{ background: '#fff' }}>
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/Sidebar.tsx
+ ⨯ ./components/Sidebar.tsx
+Error: 
+  [31mx[0m Unexpected token `aside`. Expected jsx identifier
+    ,-[[36;1;4mC:\Users\roudy\Desktop\esg-tracker\components\Sidebar.tsx[0m:83:1]
+ [2m83[0m |   const initials = user?.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?'
+ [2m84[0m | 
+ [2m85[0m |   return (
+ [2m86[0m |     <aside className="w-56 min-h-screen flex flex-col shrink-0" style={{ background: BG, borderRight: '1px solid #1F2937' }}>
+    : [31;1m     ^^^^^[0m
+ [2m87[0m |       {/* Logo */}
+ [2m88[0m |       <div className="px-4 pt-5 pb-4" style={{ borderBottom: '1px solid #1F2937' }}>
+ [2m89[0m |         <div className="rounded-xl px-3 py-2.5 flex items-center justify-center" style={{ background: '#fff' }}>
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/Sidebar.tsx
+ ⨯ ./components/Sidebar.tsx
+Error: 
+  [31mx[0m Unexpected token `aside`. Expected jsx identifier
+    ,-[[36;1;4mC:\Users\roudy\Desktop\esg-tracker\components\Sidebar.tsx[0m:83:1]
+ [2m83[0m |   const initials = user?.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?'
+ [2m84[0m | 
+ [2m85[0m |   return (
+ [2m86[0m |     <aside className="w-56 min-h-screen flex flex-col shrink-0" style={{ background: BG, borderRight: '1px solid #1F2937' }}>
+    : [31;1m     ^^^^^[0m
+ [2m87[0m |       {/* Logo */}
+ [2m88[0m |       <div className="px-4 pt-5 pb-4" style={{ borderBottom: '1px solid #1F2937' }}>
+ [2m89[0m |         <div className="rounded-xl px-3 py-2.5 flex items-center justify-center" style={{ background: '#fff' }}>
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/Sidebar.tsx
+ ⨯ ./components/Sidebar.tsx
+Error: 
+  [31mx[0m Unexpected token `aside`. Expected jsx identifier
+    ,-[[36;1;4mC:\Users\roudy\Desktop\esg-tracker\components\Sidebar.tsx[0m:83:1]
+ [2m83[0m |   const initials = user?.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?'
+ [2m84[0m | 
+ [2m85[0m |   return (
+ [2m86[0m |     <aside className="w-56 min-h-screen flex flex-col shrink-0" style={{ background: BG, borderRight: '1px solid #1F2937' }}>
+    : [31;1m     ^^^^^[0m
+ [2m87[0m |       {/* Logo */}
+ [2m88[0m |       <div className="px-4 pt-5 pb-4" style={{ borderBottom: '1px solid #1F2937' }}>
+ [2m89[0m |         <div className="rounded-xl px-3 py-2.5 flex items-center justify-center" style={{ background: '#fff' }}>
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/Sidebar.tsx
+ ⨯ ./components/Sidebar.tsx
+Error: 
+  [31mx[0m Unexpected token `aside`. Expected jsx identifier
+    ,-[[36;1;4mC:\Users\roudy\Desktop\esg-tracker\components\Sidebar.tsx[0m:83:1]
+ [2m83[0m |   const initials = user?.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?'
+ [2m84[0m | 
+ [2m85[0m |   return (
+ [2m86[0m |     <aside className="w-56 min-h-screen flex flex-col shrink-0" style={{ background: BG, borderRight: '1px solid #1F2937' }}>
+    : [31;1m     ^^^^^[0m
+ [2m87[0m |       {/* Logo */}
+ [2m88[0m |       <div className="px-4 pt-5 pb-4" style={{ borderBottom: '1px solid #1F2937' }}>
+ [2m89[0m |         <div className="rounded-xl px-3 py-2.5 flex items-center justify-center" style={{ background: '#fff' }}>
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/Sidebar.tsx
+ ⨯ ./components/Sidebar.tsx
+Error: 
+  [31mx[0m Unexpected token `aside`. Expected jsx identifier
+    ,-[[36;1;4mC:\Users\roudy\Desktop\esg-tracker\components\Sidebar.tsx[0m:83:1]
+ [2m83[0m |   const initials = user?.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?'
+ [2m84[0m | 
+ [2m85[0m |   return (
+ [2m86[0m |     <aside className="w-56 min-h-screen flex flex-col shrink-0" style={{ background: BG, borderRight: '1px solid #1F2937' }}>
+    : [31;1m     ^^^^^[0m
+ [2m87[0m |       {/* Logo */}
+ [2m88[0m |       <div className="px-4 pt-5 pb-4" style={{ borderBottom: '1px solid #1F2937' }}>
+ [2m89[0m |         <div className="rounded-xl px-3 py-2.5 flex items-center justify-center" style={{ background: '#fff' }}>
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/Sidebar.tsx
+ ⨯ ./components/Sidebar.tsx
+Error: 
+  [31mx[0m Unexpected token `aside`. Expected jsx identifier
+    ,-[[36;1;4mC:\Users\roudy\Desktop\esg-tracker\components\Sidebar.tsx[0m:83:1]
+ [2m83[0m |   const initials = user?.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?'
+ [2m84[0m | 
+ [2m85[0m |   return (
+ [2m86[0m |     <aside className="w-56 min-h-screen flex flex-col shrink-0" style={{ background: BG, borderRight: '1px solid #1F2937' }}>
+    : [31;1m     ^^^^^[0m
+ [2m87[0m |       {/* Logo */}
+ [2m88[0m |       <div className="px-4 pt-5 pb-4" style={{ borderBottom: '1px solid #1F2937' }}>
+ [2m89[0m |         <div className="rounded-xl px-3 py-2.5 flex items-center justify-center" style={{ background: '#fff' }}>
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/Sidebar.tsx
+ ⨯ ./components/Sidebar.tsx
+Error: 
+  [31mx[0m Unexpected token `aside`. Expected jsx identifier
+    ,-[[36;1;4mC:\Users\roudy\Desktop\esg-tracker\components\Sidebar.tsx[0m:83:1]
+ [2m83[0m |   const initials = user?.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?'
+ [2m84[0m | 
+ [2m85[0m |   return (
+ [2m86[0m |     <aside className="w-56 min-h-screen flex flex-col shrink-0" style={{ background: BG, borderRight: '1px solid #1F2937' }}>
+    : [31;1m     ^^^^^[0m
+ [2m87[0m |       {/* Logo */}
+ [2m88[0m |       <div className="px-4 pt-5 pb-4" style={{ borderBottom: '1px solid #1F2937' }}>
+ [2m89[0m |         <div className="rounded-xl px-3 py-2.5 flex items-center justify-center" style={{ background: '#fff' }}>
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/Sidebar.tsx
+ ⨯ ./components/Sidebar.tsx
+Error: 
+  [31mx[0m Unexpected token `aside`. Expected jsx identifier
+    ,-[[36;1;4mC:\Users\roudy\Desktop\esg-tracker\components\Sidebar.tsx[0m:83:1]
+ [2m83[0m |   const initials = user?.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?'
+ [2m84[0m | 
+ [2m85[0m |   return (
+ [2m86[0m |     <aside className="w-56 min-h-screen flex flex-col shrink-0" style={{ background: BG, borderRight: '1px solid #1F2937' }}>
+    : [31;1m     ^^^^^[0m
+ [2m87[0m |       {/* Logo */}
+ [2m88[0m |       <div className="px-4 pt-5 pb-4" style={{ borderBottom: '1px solid #1F2937' }}>
+ [2m89[0m |         <div className="rounded-xl px-3 py-2.5 flex items-center justify-center" style={{ background: '#fff' }}>
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/Sidebar.tsx
+ ⨯ ./components/Sidebar.tsx
+Error: 
+  [31mx[0m Unexpected token `aside`. Expected jsx identifier
+    ,-[[36;1;4mC:\Users\roudy\Desktop\esg-tracker\components\Sidebar.tsx[0m:83:1]
+ [2m83[0m |   const initials = user?.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?'
+ [2m84[0m | 
+ [2m85[0m |   return (
+ [2m86[0m |     <aside className="w-56 min-h-screen flex flex-col shrink-0" style={{ background: BG, borderRight: '1px solid #1F2937' }}>
+    : [31;1m     ^^^^^[0m
+ [2m87[0m |       {/* Logo */}
+ [2m88[0m |       <div className="px-4 pt-5 pb-4" style={{ borderBottom: '1px solid #1F2937' }}>
+ [2m89[0m |         <div className="rounded-xl px-3 py-2.5 flex items-center justify-center" style={{ background: '#fff' }}>
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/Sidebar.tsx
+ ⨯ ./components/Sidebar.tsx
+Error: 
+  [31mx[0m Unexpected token `aside`. Expected jsx identifier
+    ,-[[36;1;4mC:\Users\roudy\Desktop\esg-tracker\components\Sidebar.tsx[0m:83:1]
+ [2m83[0m |   const initials = user?.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?'
+ [2m84[0m | 
+ [2m85[0m |   return (
+ [2m86[0m |     <aside className="w-56 min-h-screen flex flex-col shrink-0" style={{ background: BG, borderRight: '1px solid #1F2937' }}>
+    : [31;1m     ^^^^^[0m
+ [2m87[0m |       {/* Logo */}
+ [2m88[0m |       <div className="px-4 pt-5 pb-4" style={{ borderBottom: '1px solid #1F2937' }}>
+ [2m89[0m |         <div className="rounded-xl px-3 py-2.5 flex items-center justify-center" style={{ background: '#fff' }}>
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/Sidebar.tsx
+ ⨯ ./components/Sidebar.tsx
+Error: 
+  [31mx[0m Unexpected token `aside`. Expected jsx identifier
+    ,-[[36;1;4mC:\Users\roudy\Desktop\esg-tracker\components\Sidebar.tsx[0m:83:1]
+ [2m83[0m |   const initials = user?.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?'
+ [2m84[0m | 
+ [2m85[0m |   return (
+ [2m86[0m |     <aside className="w-56 min-h-screen flex flex-col shrink-0" style={{ background: BG, borderRight: '1px solid #1F2937' }}>
+    : [31;1m     ^^^^^[0m
+ [2m87[0m |       {/* Logo */}
+ [2m88[0m |       <div className="px-4 pt-5 pb-4" style={{ borderBottom: '1px solid #1F2937' }}>
+ [2m89[0m |         <div className="rounded-xl px-3 py-2.5 flex items-center justify-center" style={{ background: '#fff' }}>
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/Sidebar.tsx
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, lstat 'C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js'
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Resolving '../../../../.next/server/app/upload/page' in C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server for build dependencies doesn't lead to expected result 'C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js', but to 'Error: Can't resolve '../../../../.next/server/app/upload/page' in 'C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server'' instead. Resolving dependencies are ignored for this path.
+<w>  at resolve commonjs file ../../../../.next/server/app/upload/page (expected C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js)
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\require.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\require.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\load-components.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\load-components.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\utils.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\utils.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-app-loader.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-app-loader.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\bundle5.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\bundle5.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\webpack.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\webpack.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\plugins\define-env-plugin.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\plugins\define-env-plugin.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack-config.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack-config.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at resolve commonjs C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+ ⨯ ./components/Sidebar.tsx
+Error: 
+  [31mx[0m Unexpected token `aside`. Expected jsx identifier
+    ,-[[36;1;4mC:\Users\roudy\Desktop\esg-tracker\components\Sidebar.tsx[0m:83:1]
+ [2m83[0m |   const initials = user?.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?'
+ [2m84[0m | 
+ [2m85[0m |   return (
+ [2m86[0m |     <aside className="w-56 min-h-screen flex flex-col shrink-0" style={{ background: BG, borderRight: '1px solid #1F2937' }}>
+    : [31;1m     ^^^^^[0m
+ [2m87[0m |       {/* Logo */}
+ [2m88[0m |       <div className="px-4 pt-5 pb-4" style={{ borderBottom: '1px solid #1F2937' }}>
+ [2m89[0m |         <div className="rounded-xl px-3 py-2.5 flex items-center justify-center" style={{ background: '#fff' }}>
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/Sidebar.tsx
+ ⨯ ./components/Sidebar.tsx
+Error: 
+  [31mx[0m Unexpected token `aside`. Expected jsx identifier
+    ,-[[36;1;4mC:\Users\roudy\Desktop\esg-tracker\components\Sidebar.tsx[0m:83:1]
+ [2m83[0m |   const initials = user?.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?'
+ [2m84[0m | 
+ [2m85[0m |   return (
+ [2m86[0m |     <aside className="w-56 min-h-screen flex flex-col shrink-0" style={{ background: BG, borderRight: '1px solid #1F2937' }}>
+    : [31;1m     ^^^^^[0m
+ [2m87[0m |       {/* Logo */}
+ [2m88[0m |       <div className="px-4 pt-5 pb-4" style={{ borderBottom: '1px solid #1F2937' }}>
+ [2m89[0m |         <div className="rounded-xl px-3 py-2.5 flex items-center justify-center" style={{ background: '#fff' }}>
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/Sidebar.tsx
+ ⨯ ./components/Sidebar.tsx
+Error: 
+  [31mx[0m Unexpected token `aside`. Expected jsx identifier
+    ,-[[36;1;4mC:\Users\roudy\Desktop\esg-tracker\components\Sidebar.tsx[0m:83:1]
+ [2m83[0m |   const initials = user?.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?'
+ [2m84[0m | 
+ [2m85[0m |   return (
+ [2m86[0m |     <aside className="w-56 min-h-screen flex flex-col shrink-0" style={{ background: BG, borderRight: '1px solid #1F2937' }}>
+    : [31;1m     ^^^^^[0m
+ [2m87[0m |       {/* Logo */}
+ [2m88[0m |       <div className="px-4 pt-5 pb-4" style={{ borderBottom: '1px solid #1F2937' }}>
+ [2m89[0m |         <div className="rounded-xl px-3 py-2.5 flex items-center justify-center" style={{ background: '#fff' }}>
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/Sidebar.tsx
+ ⨯ ./components/Sidebar.tsx
+Error: 
+  [31mx[0m Unexpected token `aside`. Expected jsx identifier
+    ,-[[36;1;4mC:\Users\roudy\Desktop\esg-tracker\components\Sidebar.tsx[0m:83:1]
+ [2m83[0m |   const initials = user?.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?'
+ [2m84[0m | 
+ [2m85[0m |   return (
+ [2m86[0m |     <aside className="w-56 min-h-screen flex flex-col shrink-0" style={{ background: BG, borderRight: '1px solid #1F2937' }}>
+    : [31;1m     ^^^^^[0m
+ [2m87[0m |       {/* Logo */}
+ [2m88[0m |       <div className="px-4 pt-5 pb-4" style={{ borderBottom: '1px solid #1F2937' }}>
+ [2m89[0m |         <div className="rounded-xl px-3 py-2.5 flex items-center justify-center" style={{ background: '#fff' }}>
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/Sidebar.tsx
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, lstat 'C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js'
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Resolving '../../../../.next/server/app/upload/page' in C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server for build dependencies doesn't lead to expected result 'C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js', but to 'Error: Can't resolve '../../../../.next/server/app/upload/page' in 'C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server'' instead. Resolving dependencies are ignored for this path.
+<w>  at resolve commonjs file ../../../../.next/server/app/upload/page (expected C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js)
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\require.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\require.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\load-components.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\load-components.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\utils.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\utils.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\handle-externals.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\handle-externals.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at resolve commonjs C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+ ⨯ ./components/Sidebar.tsx
+Error: 
+  [31mx[0m Unexpected token `aside`. Expected jsx identifier
+    ,-[[36;1;4mC:\Users\roudy\Desktop\esg-tracker\components\Sidebar.tsx[0m:83:1]
+ [2m83[0m |   const initials = user?.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?'
+ [2m84[0m | 
+ [2m85[0m |   return (
+ [2m86[0m |     <aside className="w-56 min-h-screen flex flex-col shrink-0" style={{ background: BG, borderRight: '1px solid #1F2937' }}>
+    : [31;1m     ^^^^^[0m
+ [2m87[0m |       {/* Logo */}
+ [2m88[0m |       <div className="px-4 pt-5 pb-4" style={{ borderBottom: '1px solid #1F2937' }}>
+ [2m89[0m |         <div className="rounded-xl px-3 py-2.5 flex items-center justify-center" style={{ background: '#fff' }}>
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/Sidebar.tsx
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, lstat 'C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js'
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Resolving '../../../../.next/server/app/upload/page' in C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server for build dependencies doesn't lead to expected result 'C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js', but to 'Error: Can't resolve '../../../../.next/server/app/upload/page' in 'C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server'' instead. Resolving dependencies are ignored for this path.
+<w>  at resolve commonjs file ../../../../.next/server/app/upload/page (expected C:\Users\roudy\Desktop\esg-tracker\.next\server\app\upload\page.js)
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\require.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\require.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\load-components.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\server\load-components.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\utils.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\utils.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-app-loader.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-app-loader.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\bundle5.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\bundle5.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\webpack.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\compiled\webpack\webpack.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\plugins\define-env-plugin.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\plugins\define-env-plugin.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\swc\index.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\swc\index.js
+<w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at resolve commonjs C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+ ⨯ ./components/Sidebar.tsx
+Error: 
+  [31mx[0m Unexpected token `aside`. Expected jsx identifier
+    ,-[[36;1;4mC:\Users\roudy\Desktop\esg-tracker\components\Sidebar.tsx[0m:83:1]
+ [2m83[0m |   const initials = user?.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?'
+ [2m84[0m | 
+ [2m85[0m |   return (
+ [2m86[0m |     <aside className="w-56 min-h-screen flex flex-col shrink-0" style={{ background: BG, borderRight: '1px solid #1F2937' }}>
+    : [31;1m     ^^^^^[0m
+ [2m87[0m |       {/* Logo */}
+ [2m88[0m |       <div className="px-4 pt-5 pb-4" style={{ borderBottom: '1px solid #1F2937' }}>
+ [2m89[0m |         <div className="rounded-xl px-3 py-2.5 flex items-center justify-center" style={{ background: '#fff' }}>
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/Sidebar.tsx

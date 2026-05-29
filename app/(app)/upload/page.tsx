@@ -1,7 +1,6 @@
 ﻿'use client'
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { sendNewInvoiceEmail } from '@/lib/email'
 
 interface ScannedData {
   subcontractor_name: string
