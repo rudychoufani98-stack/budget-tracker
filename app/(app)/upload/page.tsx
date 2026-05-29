@@ -17,7 +17,25 @@ interface ScannedData {
 }
 
 const C = { card:'#FFFFFF', card2:'#F1F5F9', border:'#E2E8F0', border2:'#CBD5E1', green:'#10B981', amber:'#F59E0B', red:'#EF4444', blue:'#3B82F6', muted:'#6B7280' }
-const CATEGORIES = ['Subcontracting','Travel','Accommodation','Meals','Equipment','Other']
+
+export const CATEGORIES: { label: string; icon: string; color: string }[] = [
+  { label: 'Subcontracting', icon: '🤝', color: '#3B82F6' },
+  { label: 'Consulting',     icon: '💼', color: '#8B5CF6' },
+  { label: 'Travel',         icon: '✈️', color: '#06B6D4' },
+  { label: 'Accommodation',  icon: '🏨', color: '#F59E0B' },
+  { label: 'Meals',          icon: '🍽️', color: '#F97316' },
+  { label: 'Fuel & Transport', icon: '⛽', color: '#EF4444' },
+  { label: 'Equipment',      icon: '🔧', color: '#64748B' },
+  { label: 'Software & IT',  icon: '💻', color: '#10B981' },
+  { label: 'Security',       icon: '🛡️', color: '#1D4ED8' },
+  { label: 'Logistics',      icon: '📦', color: '#D97706' },
+  { label: 'Communication',  icon: '📡', color: '#7C3AED' },
+  { label: 'Training',       icon: '📚', color: '#059669' },
+  { label: 'Legal & Compliance', icon: '⚖️', color: '#475569' },
+  { label: 'Medical & Health',   icon: '🏥', color: '#DC2626' },
+  { label: 'Other',          icon: '📋', color: '#94A3B8' },
+]
+
 const CURRENCIES  = ['EUR','USD','GBP','CHF','MAD','XOF','NGN','CAD','AED','JPY']
 
 function cs(v: number | null, currency: string) {
@@ -207,18 +225,33 @@ export default function UploadPage() {
                     <input type={f.type||'text'} className={inp} style={inpStyle} value={(scanned as any)[f.key]||''} onChange={e=>setScanned(p=>p?{...p,[f.key]:e.target.value}:p)} />
                   </div>
                 ))}
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="text-xs font-medium mb-1.5 block" style={{ color:C.muted }}>Currency</label>
-                    <select className={inp} style={inpStyle} value={scanned.currency||'EUR'} onChange={e=>setScanned(p=>p?{...p,currency:e.target.value}:p)}>
-                      {CURRENCIES.map(c=><option key={c} value={c}>{c}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="text-xs font-medium mb-1.5 block" style={{ color:C.muted }}>Category</label>
-                    <select className={inp} style={inpStyle} value={scanned.category||'Other'} onChange={e=>setScanned(p=>p?{...p,category:e.target.value}:p)}>
-                      {CATEGORIES.map(c=><option key={c} value={c}>{c}</option>)}
-                    </select>
+                <div>
+                  <label className="text-xs font-medium mb-1.5 block" style={{ color:C.muted }}>Currency</label>
+                  <select className={inp} style={inpStyle} value={scanned.currency||'EUR'} onChange={e=>setScanned(p=>p?{...p,currency:e.target.value}:p)}>
+                    {CURRENCIES.map(c=><option key={c} value={c}>{c}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs font-medium mb-1.5 block" style={{ color:C.muted }}>Category</label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {CATEGORIES.map(cat => {
+                      const selected = (scanned.category||'Other') === cat.label
+                      return (
+                        <button
+                          key={cat.label}
+                          type="button"
+                          onClick={() => setScanned(p => p ? {...p, category: cat.label} : p)}
+                          className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-all text-left"
+                          style={selected
+                            ? { background: `${cat.color}18`, border: `2px solid ${cat.color}`, color: cat.color }
+                            : { background: '#F8FAFC', border: '2px solid #E2E8F0', color: '#64748B' }
+                          }
+                        >
+                          <span className="text-base leading-none">{cat.icon}</span>
+                          <span className="text-xs leading-tight">{cat.label}</span>
+                        </button>
+                      )
+                    })}
                   </div>
                 </div>
                 <div className="grid grid-cols-3 gap-3">

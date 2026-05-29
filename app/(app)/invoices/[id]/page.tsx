@@ -8,7 +8,25 @@ import { createClient } from '@/utils/supabase/client'
 import { formatCurrency, formatDate } from '@/lib/format'
 import type { Invoice, InvoiceLineItem, Validation } from '@/lib/types'
 
-const C = { card:'#FFFFFF', border:'#E2E8F0', border2:'#CBD5E1', green:'#10B981', amber:'#F59E0B', red:'#EF4444', blue:'#3B82F6', muted:'#6B7280', muted2:'#9CA3AF', text:'#0F172A' }
+const C = { card:'#FFFFFF', border:'#E2E8F0', border2:'#CBD5E1', green:'#10B981', amber:'#F59E0B', red:'#EF4444', blue:'#3B82F6', muted:'#64748B', muted2:'#94A3B8', text:'#0F172A' }
+
+const ALL_CATEGORIES = [
+  { label:'Subcontracting',    icon:'🤝', color:'#3B82F6' },
+  { label:'Consulting',        icon:'💼', color:'#8B5CF6' },
+  { label:'Travel',            icon:'✈️', color:'#06B6D4' },
+  { label:'Accommodation',     icon:'🏨', color:'#F59E0B' },
+  { label:'Meals',             icon:'🍽️', color:'#F97316' },
+  { label:'Fuel & Transport',  icon:'⛽', color:'#EF4444' },
+  { label:'Equipment',         icon:'🔧', color:'#64748B' },
+  { label:'Software & IT',     icon:'💻', color:'#10B981' },
+  { label:'Security',          icon:'🛡️', color:'#1D4ED8' },
+  { label:'Logistics',         icon:'📦', color:'#D97706' },
+  { label:'Communication',     icon:'📡', color:'#7C3AED' },
+  { label:'Training',          icon:'📚', color:'#059669' },
+  { label:'Legal & Compliance',icon:'⚖️', color:'#475569' },
+  { label:'Medical & Health',  icon:'🏥', color:'#DC2626' },
+  { label:'Other',             icon:'📋', color:'#94A3B8' },
+]
 
 const STATUS: Record<string, { label: string; color: string; bg: string; dot: string }> = {
   pending_review:  { label: 'Awaiting Rudy',    color: '#F97316', bg: 'rgba(249,115,22,0.12)',  dot: '#F97316' },
@@ -228,13 +246,25 @@ export default function InvoiceDetailPage() {
                   <DField label="Subcontractor" value={editData.subcontractor_name||''} onChange={v=>setEditData(p=>({...p,subcontractor_name:v}))}/>
                   <DField label="Invoice #" value={editData.invoice_number||''} onChange={v=>setEditData(p=>({...p,invoice_number:v}))}/>
                   <DField label="Date" value={editData.invoice_date||''} onChange={v=>setEditData(p=>({...p,invoice_date:v}))} type="date"/>
-                  <div>
-                    <label className="text-xs font-medium block mb-1" style={{ color: C.muted }}>Category</label>
-                    <select value={editData.category||''} onChange={e=>setEditData(p=>({...p,category:e.target.value as Invoice['category']}))} className="w-full rounded-lg px-3 py-2 text-sm" style={{ background:'#E2E8F0', color:C.text, border:`1px solid ${C.border2}` }}>
-                      {['Subcontracting','Travel','Accommodation','Meals','Equipment','Other'].map(c=>(
-                        <option key={c} value={c}>{c}</option>
-                      ))}
-                    </select>
+                  <div className="col-span-2">
+                    <label className="text-xs font-medium block mb-2" style={{ color: C.muted }}>Category</label>
+                    <div className="grid grid-cols-4 gap-2">
+                      {ALL_CATEGORIES.map(cat => {
+                        const sel = (editData.category||'') === cat.label
+                        return (
+                          <button key={cat.label} type="button"
+                            onClick={()=>setEditData(p=>({...p,category:cat.label as Invoice['category']}))}
+                            className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium transition-all"
+                            style={sel
+                              ? { background:`${cat.color}18`, border:`2px solid ${cat.color}`, color:cat.color }
+                              : { background:'#F8FAFC', border:'2px solid #E2E8F0', color:'#64748B' }
+                            }
+                          >
+                            <span>{cat.icon}</span><span>{cat.label}</span>
+                          </button>
+                        )
+                      })}
+                    </div>
                   </div>
                   <DField label={`Amount excl. VAT (${currency})`} value={String(editData.amount_ht||'')} onChange={v=>setEditData(p=>({...p,amount_ht:parseFloat(v)}))} type="number"/>
                   <DField label="VAT rate (%)" value={String(editData.vat_rate||'')} onChange={v=>setEditData(p=>({...p,vat_rate:parseFloat(v)}))} type="number"/>
