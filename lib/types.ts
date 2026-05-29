@@ -136,17 +136,15 @@ export interface ProviderWithStats extends ServiceProvider {
 }
 
 export interface DashboardStats {
-  total_committed: number
-  total_paid: number
-  total_pipeline: number
-  total_unscheduled: number
-  payment_rate: number
-  pending_rudy: number
-  pending_placide: number
-  pending_hitech: number
-  monthly_data: { month: string; amount: number }[]
-  tranche_status_counts: { paid: number; scheduled: number; unpaid: number }
-  alerts: Alert[]
+  totalBudget: number
+  totalSpent: number
+  totalRemaining: number
+  pendingRudy: number
+  pendingPlacide: number
+  pendingHitech: number
+  topSubcontractors: { name: string; amount: number }[]
+  monthlyData: { month: string; amount: number }[]
+  vatSummary: { totalHT: number; totalTVA: number; totalTTC: number }
 }
 
 export interface Alert {
