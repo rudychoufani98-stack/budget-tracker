@@ -5,13 +5,17 @@ import Link from 'next/link'
 
 const C = { card: '#FFFFFF', border: '#E2E8F0', blue: '#3B82F6', muted: '#6B7280' }
 const TRANCHE_NAMES = ['T1','T2','T3','T4','One-Shot']
+const CURRENCIES = ['USD','EUR','GBP','CHF','MAD','XOF','NGN','CAD','AED']
 
 export default function NewContractPage() {
   const router = useRouter()
   const [providers, setProviders] = useState<any[]>([])
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
-  const [form, setForm] = useState({ contract_name:'', service_provider_id:'', project:'', category:'E', description:'', currency:'USD', start_date:'', end_date:'', status:'active', notes:'' })
+  const [form, setForm] = useState({
+    contract_name:'', service_provider_id:'', project:'', category:'E',
+    description:'', currency:'USD', start_date:'', end_date:'', status:'active', notes:''
+  })
   const [tranches, setTranches] = useState<{ name:string; amount:string; date:string }[]>([])
 
   useEffect(() => { fetch('/api/providers').then(r=>r.json()).then(setProviders) }, [])
@@ -25,16 +29,22 @@ export default function NewContractPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault(); setSaving(true); setError('')
     const totalAmount = tranches.reduce((s,t)=>s+(parseFloat(t.amount)||0),0)
-    const res = await fetch('/api/contracts', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ ...form, contract_amount: totalAmount }) })
+    const res = await fetch('/api/contracts', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ ...form, contract_amount: totalAmount })
+    })
     const data = await res.json()
     if (!res.ok) { setError(data.error || 'Failed'); setSaving(false); return }
     for (const t of tranches) {
-      if (t.amount) await fetch('/api/tranches', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ contract_id:data.id, tranche_name:t.name, amount:parseFloat(t.amount)||0, scheduled_date:t.date||null }) })
+      if (t.amount) await fetch('/api/tranches', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ contract_id:data.id, tranche_name:t.name, amount:parseFloat(t.amount)||0, scheduled_date:t.date||null })
+      })
     }
     router.push(`/contracts/${data.id}`)
   }
 
-  const inp = "w-full px-3 py-2.5 text-sm rounded-xl"
+  const inp = 'w-full px-3 py-2.5 text-sm rounded-xl'
   const inpStyle = { background:'#E2E8F0', border:'1px solid #CBD5E1', color:'#0F172A' }
 
   return (
@@ -62,7 +72,10 @@ export default function NewContractPage() {
             <div>
               <label className="text-xs font-medium mb-1.5 block" style={{ color: C.muted }}>ESG Category</label>
               <select className={inp} style={inpStyle} value={form.category} onChange={e=>setForm(p=>({...p,category:e.target.value}))}>
-                {['E','S','G','Other'].map(c=><option key={c} value={c}>{c === 'E' ? 'E — Environmental' : c === 'S' ? 'S — Social' : c === 'G' ? 'G — Governance' : 'Other'}</option>)}
+                <option value="E">E - Environmental</option>
+                <option value="S">S - Social</option>
+                <option value="G">G - Governance</option>
+                <option value="Other">Other</option>
               </select>
             </div>
             <div>
@@ -72,7 +85,7 @@ export default function NewContractPage() {
             <div>
               <label className="text-xs font-medium mb-1.5 block" style={{ color: C.muted }}>Currency</label>
               <select className={inp} style={inpStyle} value={form.currency} onChange={e=>setForm(p=>({...p,currency:e.target.value}))}>
-                {['USD','USD','GBP','CHF','MAD','XOF','NGN'].map(c=><option key={c} value={c}>{c}</option>)}
+                {CURRENCIES.map(c=><option key={c} value={c}>{c}</option>)}
               </select>
             </div>
             <div>
@@ -110,13 +123,17 @@ export default function NewContractPage() {
               ))}
             </div>
             {tranches.length > 0 && (
-              <p className="text-sm mt-2" style={{ color: C.muted }}>Total: <span style={{ color:'#0F172A', fontWeight:500 }}>{tranches.reduce((s,t)=>s+(parseFloat(t.amount)||0),0).toLocaleString()} {form.currency}</span></p>
+              <p className="text-sm mt-2" style={{ color: C.muted }}>
+                Total: <span style={{ color:'#0F172A', fontWeight:500 }}>{tranches.reduce((s,t)=>s+(parseFloat(t.amount)||0),0).toLocaleString()} {form.currency}</span>
+              </p>
             )}
           </div>
 
           {error && <p className="text-sm px-4 py-3 rounded-xl" style={{ background:'rgba(239,68,68,0.1)', color:'#EF4444' }}>{error}</p>}
           <div className="flex gap-3 pt-2">
-            <button type="submit" disabled={saving} className="flex-1 py-3 rounded-xl text-sm font-medium disabled:opacity-50" style={{ background: C.blue, color: '#fff' }}>{saving ? 'Creating...' : 'Create Contract'}</button>
+            <button type="submit" disabled={saving} className="flex-1 py-3 rounded-xl text-sm font-medium disabled:opacity-50" style={{ background: C.blue, color: '#fff' }}>
+              {saving ? 'Creating...' : 'Create Contract'}
+            </button>
             <Link href="/contracts" className="px-5 py-3 rounded-xl text-sm" style={{ background:'#E2E8F0', color: C.muted }}>Cancel</Link>
           </div>
         </form>

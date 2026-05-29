@@ -46,7 +46,6 @@ export default function ValidationsPage() {
 
   async function validate(invoiceId: string, decision: 'approved'|'rejected') {
     setSubmitting(invoiceId)
-    const inv = invoices.find(i=>i.id===invoiceId)
     const validatorName = userRole === 'admin' || userRole === 'rudy' ? 'Rudy' : userRole === 'placide' ? 'Placide' : 'Dani'
     await fetch(`/api/invoices/${invoiceId}/validate`, {
       method:'POST', headers:{'Content-Type':'application/json'},
@@ -96,7 +95,7 @@ export default function ValidationsPage() {
                         </div>
                         <span className="text-xs px-2 py-0.5 rounded-full" style={{ background:urgent?'rgba(239,68,68,0.15)':'rgba(107,114,128,0.15)', color:urgent?C.red:C.muted }}>{days}d</span>
                       </div>
-                      <p className="text-sm font-medium mb-3" style={{ color:col.color }}>{formatCurrency(inv.amount_ttc)}</p>
+                      <p className="text-sm font-medium mb-3" style={{ color:col.color }}>{formatCurrency(inv.amount_ttc, inv.currency || 'USD')}</p>
                       <Link href={`/invoices/${inv.id}`} className="block text-xs mb-3" style={{ color:C.blue }}>View details</Link>
                       {canAct && (
                         <div className="space-y-2">
@@ -131,7 +130,7 @@ export default function ValidationsPage() {
               <div key={v.id} className="flex items-center justify-between px-6 py-3" style={{ borderBottom:`1px solid ${C.border}` }}>
                 <div>
                   <p className="text-sm" style={{ color:'#0F172A' }}>{(v.invoices as any)?.subcontractor_name || 'Invoice'}</p>
-                  <p className="text-xs mt-0.5" style={{ color:C.muted }}>{v.validator_name} · {new Date(v.validated_at).toLocaleDateString('fr-FR')}</p>
+                  <p className="text-xs mt-0.5" style={{ color:C.muted }}>{v.validator_name} - {new Date(v.validated_at).toLocaleDateString('en-GB')}</p>
                   {v.comment && <p className="text-xs mt-0.5 italic" style={{ color:'#6B7280' }}>"{v.comment}"</p>}
                 </div>
                 <span className="text-xs px-2.5 py-1 rounded-full" style={{ background:v.decision==='approved'?'rgba(16,185,129,0.15)':'rgba(239,68,68,0.15)', color:v.decision==='approved'?C.green:C.red }}>
