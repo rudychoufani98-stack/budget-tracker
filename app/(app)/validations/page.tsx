@@ -23,13 +23,16 @@ export default function ValidationsPage() {
   const [rejectModal, setRejectModal] = useState<string|null>(null)
 
   async function load() {
-    const [invRes, valRes] = await Promise.all([
-      supabase.from('invoices').select('*, invoice_currency(currency)').in('status',['pending_review','pending_placide','pending_hitech']).order('submitted_at'),
+    const [invRes, curRes, valRes] = await Promise.all([
+      supabase.from('invoices').select('*').in('status',['pending_review','pending_placide','pending_hitech']).order('submitted_at'),
+      supabase.from('invoice_currency').select('invoice_id, currency'),
       supabase.from('validations').select('*, invoices(subcontractor_name)').order('validated_at', { ascending:false }).limit(50),
     ])
+    const cmap: Record<string,string> = {}
+    for (const c of curRes.data || []) cmap[c.invoice_id] = c.currency
     setInvoices((invRes.data || []).map((inv: any) => ({
       ...inv,
-      currency: inv.invoice_currency?.[0]?.currency || inv.currency || 'EUR',
+      currency: cmap[inv.id] || inv.currency || 'EUR',
     })))
     setHistory(valRes.data || [])
     setLoading(false)

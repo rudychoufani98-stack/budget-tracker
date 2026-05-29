@@ -5,15 +5,23 @@ import { InvoicesClient } from './InvoicesClient'
 export const revalidate = 0
 
 export default async function InvoicesPage() {
-  const { data } = await supabaseAdmin
-    .from('invoices')
-    .select('*, service_providers(name), contracts(contract_name, project), invoice_currency(currency)')
-    .order('created_at', { ascending: false })
+  const [{ data: invoiceData }, { data: currencyData }] = await Promise.all([
+    supabaseAdmin
+      .from('invoices')
+      .select('*, service_providers(name), contracts(contract_name, project)')
+      .order('created_at', { ascending: false }),
+    supabaseAdmin
+      .from('invoice_currency')
+      .select('invoice_id, currency'),
+  ])
 
-  // Normalize: pull currency out of the joined invoice_currency row
-  const invoices = (data || []).map((inv: any) => ({
+  // Build currency lookup map
+  const currencyMap: Record<string, string> = {}
+  for (const c of currencyData || []) currencyMap[c.invoice_id] = c.currency
+
+  const invoices = (invoiceData || []).map((inv: any) => ({
     ...inv,
-    currency: inv.invoice_currency?.[0]?.currency || inv.currency || 'EUR',
+    currency: currencyMap[inv.id] || inv.currency || 'EUR',
   }))
 
   return (
