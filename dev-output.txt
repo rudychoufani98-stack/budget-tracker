@@ -2043,3 +2043,5 @@ Import trace for requested module:
 <w>  at file dependencies C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
 <w>  at file C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
 <w>  at resolve commonjs C:\Users\roudy\Desktop\esg-tracker\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+ ✓ Compiled in 167ms (332 modules)
+ ✓ Compiled in 257ms (332 modules)

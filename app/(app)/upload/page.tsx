@@ -68,7 +68,9 @@ export default function UploadPage() {
   async function handleSubmit() {
     if (!scanned) return
     setSubmitting(true); setSubmitError('')
-    const uploadFd = new FormData(); uploadFd.append('file', file!)
+    const uploadFd = new FormData()
+    uploadFd.append('file', file!)
+    uploadFd.append('path', `invoices/${Date.now()}_${file!.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`)
     const uploadRes = await fetch('/api/storage/upload', { method:'POST', body: uploadFd })
     const { signedUrl, error: uploadErr } = await uploadRes.json()
     if (uploadErr) { setSubmitError(`Upload failed: ${uploadErr}`); setSubmitting(false); return }
