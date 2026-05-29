@@ -74,12 +74,16 @@ export default function UploadPage() {
     const uploadRes = await fetch('/api/storage/upload', { method:'POST', body: uploadFd })
     const { signedUrl, error: uploadErr } = await uploadRes.json()
     if (uploadErr) { setSubmitError(`Upload failed: ${uploadErr}`); setSubmitting(false); return }
+    const { line_items, ...invoiceFields } = scanned
     const invoiceBody = {
-      ...scanned,
-      pdf_url: signedUrl,
-      service_provider_id: selectedProvider || null,
-      contract_id: selectedContract || null,
-      tranche_id: selectedTranche || null,
+      invoice: {
+        ...invoiceFields,
+        pdf_url: signedUrl,
+        service_provider_id: selectedProvider || null,
+        contract_id: selectedContract || null,
+        tranche_id: selectedTranche || null,
+      },
+      line_items: line_items || [],
     }
     const createRes = await fetch('/api/invoices/create', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(invoiceBody) })
     const createData = await createRes.json()
