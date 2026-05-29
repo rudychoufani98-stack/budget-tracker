@@ -5,7 +5,7 @@ import { DashboardCharts } from './DashboardCharts'
 
 export const revalidate = 0
 
-const C = { bg: '#0A0F1E', card: '#111827', border: '#1F2937', green: '#10B981', amber: '#F59E0B', red: '#EF4444', blue: '#3B82F6', muted: '#6B7280' }
+const C = { bg: '#1A1F35', card: '#222A42', border: '#323D5E', green: '#10B981', amber: '#F59E0B', red: '#EF4444', blue: '#3B82F6', muted: '#6B7280' }
 
 async function getData() {
   const [tranchesRes, invoicesRes, allInvRes] = await Promise.all([
@@ -82,7 +82,7 @@ export default async function DashboardPage() {
           <div key={k.label} className="rounded-2xl p-5" style={{ background: C.card, border: `1px solid ${C.border}` }}>
             <p className="text-xs font-medium mb-3" style={{ color: C.muted }}>{k.label}</p>
             <p className="text-xl font-medium" style={{ color: k.color }}>{k.value}</p>
-            <p className="text-xs mt-1" style={{ color: '#4B5563' }}>{k.sub}</p>
+            <p className="text-xs mt-1" style={{ color: '#5A6A8A' }}>{k.sub}</p>
           </div>
         ))}
       </div>
@@ -91,7 +91,7 @@ export default async function DashboardPage() {
           <p className="text-sm font-medium" style={{ color: '#F9FAFB' }}>Overall Payment Rate</p>
           <p className="text-2xl font-medium" style={{ color: d.payment_rate >= 80 ? C.green : d.payment_rate >= 40 ? C.amber : C.red }}>{d.payment_rate}%</p>
         </div>
-        <div className="h-2 rounded-full" style={{ background: '#1F2937' }}>
+        <div className="h-2 rounded-full" style={{ background: '#323D5E' }}>
           <div className="h-2 rounded-full" style={{ width: `${d.payment_rate}%`, background: d.payment_rate >= 80 ? C.green : d.payment_rate >= 40 ? C.amber : C.red }} />
         </div>
       </div>
@@ -115,7 +115,7 @@ export default async function DashboardPage() {
                 </div>
               ))}
             </div>
-            <Link href="/validations" className="block mt-4 text-xs text-center py-2 rounded-lg" style={{ color: C.blue, border: `1px solid #1F2937` }}>View all</Link>
+            <Link href="/validations" className="block mt-4 text-xs text-center py-2 rounded-lg" style={{ color: C.blue, border: `1px solid #323D5E` }}>View all</Link>
           </div>
           {d.alerts.length > 0 && (
             <div className="rounded-2xl p-5" style={{ background: C.card, border: `1px solid ${C.border}` }}>

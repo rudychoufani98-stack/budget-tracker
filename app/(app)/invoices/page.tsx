@@ -4,7 +4,7 @@ import Link from 'next/link'
 import type { Invoice } from '@/lib/types'
 
 export const revalidate = 0
-const C = { card:'#111827', border:'#1F2937', green:'#10B981', amber:'#F59E0B', red:'#EF4444', blue:'#3B82F6', muted:'#6B7280' }
+const C = { card:'#222A42', border:'#323D5E', green:'#10B981', amber:'#F59E0B', red:'#EF4444', blue:'#3B82F6', muted:'#6B7280' }
 
 const STATUS_MAP: Record<string,{label:string;color:string}> = {
   pending_review:  { label:'Awaiting Rudy',    color:'#F97316' },
@@ -43,8 +43,8 @@ export default async function InvoicesPage() {
           { label:'Approved', count:counts.approved, color:C.green },
           { label:'Rejected', count:counts.rejected, color:C.red },
         ].map(p=>(
-          <div key={p.label} className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium" style={{ background:'#1F2937', border:'1px solid #374151', color:p.color }}>
-            {p.label} <span className="px-1.5 py-0.5 rounded-full text-xs" style={{ background:'#374151' }}>{p.count}</span>
+          <div key={p.label} className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium" style={{ background:'#323D5E', border:'1px solid #404F74', color:p.color }}>
+            {p.label} <span className="px-1.5 py-0.5 rounded-full text-xs" style={{ background:'#404F74' }}>{p.count}</span>
           </div>
         ))}
       </div>
@@ -73,7 +73,7 @@ export default async function InvoicesPage() {
                     <span className="text-xs px-2.5 py-1 rounded-full" style={{ background:`${st.color}20`, color:st.color }}>{st.label}</span>
                   </div>
                   <div className="flex justify-end">
-                    <svg width="14" height="14" fill="none" stroke="#4B5563" strokeWidth="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+                    <svg width="14" height="14" fill="none" stroke="#5A6A8A" strokeWidth="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
                   </div>
                 </Link>
               )

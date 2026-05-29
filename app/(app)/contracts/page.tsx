@@ -4,7 +4,7 @@ import { formatCurrency } from '@/lib/format'
 import type { ContractTranche } from '@/lib/types'
 
 export const revalidate = 0
-const C = { card: '#111827', border: '#1F2937', green: '#10B981', amber: '#F59E0B', red: '#EF4444', blue: '#3B82F6', muted: '#6B7280' }
+const C = { card: '#222A42', border: '#323D5E', green: '#10B981', amber: '#F59E0B', red: '#EF4444', blue: '#3B82F6', muted: '#6B7280' }
 
 const ESG_COLORS: Record<string, string> = { E: '#10B981', S: '#3B82F6', G: '#F59E0B', Other: '#6B7280' }
 
@@ -57,7 +57,7 @@ export default async function ContractsPage() {
                   <div className="text-sm" style={{ color: balance > 0 ? C.amber : C.muted }}>{formatCurrency(balance)}</div>
                   <div className="pr-4">
                     <div className="flex items-center gap-2">
-                      <div className="flex-1 h-1.5 rounded-full" style={{ background: '#1F2937' }}>
+                      <div className="flex-1 h-1.5 rounded-full" style={{ background: '#323D5E' }}>
                         <div className="h-1.5 rounded-full" style={{ width: `${rate}%`, background: rate >= 80 ? C.green : rate >= 40 ? C.amber : C.blue }} />
                       </div>
                       <span className="text-xs" style={{ color: C.muted }}>{rate}%</span>

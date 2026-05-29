@@ -5,7 +5,7 @@ import { createClient } from '@/utils/supabase/client'
 import Link from 'next/link'
 import { formatCurrency } from '@/lib/format'
 
-const C = { card:'#111827', card2:'#1A2235', border:'#1F2937', green:'#10B981', amber:'#F59E0B', red:'#EF4444', blue:'#3B82F6', muted:'#6B7280' }
+const C = { card:'#222A42', card2:'#2A3354', border:'#323D5E', green:'#10B981', amber:'#F59E0B', red:'#EF4444', blue:'#3B82F6', muted:'#6B7280' }
 
 const COLUMNS = [
   { key:'pending_review',  label:'Awaiting Rudy',    role:['rudy','admin'], color:'#F97316' },
@@ -94,7 +94,7 @@ export default function ValidationsPage() {
                       <Link href={`/invoices/${inv.id}`} className="block text-xs mb-3" style={{ color:C.blue }}>View details</Link>
                       {canAct && (
                         <div className="space-y-2">
-                          <textarea rows={1} placeholder="Comment (optional)" className="w-full text-xs px-3 py-2 rounded-lg resize-none" style={{ background:'#111827', border:'1px solid #374151', color:'#F9FAFB' }}
+                          <textarea rows={1} placeholder="Comment (optional)" className="w-full text-xs px-3 py-2 rounded-lg resize-none" style={{ background:'#222A42', border:'1px solid #404F74', color:'#F9FAFB' }}
                             value={comments[inv.id]||''} onChange={e=>setComments(p=>({...p,[inv.id]:e.target.value}))} />
                           <div className="grid grid-cols-2 gap-2">
                             <button onClick={()=>validate(inv.id,'approved')} disabled={submitting===inv.id} className="py-2 rounded-lg text-xs font-medium disabled:opacity-50" style={{ background:C.green, color:'#fff' }}>
@@ -139,13 +139,13 @@ export default function ValidationsPage() {
 
       {rejectModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background:'rgba(0,0,0,0.7)' }} onClick={()=>setRejectModal(null)}>
-          <div className="rounded-2xl p-6 w-full max-w-md" style={{ background:C.card, border:`1px solid #374151` }} onClick={e=>e.stopPropagation()}>
+          <div className="rounded-2xl p-6 w-full max-w-md" style={{ background:C.card, border:`1px solid #404F74` }} onClick={e=>e.stopPropagation()}>
             <h3 className="text-base font-medium mb-4" style={{ color:'#F9FAFB' }}>Reject Invoice</h3>
-            <textarea rows={3} placeholder="Reason for rejection..." className="w-full text-sm px-4 py-3 rounded-xl resize-none mb-4" style={{ background:'#1F2937', border:'1px solid #374151', color:'#F9FAFB' }}
+            <textarea rows={3} placeholder="Reason for rejection..." className="w-full text-sm px-4 py-3 rounded-xl resize-none mb-4" style={{ background:'#323D5E', border:'1px solid #404F74', color:'#F9FAFB' }}
               value={comments[rejectModal]||''} onChange={e=>setComments(p=>({...p,[rejectModal]:e.target.value}))} />
             <div className="flex gap-3">
               <button onClick={()=>validate(rejectModal,'rejected')} className="flex-1 py-2.5 rounded-xl text-sm font-medium" style={{ background:C.red, color:'#fff' }}>Confirm Rejection</button>
-              <button onClick={()=>setRejectModal(null)} className="px-5 py-2.5 rounded-xl text-sm" style={{ background:'#1F2937', color:C.muted }}>Cancel</button>
+              <button onClick={()=>setRejectModal(null)} className="px-5 py-2.5 rounded-xl text-sm" style={{ background:'#323D5E', color:C.muted }}>Cancel</button>
             </div>
           </div>
         </div>

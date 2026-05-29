@@ -1,15 +1,15 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap');
+﻿@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --bg:      #0F172A;
-  --card:    #1E293B;
-  --card2:   #263548;
-  --border:  #2D3F55;
-  --border2: #3F546F;
+  --bg:      #1A1F35;
+  --card:    #222A42;
+  --card2:   #2A3354;
+  --border:  #323D5E;
+  --border2: #404F74;
   --text:    #F1F5F9;
   --muted:   #94A3B8;
   --muted2:  #64748B;
@@ -32,15 +32,15 @@ html, body {
 
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: #4B5563; }
+::-webkit-scrollbar-thumb { background: #404F74; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #5A6A8A; }
 
 a, button { transition: all 150ms ease; }
 
 input, textarea, select {
-  background: #1F2937;
+  background: #323D5E;
   color: #F9FAFB;
-  border: 1px solid #374151;
+  border: 1px solid #404F74;
   border-radius: 10px;
 }
 input::placeholder, textarea::placeholder { color: #6B7280; }
@@ -49,4 +49,4 @@ input:focus, textarea:focus, select:focus {
   border-color: #3B82F6;
   box-shadow: 0 0 0 2px rgba(59,130,246,0.15);
 }
-select option { background: #1F2937; color: #F9FAFB; }
+select option { background: #323D5E; color: #F9FAFB; }

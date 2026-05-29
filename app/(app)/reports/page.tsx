@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import { formatCurrency } from '@/lib/format'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 
-const C = { card:'#111827', border:'#1F2937', green:'#10B981', amber:'#F59E0B', red:'#EF4444', blue:'#3B82F6', muted:'#6B7280' }
+const C = { card:'#222A42', border:'#323D5E', green:'#10B981', amber:'#F59E0B', red:'#EF4444', blue:'#3B82F6', muted:'#6B7280' }
 
 export default function ReportsPage() {
   const [data, setData] = useState<any>(null)
@@ -37,12 +37,12 @@ export default function ReportsPage() {
           <p className="text-xs font-medium uppercase tracking-widest mb-1" style={{ color:C.muted }}>Analytics</p>
           <h1 className="text-2xl font-medium" style={{ color:'#F9FAFB' }}>Reports</h1>
         </div>
-        <button onClick={()=>window.print()} className="text-sm font-medium px-4 py-2 rounded-xl" style={{ background:'#1F2937', border:'1px solid #374151', color:'#F9FAFB' }}>Print / PDF</button>
+        <button onClick={()=>window.print()} className="text-sm font-medium px-4 py-2 rounded-xl" style={{ background:'#323D5E', border:'1px solid #404F74', color:'#F9FAFB' }}>Print / PDF</button>
       </div>
 
-      <div className="flex gap-1 mb-6 p-1 rounded-xl" style={{ background:'#111827', border:'1px solid #1F2937' }}>
+      <div className="flex gap-1 mb-6 p-1 rounded-xl" style={{ background:'#222A42', border:'1px solid #323D5E' }}>
         {tabs.map(t=>(
-          <button key={t.key} onClick={()=>setTab(t.key as any)} className="flex-1 py-2 text-xs font-medium rounded-lg transition-all" style={tab===t.key ? { background:'#1F2937', color:'#F9FAFB' } : { color:C.muted }}>
+          <button key={t.key} onClick={()=>setTab(t.key as any)} className="flex-1 py-2 text-xs font-medium rounded-lg transition-all" style={tab===t.key ? { background:'#323D5E', color:'#F9FAFB' } : { color:C.muted }}>
             {t.label}
           </button>
         ))}
@@ -52,7 +52,7 @@ export default function ReportsPage() {
         <div>
           <div className="flex justify-between mb-4">
             <p className="text-sm font-medium" style={{ color:'#F9FAFB' }}>Payment Summary by Provider</p>
-            <button onClick={()=>exportCSV([['Provider','Contracted','Paid','Balance'],...(data.byProvider||[]).map((p:any)=>[p.name,p.total_contracted,p.total_paid,p.total_contracted-p.total_paid])],'providers.csv')} className="text-xs px-3 py-1.5 rounded-lg" style={{ background:'#1F2937', color:C.blue }}>Export CSV</button>
+            <button onClick={()=>exportCSV([['Provider','Contracted','Paid','Balance'],...(data.byProvider||[]).map((p:any)=>[p.name,p.total_contracted,p.total_paid,p.total_contracted-p.total_paid])],'providers.csv')} className="text-xs px-3 py-1.5 rounded-lg" style={{ background:'#323D5E', color:C.blue }}>Export CSV</button>
           </div>
           <div className="rounded-2xl overflow-hidden" style={{ background:C.card, border:`1px solid ${C.border}` }}>
             <div className="grid px-6 py-3 text-xs font-medium uppercase tracking-widest" style={{ color:C.muted, borderBottom:`1px solid ${C.border}`, gridTemplateColumns:'2fr 1fr 1fr 1fr 1fr' }}>
@@ -67,7 +67,7 @@ export default function ReportsPage() {
                   <p className="text-sm" style={{ color:C.green }}>{formatCurrency(p.total_paid)}</p>
                   <p className="text-sm" style={{ color:C.amber }}>{formatCurrency(p.total_contracted-p.total_paid)}</p>
                   <div className="flex items-center gap-2">
-                    <div className="flex-1 h-1.5 rounded-full" style={{ background:'#1F2937' }}>
+                    <div className="flex-1 h-1.5 rounded-full" style={{ background:'#323D5E' }}>
                       <div className="h-1.5 rounded-full" style={{ width:`${rate}%`, background:rate>=80?C.green:rate>=40?C.amber:C.blue }} />
                     </div>
                     <span className="text-xs" style={{ color:C.muted }}>{rate}%</span>
@@ -106,7 +106,7 @@ export default function ReportsPage() {
               <BarChart data={data.monthlyData||[]} margin={{ top:4, right:4, bottom:4, left:4 }}>
                 <XAxis dataKey="month" tick={{ fill:'#6B7280', fontSize:11 }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fill:'#6B7280', fontSize:11 }} axisLine={false} tickLine={false} tickFormatter={(v:number)=>v>=1000000?`${(v/1000000).toFixed(1)}M`:v>=1000?`${(v/1000).toFixed(0)}K`:String(v)} />
-                <Tooltip contentStyle={{ background:'#1F2937', border:'1px solid #374151', borderRadius:8, color:'#F9FAFB' }} />
+                <Tooltip contentStyle={{ background:'#323D5E', border:'1px solid #404F74', borderRadius:8, color:'#F9FAFB' }} />
                 <Bar dataKey="amount" fill="#3B82F6" radius={[4,4,0,0]} name="Amount" />
               </BarChart>
             </ResponsiveContainer>
@@ -145,7 +145,7 @@ export default function ReportsPage() {
                 <span style={{ color:'#F9FAFB' }}>{a.action}</span>
                 <span style={{ color:C.muted }}>{a.entity_type}</span>
                 <span style={{ color:C.muted }}>{new Date(a.created_at).toLocaleDateString('fr-FR')}</span>
-                <span className="text-xs font-mono truncate" style={{ color:'#4B5563' }}>{a.details ? JSON.stringify(a.details).slice(0,60) : '—'}</span>
+                <span className="text-xs font-mono truncate" style={{ color:'#5A6A8A' }}>{a.details ? JSON.stringify(a.details).slice(0,60) : '—'}</span>
               </div>
             ))}
           </div>

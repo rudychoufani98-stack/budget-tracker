@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { formatCurrency } from '@/lib/format'
 
-const C = { card:'#111827', card2:'#1A2235', border:'#1F2937', border2:'#374151', green:'#10B981', amber:'#F59E0B', red:'#EF4444', blue:'#3B82F6', muted:'#6B7280' }
+const C = { card:'#222A42', card2:'#2A3354', border:'#323D5E', border2:'#404F74', green:'#10B981', amber:'#F59E0B', red:'#EF4444', blue:'#3B82F6', muted:'#6B7280' }
 const TRANCHES = ['T1','T2','T3','T4','One-Shot']
 const ESG_COLORS: Record<string,string> = { E:'#10B981', S:'#3B82F6', G:'#F59E0B', Other:'#6B7280' }
 
@@ -67,10 +67,10 @@ export default function PaymentRegisterPage() {
           <h1 className="text-2xl font-medium" style={{ color:'#F9FAFB' }}>Payment Register</h1>
         </div>
         <div className="flex gap-3">
-          <button onClick={exportCSV} className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-xl" style={{ background:'#1F2937', border:'1px solid #374151', color:'#F9FAFB' }}>
+          <button onClick={exportCSV} className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-xl" style={{ background:'#323D5E', border:'1px solid #404F74', color:'#F9FAFB' }}>
             Export CSV
           </button>
-          <button onClick={()=>window.print()} className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-xl" style={{ background:'#1F2937', border:'1px solid #374151', color:'#F9FAFB' }}>
+          <button onClick={()=>window.print()} className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-xl" style={{ background:'#323D5E', border:'1px solid #404F74', color:'#F9FAFB' }}>
             Print / PDF
           </button>
         </div>
@@ -80,7 +80,7 @@ export default function PaymentRegisterPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm" style={{ minWidth:1600 }}>
             <thead>
-              <tr style={{ borderBottom:`1px solid ${C.border}`, background:'#0D1117' }}>
+              <tr style={{ borderBottom:`1px solid ${C.border}`, background:'#161B30' }}>
                 <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-widest" style={{ color:C.muted, width:180 }}>Provider</th>
                 <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-widest" style={{ color:C.muted, width:100 }}>Cat</th>
                 <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-widest" style={{ color:C.muted, width:160 }}>Contract</th>
@@ -91,10 +91,10 @@ export default function PaymentRegisterPage() {
                 <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-widest" style={{ color:C.muted }}>Balance</th>
                 <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-widest" style={{ color:C.muted }}>%</th>
               </tr>
-              <tr style={{ borderBottom:`2px solid ${C.border}`, background:'#0D1117' }}>
+              <tr style={{ borderBottom:`2px solid ${C.border}`, background:'#161B30' }}>
                 <th colSpan={3} />
                 {TRANCHES.map(t=>(
-                  <th key={t} colSpan={1} className="px-2 py-2 text-left text-xs" style={{ color:'#4B5563', borderLeft:`1px solid ${C.border}` }}>Amt</th>
+                  <th key={t} colSpan={1} className="px-2 py-2 text-left text-xs" style={{ color:'#5A6A8A', borderLeft:`1px solid ${C.border}` }}>Amt</th>
                 ))}
                 <th colSpan={2} /><th />
               </tr>
@@ -128,9 +128,9 @@ export default function PaymentRegisterPage() {
                           {tr ? (
                             <div>
                               <p className="text-xs font-medium" style={{ color: isPaid?C.green:tr.status==='scheduled'?C.amber:C.muted }}>{formatCurrency(tr.amount)}</p>
-                              <p className="text-xs mt-0.5" style={{ color:'#4B5563' }}>{tr.scheduled_date||'—'}</p>
-                              {tr.pop_reference && <p className="text-xs mt-0.5 font-mono" style={{ color:'#4B5563' }}>{tr.pop_reference}</p>}
-                              <span className="text-xs" style={{ color: isPaid?C.green:tr.status==='scheduled'?C.amber:'#4B5563' }}>{isPaid?'✓ Paid':tr.status==='scheduled'?'Sched':'Unpaid'}</span>
+                              <p className="text-xs mt-0.5" style={{ color:'#5A6A8A' }}>{tr.scheduled_date||'—'}</p>
+                              {tr.pop_reference && <p className="text-xs mt-0.5 font-mono" style={{ color:'#5A6A8A' }}>{tr.pop_reference}</p>}
+                              <span className="text-xs" style={{ color: isPaid?C.green:tr.status==='scheduled'?C.amber:'#5A6A8A' }}>{isPaid?'✓ Paid':tr.status==='scheduled'?'Sched':'Unpaid'}</span>
                             </div>
                           ) : <span style={{ color:'#2D3748' }}>—</span>}
                         </td>

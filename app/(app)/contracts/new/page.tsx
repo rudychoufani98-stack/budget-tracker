@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
-const C = { card: '#111827', border: '#1F2937', blue: '#3B82F6', muted: '#6B7280' }
+const C = { card: '#222A42', border: '#323D5E', blue: '#3B82F6', muted: '#6B7280' }
 const TRANCHE_NAMES = ['T1','T2','T3','T4','One-Shot']
 
 export default function NewContractPage() {
@@ -35,7 +35,7 @@ export default function NewContractPage() {
   }
 
   const inp = "w-full px-3 py-2.5 text-sm rounded-xl"
-  const inpStyle = { background:'#1F2937', border:'1px solid #374151', color:'#F9FAFB' }
+  const inpStyle = { background:'#323D5E', border:'1px solid #404F74', color:'#F9FAFB' }
 
   return (
     <div className="px-6 py-8 max-w-3xl mx-auto">
@@ -94,10 +94,10 @@ export default function NewContractPage() {
               <p className="text-sm font-medium" style={{ color: '#F9FAFB' }}>Payment Tranches</p>
               <button type="button" onClick={addTranche} className="text-xs px-3 py-1.5 rounded-lg" style={{ background:'rgba(59,130,246,0.15)', color: C.blue }}>+ Add Tranche</button>
             </div>
-            {tranches.length === 0 && <p className="text-sm" style={{ color: '#4B5563' }}>No tranches added. Click above to add payment schedule.</p>}
+            {tranches.length === 0 && <p className="text-sm" style={{ color: '#5A6A8A' }}>No tranches added. Click above to add payment schedule.</p>}
             <div className="space-y-2">
               {tranches.map((t,i) => (
-                <div key={i} className="grid grid-cols-3 gap-3 p-3 rounded-xl" style={{ background:'#1A2235', border:'1px solid #1F2937' }}>
+                <div key={i} className="grid grid-cols-3 gap-3 p-3 rounded-xl" style={{ background:'#2A3354', border:'1px solid #323D5E' }}>
                   <select className={inp} style={inpStyle} value={t.name} onChange={e=>setTranches(p=>p.map((x,j)=>j===i?{...x,name:e.target.value}:x))}>
                     {TRANCHE_NAMES.map(n=><option key={n} value={n}>{n}</option>)}
                   </select>
@@ -117,7 +117,7 @@ export default function NewContractPage() {
           {error && <p className="text-sm px-4 py-3 rounded-xl" style={{ background:'rgba(239,68,68,0.1)', color:'#EF4444' }}>{error}</p>}
           <div className="flex gap-3 pt-2">
             <button type="submit" disabled={saving} className="flex-1 py-3 rounded-xl text-sm font-medium disabled:opacity-50" style={{ background: C.blue, color: '#fff' }}>{saving ? 'Creating...' : 'Create Contract'}</button>
-            <Link href="/contracts" className="px-5 py-3 rounded-xl text-sm" style={{ background:'#1F2937', color: C.muted }}>Cancel</Link>
+            <Link href="/contracts" className="px-5 py-3 rounded-xl text-sm" style={{ background:'#323D5E', color: C.muted }}>Cancel</Link>
           </div>
         </form>
       </div>

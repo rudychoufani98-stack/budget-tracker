@@ -16,7 +16,7 @@ interface ScannedData {
   line_items: { description: string; quantity: number|null; unit_price: number|null; total_ht: number|null; vat_rate: number|null; total_ttc: number|null }[]
 }
 
-const C = { card:'#111827', card2:'#1A2235', border:'#1F2937', border2:'#374151', green:'#10B981', amber:'#F59E0B', red:'#EF4444', blue:'#3B82F6', muted:'#6B7280' }
+const C = { card:'#222A42', card2:'#2A3354', border:'#323D5E', border2:'#404F74', green:'#10B981', amber:'#F59E0B', red:'#EF4444', blue:'#3B82F6', muted:'#6B7280' }
 const CATEGORIES = ['Subcontracting','Travel','Accommodation','Meals','Equipment','Other']
 const CURRENCIES  = ['EUR','USD','GBP','CHF','MAD','XOF','NGN','CAD','AED','JPY']
 
@@ -87,7 +87,7 @@ export default function UploadPage() {
   }
 
   const inp = "w-full px-3 py-2.5 text-sm rounded-xl"
-  const inpStyle = { background:'#1F2937', border:'1px solid #374151', color:'#F9FAFB' }
+  const inpStyle = { background:'#323D5E', border:'1px solid #404F74', color:'#F9FAFB' }
 
   return (
     <div className="px-6 py-8 max-w-5xl mx-auto">
@@ -103,12 +103,12 @@ export default function UploadPage() {
           return (
             <div key={label} className="flex items-center gap-2 flex-1">
               <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium" style={done ? { background:C.green, color:'#fff' } : active ? { background:C.blue, color:'#fff' } : { background:'#1F2937', color:C.muted }}>
+                <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium" style={done ? { background:C.green, color:'#fff' } : active ? { background:C.blue, color:'#fff' } : { background:'#323D5E', color:C.muted }}>
                   {done ? '✓' : i+1}
                 </div>
                 <span className="text-sm" style={{ color:active?'#F9FAFB':done?C.green:C.muted }}>{label}</span>
               </div>
-              {i < 2 && <div className="flex-1 h-px mx-2" style={{ background: done?C.green:'#1F2937' }} />}
+              {i < 2 && <div className="flex-1 h-px mx-2" style={{ background: done?C.green:'#323D5E' }} />}
             </div>
           )
         })}
@@ -120,7 +120,7 @@ export default function UploadPage() {
             <p className="text-sm font-medium mb-4" style={{ color:'#F9FAFB' }}>PDF Invoice</p>
             <div
               className="border-2 border-dashed rounded-xl flex flex-col items-center justify-center cursor-pointer mb-4"
-              style={{ borderColor:'#374151', minHeight:200, background:'#0D1117' }}
+              style={{ borderColor:'#404F74', minHeight:200, background:'#161B30' }}
               onClick={() => fileRef.current?.click()}
             >
               {file ? (
@@ -131,7 +131,7 @@ export default function UploadPage() {
                 </div>
               ) : (
                 <div className="text-center p-6">
-                  <svg width="36" height="36" fill="none" stroke="#374151" strokeWidth="1.5" viewBox="0 0 24 24" className="mx-auto mb-3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                  <svg width="36" height="36" fill="none" stroke="#404F74" strokeWidth="1.5" viewBox="0 0 24 24" className="mx-auto mb-3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                   <p className="text-sm" style={{ color:C.muted }}>Click to select PDF</p>
                 </div>
               )}
@@ -169,9 +169,9 @@ export default function UploadPage() {
                 </div>
               )}
             </div>
-            <div className="mt-6 p-4 rounded-xl" style={{ background:'#0D1117', border:'1px solid #1F2937' }}>
+            <div className="mt-6 p-4 rounded-xl" style={{ background:'#161B30', border:'1px solid #323D5E' }}>
               <p className="text-xs font-medium mb-2" style={{ color:C.muted }}>How it works</p>
-              <ul className="text-xs space-y-1.5" style={{ color:'#4B5563' }}>
+              <ul className="text-xs space-y-1.5" style={{ color:'#5A6A8A' }}>
                 <li>1. Upload the PDF invoice</li>
                 <li>2. AI extracts all data automatically</li>
                 <li>3. Review and correct if needed</li>
@@ -238,7 +238,7 @@ export default function UploadPage() {
             </div>
             {submitError && <p className="text-sm px-4 py-3 rounded-xl" style={{ background:'rgba(239,68,68,0.1)', color:C.red }}>{submitError}</p>}
             <div className="flex gap-3">
-              <button onClick={()=>setStep(1)} className="px-5 py-3 rounded-xl text-sm" style={{ background:'#1F2937', color:C.muted }}>Back</button>
+              <button onClick={()=>setStep(1)} className="px-5 py-3 rounded-xl text-sm" style={{ background:'#323D5E', color:C.muted }}>Back</button>
               <button onClick={handleSubmit} disabled={submitting} className="flex-1 py-3 rounded-xl text-sm font-medium disabled:opacity-50" style={{ background:C.green, color:'#fff' }}>
                 {submitting ? 'Submitting...' : 'Submit Invoice'}
               </button>

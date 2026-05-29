@@ -1,7 +1,7 @@
 ﻿'use client'
 import { useState, useEffect } from 'react'
 
-const C = { card:'#111827', card2:'#1A2235', border:'#1F2937', border2:'#374151', green:'#10B981', amber:'#F59E0B', red:'#EF4444', blue:'#3B82F6', muted:'#6B7280' }
+const C = { card:'#222A42', card2:'#2A3354', border:'#323D5E', border2:'#404F74', green:'#10B981', amber:'#F59E0B', red:'#EF4444', blue:'#3B82F6', muted:'#6B7280' }
 const ROLES = ['admin','rudy','placide','hitech','viewer']
 const ROLE_COLORS: Record<string,string> = { admin:'#3B82F6', rudy:'#F97316', placide:'#D97706', hitech:'#FACC15', viewer:'#6B7280' }
 
@@ -45,7 +45,7 @@ export default function SettingsPage() {
   }
 
   const inp = "w-full px-3 py-2.5 text-sm rounded-xl"
-  const inpStyle = { background:'#1F2937', border:'1px solid #374151', color:'#F9FAFB' }
+  const inpStyle = { background:'#323D5E', border:'1px solid #404F74', color:'#F9FAFB' }
 
   const tabs = [
     { key:'users', label:'User Management' },
@@ -61,9 +61,9 @@ export default function SettingsPage() {
         <h1 className="text-2xl font-medium" style={{ color:'#F9FAFB' }}>Settings</h1>
       </div>
 
-      <div className="flex gap-1 mb-6 p-1 rounded-xl" style={{ background:'#111827', border:'1px solid #1F2937' }}>
+      <div className="flex gap-1 mb-6 p-1 rounded-xl" style={{ background:'#222A42', border:'1px solid #323D5E' }}>
         {tabs.map(t=>(
-          <button key={t.key} onClick={()=>setTab(t.key as any)} className="flex-1 py-2 text-xs font-medium rounded-lg transition-all" style={tab===t.key ? { background:'#1F2937', color:'#F9FAFB' } : { color:C.muted }}>
+          <button key={t.key} onClick={()=>setTab(t.key as any)} className="flex-1 py-2 text-xs font-medium rounded-lg transition-all" style={tab===t.key ? { background:'#323D5E', color:'#F9FAFB' } : { color:C.muted }}>
             {t.label}
           </button>
         ))}
@@ -91,7 +91,7 @@ export default function SettingsPage() {
                 {error && <div className="col-span-2 text-sm px-4 py-3 rounded-xl" style={{ background:'rgba(239,68,68,0.1)', color:C.red }}>{error}</div>}
                 <div className="col-span-2 flex gap-3">
                   <button type="submit" disabled={saving} className="flex-1 py-3 rounded-xl text-sm font-medium disabled:opacity-50" style={{ background:C.blue, color:'#fff' }}>{saving?'Creating...':'Create Account'}</button>
-                  <button type="button" onClick={()=>setShowForm(false)} className="px-5 py-3 rounded-xl text-sm" style={{ background:'#1F2937', color:C.muted }}>Cancel</button>
+                  <button type="button" onClick={()=>setShowForm(false)} className="px-5 py-3 rounded-xl text-sm" style={{ background:'#323D5E', color:C.muted }}>Cancel</button>
                 </div>
               </form>
             </div>
@@ -104,7 +104,7 @@ export default function SettingsPage() {
                 return (
                   <div key={u.id} className="flex items-center justify-between px-5 py-3" style={{ borderBottom:`1px solid ${C.border}` }}>
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium" style={{ background:'#1F2937', color:'#F9FAFB' }}>{initials||'?'}</div>
+                      <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium" style={{ background:'#323D5E', color:'#F9FAFB' }}>{initials||'?'}</div>
                       <div>
                         <p className="text-sm font-medium" style={{ color:'#F9FAFB' }}>{u.name||'—'}</p>
                         <p className="text-xs" style={{ color:C.muted }}>{u.email}</p>
@@ -139,7 +139,7 @@ export default function SettingsPage() {
                   <p className="text-sm" style={{ color:'#F9FAFB' }}>{n.label}</p>
                   <p className="text-xs mt-0.5" style={{ color:C.muted }}>{n.sub}</p>
                 </div>
-                <div className="w-10 h-5 rounded-full flex items-center px-0.5" style={{ background:n.enabled?C.blue:'#374151' }}>
+                <div className="w-10 h-5 rounded-full flex items-center px-0.5" style={{ background:n.enabled?C.blue:'#404F74' }}>
                   <div className="w-4 h-4 rounded-full bg-white" style={{ marginLeft:n.enabled?20:0, transition:'margin 0.2s' }} />
                 </div>
               </div>

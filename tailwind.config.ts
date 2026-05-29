@@ -1,4 +1,4 @@
-import type { Config } from "tailwindcss";
+﻿import type { Config } from "tailwindcss";
 
 const config: Config = {
   content: [
@@ -9,11 +9,11 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        bg:     "#0A0F1E",
-        card:   "#111827",
-        card2:  "#1A2235",
-        bdr:    "#1F2937",
-        bdr2:   "#374151",
+        bg:     "#1A1F35",
+        card:   "#222A42",
+        card2:  "#2A3354",
+        bdr:    "#323D5E",
+        bdr2:   "#404F74",
         egreen: "#10B981",
         eamber: "#F59E0B",
         ered:   "#EF4444",

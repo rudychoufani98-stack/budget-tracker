@@ -3,9 +3,9 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
-const C = { card:'#111827', border:'#1F2937', blue:'#3B82F6', muted:'#6B7280' }
+const C = { card:'#222A42', border:'#323D5E', blue:'#3B82F6', muted:'#6B7280' }
 const inp = "w-full px-3 py-2.5 text-sm rounded-xl"
-const inpStyle = { background:'#1F2937', border:'1px solid #374151', color:'#F9FAFB' }
+const inpStyle = { background:'#323D5E', border:'1px solid #404F74', color:'#F9FAFB' }
 
 export default function NewProviderPage() {
   const router = useRouter()
@@ -38,7 +38,7 @@ export default function NewProviderPage() {
           {error && <p className="text-sm px-3 py-2 rounded-xl" style={{ background:'rgba(239,68,68,0.1)', color:'#EF4444' }}>{error}</p>}
           <div className="flex gap-3 pt-2">
             <button type="submit" disabled={saving} className="flex-1 py-3 rounded-xl text-sm font-medium disabled:opacity-50" style={{ background:C.blue, color:'#fff' }}>{saving?'Adding...':'Add Provider'}</button>
-            <Link href="/providers" className="px-5 py-3 rounded-xl text-sm text-center" style={{ background:'#1F2937', color:C.muted }}>Cancel</Link>
+            <Link href="/providers" className="px-5 py-3 rounded-xl text-sm text-center" style={{ background:'#323D5E', color:C.muted }}>Cancel</Link>
           </div>
         </form>
       </div>
