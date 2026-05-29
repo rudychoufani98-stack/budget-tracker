@@ -121,6 +121,11 @@ export default function UploadPage() {
     const res  = await fetch('/api/invoices/scan',{method:'POST',body:fd})
     const data = await res.json()
     if (!res.ok||data.error) { setScanError(data.error||'Scan failed'); setScanning(false); return }
+    // Pre-fill consultant name from the selected provider
+    if (selectedProvider) {
+      const prov = providers.find((p:any) => p.id === selectedProvider)
+      if (prov) data.subcontractor_name = prov.name
+    }
     setScanned(data); setScanning(false); setStep(2)
   }
 
@@ -228,7 +233,7 @@ export default function UploadPage() {
           <div className="rounded-2xl overflow-hidden" style={{ background:'#FFFFFF', border:'1px solid #E2E8F0' }}>
             <div style={{ height:3, background:'linear-gradient(90deg,#10B981,#3B82F6)' }}/>
             <div className="p-6">
-              <p className="text-sm font-semibold mb-5" style={{ color:'#0F172A' }}>Link to Project</p>
+              <p className="text-sm font-semibold mb-5" style={{ color:'#0F172A' }}>Link to Project & Consultant</p>
               <div className="space-y-4">
 
                 {/* Project */}
@@ -267,7 +272,7 @@ export default function UploadPage() {
                 <div>
                   <label className="text-xs font-semibold uppercase tracking-widest mb-2 flex items-center gap-1.5" style={{ color:'#64748B' }}>
                     <span style={{ width:6,height:6,borderRadius:'50%',background:'#10B981',display:'inline-block' }}/>
-                    Service Provider
+                    Consultant
                     {selectedContract && providers.find((p:any)=>p.id===selectedProvider) && (
                       <span className="text-xs px-2 py-0.5 rounded-full font-normal" style={{ background:'rgba(16,185,129,0.1)',color:'#10B981' }}>auto-filled</span>
                     )}
@@ -326,7 +331,7 @@ export default function UploadPage() {
                 </div>
                 <div className="space-y-3">
                   {[
-                    { label:'Subcontractor', key:'subcontractor_name' },
+                    { label:'Consultant', key:'subcontractor_name' },
                     { label:'Invoice #',     key:'invoice_number' },
                     { label:'Invoice Date',  key:'invoice_date', type:'date' },
                   ].map(f=>(

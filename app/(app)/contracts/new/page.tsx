@@ -63,7 +63,7 @@ export default function NewContractPage() {
               <input className={inp} style={inpStyle} value={form.contract_name} onChange={e=>setForm(p=>({...p,contract_name:e.target.value}))} required placeholder="e.g. Environmental Assessment 2025" />
             </div>
             <div>
-              <label className="text-xs font-medium mb-1.5 block" style={{ color: C.muted }}>Service Provider</label>
+              <label className="text-xs font-medium mb-1.5 block" style={{ color: C.muted }}>Consultant</label>
               <select className={inp} style={inpStyle} value={form.service_provider_id} onChange={e=>setForm(p=>({...p,service_provider_id:e.target.value}))}>
                 <option value="">Select provider...</option>
                 {providers.map((p:any)=><option key={p.id} value={p.id}>{p.name}</option>)}

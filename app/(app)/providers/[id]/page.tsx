@@ -63,7 +63,7 @@ export default function ProviderDetailPage() {
     <div className="px-6 py-8 max-w-6xl mx-auto">
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm mb-6" style={{ color:C.muted }}>
-        <Link href="/providers" className="hover:text-blue-500 transition-colors">Service Providers</Link>
+        <Link href="/providers" className="hover:text-blue-500 transition-colors">Consultants</Link>
         <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
         <span style={{ color:'#0F172A' }}>{provider.name}</span>
       </div>

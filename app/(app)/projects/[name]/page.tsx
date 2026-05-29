@@ -302,7 +302,7 @@ export default function ProjectDetailPage({ params }: { params: { name: string }
                         )}
                       </div>
                       <p className="text-xs" style={{ color:'#94A3B8' }}>
-                        {c.service_providers?.name || 'No provider assigned'}
+                        {c.service_providers?.name || 'No consultant assigned'}
                       </p>
                       <p className="text-xs mt-0.5" style={{ color:'#94A3B8' }}>
                         {invoices.length} invoice{invoices.length!==1?'s':''}
@@ -370,14 +370,14 @@ export default function ProjectDetailPage({ params }: { params: { name: string }
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-xs font-semibold uppercase tracking-widest mb-2 block" style={{ color:'#64748B' }}>Service Provider</label>
+                    <label className="text-xs font-semibold uppercase tracking-widest mb-2 block" style={{ color:'#64748B' }}>Consultant</label>
                     <select
                       className="w-full px-3.5 py-2.5 text-sm rounded-xl outline-none"
                       style={{ background:'#F8FAFC', border:'1.5px solid #E2E8F0', color:'#0F172A' }}
                       value={sectionForm.service_provider_id}
                       onChange={e => setSectionForm(p=>({...p, service_provider_id:e.target.value}))}
                     >
-                      <option value="">Select provider...</option>
+                      <option value="">Select consultant...</option>
                       {providers.map((p:any) => <option key={p.id} value={p.id}>{p.name}</option>)}
                     </select>
                   </div>

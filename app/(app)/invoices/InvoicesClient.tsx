@@ -129,7 +129,7 @@ export function InvoicesClient({ invoices }: { invoices: any[] }) {
       <div className="rounded-2xl overflow-hidden" style={{ background:'#FFFFFF', border:'1px solid #E2E8F0' }}>
         <div className="grid px-6 py-3 text-xs font-semibold uppercase tracking-widest" style={{ color:'#94A3B8', borderBottom:'1px solid #F1F5F9', background:'#FAFBFC', gridTemplateColumns:'0.8fr 1.8fr 1.4fr 0.7fr 0.7fr 1fr 1fr 1.4fr' }}>
           <div>Invoice #</div>
-          <div>Provider</div>
+          <div>Consultant</div>
           <div>Contract</div>
           <div>Cat</div>
           <div>CCY</div>

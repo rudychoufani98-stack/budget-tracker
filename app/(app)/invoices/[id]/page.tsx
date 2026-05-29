@@ -170,7 +170,7 @@ export default function InvoiceDetailPage() {
           <div className="rounded-2xl p-6" style={{ background: C.card, border: `1px solid ${C.border}` }}>
             <div className="flex items-start justify-between gap-3 mb-5">
               <div>
-                <h1 className="text-xl font-semibold" style={{ color: C.text }}>{invoice.subcontractor_name || 'Unknown subcontractor'}</h1>
+                <h1 className="text-xl font-semibold" style={{ color: C.text }}>{invoice.subcontractor_name || 'Unknown consultant'}</h1>
                 {invoice.invoice_number && (
                   <p className="text-sm mt-0.5" style={{ color: C.muted }}>Invoice # {invoice.invoice_number}</p>
                 )}
@@ -243,7 +243,7 @@ export default function InvoiceDetailPage() {
             {editing ? (
               <div className="space-y-3">
                 <div className="grid grid-cols-2 gap-3">
-                  <DField label="Subcontractor" value={editData.subcontractor_name||''} onChange={v=>setEditData(p=>({...p,subcontractor_name:v}))}/>
+                  <DField label="Consultant" value={editData.subcontractor_name||''} onChange={v=>setEditData(p=>({...p,subcontractor_name:v}))}/>
                   <DField label="Invoice #" value={editData.invoice_number||''} onChange={v=>setEditData(p=>({...p,invoice_number:v}))}/>
                   <DField label="Date" value={editData.invoice_date||''} onChange={v=>setEditData(p=>({...p,invoice_date:v}))} type="date"/>
                   <div className="col-span-2">
