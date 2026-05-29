@@ -26,6 +26,19 @@ export async function POST(request: NextRequest) {
       .from('invoice_currency')
       .insert({ invoice_id: inv.id, currency })
 
+    // Auto-save PDF to Document Vault
+    if (invoiceWithoutCurrency.pdf_url) {
+      await supabaseAdmin.from('documents').insert({
+        invoice_id:          inv.id,
+        contract_id:         invoiceWithoutCurrency.contract_id         || null,
+        service_provider_id: invoiceWithoutCurrency.service_provider_id || null,
+        filename:            `invoice_${invoiceWithoutCurrency.invoice_number || inv.id}.pdf`,
+        file_url:            invoiceWithoutCurrency.pdf_url,
+        file_type:           'invoice',
+        uploaded_at:         new Date().toISOString(),
+      })
+    }
+
     // Insert line items if any
     if (line_items && line_items.length > 0) {
       await supabaseAdmin

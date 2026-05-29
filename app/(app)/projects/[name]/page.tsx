@@ -40,8 +40,14 @@ export default function ProjectDetailPage({ params }: { params: { name: string }
   const [saving, setSaving]     = useState(false)
   const [confirmDel, setConfirmDel] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  // Sub-section modal
+  const [showAddSection, setShowAddSection] = useState(false)
+  const [providers, setProviders] = useState<any[]>([])
+  const [sectionForm, setSectionForm] = useState({ contract_name:'', service_provider_id:'', currency:'USD', category:'E', description:'' })
+  const [addingSection, setAddingSection] = useState(false)
 
   useEffect(() => {
+    fetch('/api/providers').then(r=>r.json()).then(d => setProviders(d || []))
     fetch(`/api/projects/${projectId}`)
       .then(r => r.json())
       .then(d => {
@@ -82,6 +88,27 @@ export default function ProjectDetailPage({ params }: { params: { name: string }
     setDeleting(true)
     await fetch(`/api/projects/${projectId}`, { method:'DELETE' })
     router.push('/projects')
+  }
+
+  async function handleAddSection(e: React.FormEvent) {
+    e.preventDefault()
+    if (!sectionForm.contract_name.trim()) return
+    setAddingSection(true)
+    await fetch('/api/contracts', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        ...sectionForm,
+        project_id: projectId,
+        project: project?.name || '',
+        status: 'active',
+        contract_amount: 0,
+      }),
+    })
+    setAddingSection(false)
+    setShowAddSection(false)
+    setSectionForm({ contract_name:'', service_provider_id:'', currency:'USD', category:'E', description:'' })
+    // Reload project data
+    fetch(`/api/projects/${projectId}`).then(r=>r.json()).then(d => { if (!d.error) setProject(d) })
   }
 
   if (loading) return (
@@ -415,11 +442,21 @@ export default function ProjectDetailPage({ params }: { params: { name: string }
       <div>
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-sm font-bold uppercase tracking-widest" style={{ color:'#64748B' }}>Sub-sections & Invoices</h2>
-          {pendingInvs.length>0 && (
-            <span className="text-xs px-2.5 py-1 rounded-full font-semibold" style={{ background:'rgba(245,158,11,0.1)', color:'#F59E0B' }}>
-              {pendingInvs.length} pending
-            </span>
-          )}
+          <div className="flex items-center gap-3">
+            {pendingInvs.length>0 && (
+              <span className="text-xs px-2.5 py-1 rounded-full font-semibold" style={{ background:'rgba(245,158,11,0.1)', color:'#F59E0B' }}>
+                {pendingInvs.length} pending
+              </span>
+            )}
+            <button
+              onClick={() => setShowAddSection(true)}
+              className="text-sm font-semibold px-3.5 py-2 rounded-xl flex items-center gap-1.5"
+              style={{ background:'#3B82F6', color:'#fff' }}
+            >
+              <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Add Sub-section
+            </button>
+          </div>
         </div>
 
         <div className="space-y-3">
@@ -491,6 +528,78 @@ export default function ProjectDetailPage({ params }: { params: { name: string }
           )}
         </div>
       </div>
+
+      {/* ── ADD SUB-SECTION MODAL ── */}
+      {showAddSection && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background:'rgba(0,0,0,0.5)' }} onClick={() => setShowAddSection(false)}>
+          <div className="rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl" style={{ background:'#FFFFFF' }} onClick={e => e.stopPropagation()}>
+            <div style={{ height:4, background:'linear-gradient(90deg,#3B82F6,#8B5CF6)' }}/>
+            <div className="p-6">
+              <h3 className="text-lg font-bold mb-5" style={{ color:'#0F172A' }}>Add Sub-section to {project?.name}</h3>
+              <form onSubmit={handleAddSection} className="space-y-4">
+                <div>
+                  <label className="text-xs font-semibold uppercase tracking-widest mb-2 block" style={{ color:'#64748B' }}>Sub-section Name *</label>
+                  <input
+                    className="w-full px-3.5 py-2.5 text-sm rounded-xl outline-none"
+                    style={{ background:'#F8FAFC', border:'1.5px solid #E2E8F0', color:'#0F172A' }}
+                    placeholder="e.g. Environmental Assessment Phase 1"
+                    value={sectionForm.contract_name}
+                    onChange={e => setSectionForm(p=>({...p, contract_name:e.target.value}))}
+                    required
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-semibold uppercase tracking-widest mb-2 block" style={{ color:'#64748B' }}>Service Provider</label>
+                    <select
+                      className="w-full px-3.5 py-2.5 text-sm rounded-xl outline-none"
+                      style={{ background:'#F8FAFC', border:'1.5px solid #E2E8F0', color:'#0F172A' }}
+                      value={sectionForm.service_provider_id}
+                      onChange={e => setSectionForm(p=>({...p, service_provider_id:e.target.value}))}
+                    >
+                      <option value="">Select provider...</option>
+                      {providers.map((p:any) => <option key={p.id} value={p.id}>{p.name}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold uppercase tracking-widest mb-2 block" style={{ color:'#64748B' }}>ESG Category</label>
+                    <select
+                      className="w-full px-3.5 py-2.5 text-sm rounded-xl outline-none"
+                      style={{ background:'#F8FAFC', border:'1.5px solid #E2E8F0', color:'#0F172A' }}
+                      value={sectionForm.category}
+                      onChange={e => setSectionForm(p=>({...p, category:e.target.value}))}
+                    >
+                      <option value="E">E - Environmental</option>
+                      <option value="S">S - Social</option>
+                      <option value="G">G - Governance</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                </div>
+                <div>
+                  <label className="text-xs font-semibold uppercase tracking-widest mb-2 block" style={{ color:'#64748B' }}>Description</label>
+                  <textarea
+                    rows={2}
+                    className="w-full px-3.5 py-2.5 text-sm rounded-xl outline-none resize-none"
+                    style={{ background:'#F8FAFC', border:'1.5px solid #E2E8F0', color:'#0F172A' }}
+                    placeholder="Brief scope of this sub-section..."
+                    value={sectionForm.description}
+                    onChange={e => setSectionForm(p=>({...p, description:e.target.value}))}
+                  />
+                </div>
+                <div className="flex gap-3 pt-1">
+                  <button type="submit" disabled={addingSection} className="flex-1 py-3 rounded-xl text-sm font-semibold disabled:opacity-50" style={{ background:'#3B82F6', color:'#fff' }}>
+                    {addingSection ? 'Creating...' : 'Create Sub-section'}
+                  </button>
+                  <button type="button" onClick={() => setShowAddSection(false)} className="px-5 py-3 rounded-xl text-sm" style={{ background:'#F1F5F9', color:'#64748B' }}>
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
