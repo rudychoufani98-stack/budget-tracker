@@ -6,8 +6,8 @@ import { usePathname, useRouter } from 'next/navigation'
 import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/utils/supabase/client'
 
-const BG   = '#0D1117'
-const CARD = '#161B22'
+const BG   = '#0F172A'
+const CARD = '#1E293B'
 
 const nav = [
   {
@@ -25,6 +25,10 @@ const nav = [
   {
     href: '/invoices', label: 'Invoices',
     icon: <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>,
+  },
+  {
+    href: '/upload', label: 'Upload Invoice',
+    icon: <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>,
   },
   {
     href: '/validations', label: 'Validations',
