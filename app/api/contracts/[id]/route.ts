@@ -5,8 +5,16 @@ import { writeAudit } from '@/lib/audit'
 export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
   const { data: contract } = await supabaseAdmin.from('contracts').select('*, service_providers(*), contract_tranches(*)').eq('id', params.id).single()
   if (!contract) return NextResponse.json({ error: 'Not found' }, { status: 404 })
-  const { data: invoices } = await supabaseAdmin.from('invoices').select('*').eq('contract_id', params.id).order('created_at', { ascending: false })
-  return NextResponse.json({ contract, invoices: invoices || [] })
+  const [{ data: invoices }, { data: currencies }] = await Promise.all([
+    supabaseAdmin.from('invoices').select('*').eq('contract_id', params.id).order('created_at', { ascending: false }),
+    supabaseAdmin.from('invoice_currency').select('invoice_id, currency'),
+  ])
+  const currencyMap: Record<string,string> = {}
+  for (const c of currencies || []) currencyMap[c.invoice_id] = c.currency
+  const invoicesWithCurrency = (invoices || []).map((inv: any) => ({
+    ...inv, currency: currencyMap[inv.id] || inv.currency || 'USD',
+  }))
+  return NextResponse.json({ ...contract, invoices: invoicesWithCurrency })
 }
 
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
