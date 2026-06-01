@@ -88,8 +88,8 @@ export function Sidebar() {
   const initials = user?.name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2) || '?'
 
   const roleLabel: Record<string,string> = {
-    admin:'Administrator', placide:'Senior Validator', uploader:'Invoice Uploader',
-    dani:'Validator', fares:'Accountant', viewer:'Viewer'
+    admin:'Administrator', placide:'ESG Manager', uploader:'Intern',
+    dani:'MD', fares:'Accountant', viewer:'Viewer'
   }
 
   return (

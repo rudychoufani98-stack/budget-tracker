@@ -3,7 +3,16 @@
 import { useState, useEffect } from 'react'
 
 const NAVY = '#0C1F52'
-const ROLES = ['admin', 'rudy', 'placide', 'hitech', 'viewer']
+const ROLES = ['admin', 'placide', 'uploader', 'dani', 'fares', 'viewer']
+
+const ROLE_LABELS: Record<string,string> = {
+  admin:    'Administrator',
+  placide:  'ESG Manager',
+  uploader: 'Intern',
+  dani:     'MD',
+  fares:    'Accountant',
+  viewer:   'Viewer',
+}
 
 interface User {
   id: string
@@ -65,11 +74,12 @@ export default function UsersPage() {
   }
 
   const roleColors: Record<string, { bg: string; color: string }> = {
-    admin:   { bg: '#EDE9FE', color: '#5B21B6' },
-    rudy:    { bg: '#DBEAFE', color: '#1D4ED8' },
-    placide: { bg: '#D1FAE5', color: '#065F46' },
-    hitech:  { bg: '#FEF3C7', color: '#92400E' },
-    viewer:  { bg: '#F3F4F6', color: '#6B7280' },
+    admin:    { bg: '#DBEAFE', color: '#1D4ED8' },
+    placide:  { bg: '#D1FAE5', color: '#065F46' },
+    uploader: { bg: '#FEF9C3', color: '#854D0E' },
+    dani:     { bg: '#EDE9FE', color: '#5B21B6' },
+    fares:    { bg: '#D1FAE5', color: '#065F46' },
+    viewer:   { bg: '#F3F4F6', color: '#6B7280' },
   }
 
   return (
@@ -143,7 +153,7 @@ export default function UsersPage() {
                 onChange={e => setForm(p => ({ ...p, role: e.target.value }))}
                 className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
               >
-                {ROLES.map(r => <option key={r} value={r}>{r.charAt(0).toUpperCase() + r.slice(1)}</option>)}
+                {ROLES.map(r => <option key={r} value={r}>{ROLE_LABELS[r] || r}</option>)}
               </select>
             </div>
             {error && (
@@ -201,7 +211,7 @@ export default function UsersPage() {
                       className="text-xs font-semibold px-3 py-1 rounded-full capitalize"
                       style={{ background: rc.bg, color: rc.color }}
                     >
-                      {user.role}
+                      {ROLE_LABELS[user.role] || user.role}
                     </span>
                     <button
                       onClick={() => deleteUser(user.id, user.name)}
