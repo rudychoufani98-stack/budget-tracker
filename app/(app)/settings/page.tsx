@@ -1,12 +1,14 @@
 ﻿'use client'
 import { useState, useEffect } from 'react'
+import { createClient } from '@/utils/supabase/client'
 
 const C = { card:'#FFFFFF', card2:'#F1F5F9', border:'#E2E8F0', border2:'#CBD5E1', green:'#10B981', amber:'#F59E0B', red:'#EF4444', blue:'#3B82F6', muted:'#6B7280' }
 const ROLES = ['admin','rudy','placide','hitech','viewer']
 const ROLE_COLORS: Record<string,string> = { admin:'#3B82F6', rudy:'#F97316', placide:'#D97706', hitech:'#FACC15', viewer:'#6B7280' }
 
 export default function SettingsPage() {
-  const [tab, setTab] = useState<'users'|'notifications'|'categories'|'validation'>('users')
+  const [currentRole, setCurrentRole] = useState<string>('viewer')
+  const [tab, setTab] = useState<'users'|'notifications'|'categories'|'validation'>('notifications')
   const [users, setUsers] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
@@ -15,6 +17,17 @@ export default function SettingsPage() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [deleting, setDeleting] = useState<string|null>(null)
+
+  useEffect(() => {
+    // Fetch current user role
+    const supabase = createClient()
+    supabase.auth.getUser().then(({ data }) => {
+      const role = data?.user?.user_metadata?.role || 'viewer'
+      setCurrentRole(role)
+      // Only admins default to users tab
+      if (role === 'admin') setTab('users')
+    })
+  }, [])
 
   async function loadUsers() {
     setLoading(true)
@@ -47,8 +60,9 @@ export default function SettingsPage() {
   const inp = "w-full px-3 py-2.5 text-sm rounded-xl"
   const inpStyle = { background:'#E2E8F0', border:'1px solid #CBD5E1', color:'#0F172A' }
 
+  const isAdmin = currentRole === 'admin'
   const tabs = [
-    { key:'users', label:'User Management' },
+    ...(isAdmin ? [{ key:'users', label:'User Management' }] : []),
     { key:'notifications', label:'Notifications' },
     { key:'categories', label:'Categories' },
     { key:'validation', label:'Validation Chain' },
