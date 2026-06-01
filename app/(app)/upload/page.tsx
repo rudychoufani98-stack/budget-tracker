@@ -286,6 +286,16 @@ export default function UploadPage() {
                   {selectedProject && sections.length===0 && (
                     <p className="text-xs mt-1" style={{ color:'#94A3B8' }}>No sections in this project - create one in Projects tab</p>
                   )}
+                  {selectedProject && sections.length>0 && !selectedSection && (
+                    <p className="text-xs mt-1 px-2.5 py-1.5 rounded-lg" style={{ background:'rgba(59,130,246,0.07)', color:'#3B82F6' }}>
+                      No section selected - invoice will be linked to the whole project
+                    </p>
+                  )}
+                  {selectedProject && selectedSection && (
+                    <p className="text-xs mt-1 px-2.5 py-1.5 rounded-lg" style={{ background:'rgba(139,92,246,0.07)', color:'#8B5CF6' }}>
+                      Invoice will count toward this section and the overall project
+                    </p>
+                  )}
                 </div>
 
                 {/* Contract */}
