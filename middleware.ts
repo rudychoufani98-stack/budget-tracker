@@ -16,11 +16,11 @@ function canAccess(role: string, pathname: string): boolean {
   return allowed.some(p => pathname === p || pathname.startsWith(p + '/'))
 }
 
-// Simple in-memory login attempt tracker (resets on cold start)
-// For production, replace with Redis/Upstash
+// In-memory rate limiter (resets on cold start — acceptable for serverless)
+// For persistent rate limiting, replace with Upstash Redis
 const loginAttempts = new Map<string, { count: number; resetAt: number }>()
-const MAX_ATTEMPTS  = 5
-const WINDOW_MS     = 15 * 60 * 1000 // 15 minutes
+const MAX_ATTEMPTS = 5
+const WINDOW_MS    = 15 * 60 * 1000 // 15 minutes
 
 function checkRateLimit(ip: string): boolean {
   const now = Date.now()
@@ -61,8 +61,8 @@ export async function middleware(request: NextRequest) {
     return supabaseResponse
   }
 
-  // Rate limit login page POST attempts
-  if ((pathname === '/login' || pathname.startsWith('/api/auth')) && request.method === 'POST') {
+  // Rate limit only POST login attempts (not GET page loads)
+  if (request.method === 'POST' && (pathname === '/login' || pathname.startsWith('/api/auth'))) {
     const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown'
     if (!checkRateLimit(ip)) {
       return NextResponse.json(
@@ -72,14 +72,13 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Allow API routes through — they have their own auth checks via auth-guard
+  // Allow API routes through — they handle auth via requireAuth
   if (pathname.startsWith('/api')) {
     return supabaseResponse
   }
 
   const { data: { user } } = await supabase.auth.getUser()
 
-  // Redirect to login if not authenticated
   if (!user) {
     if (pathname !== '/login') {
       return NextResponse.redirect(new URL('/login', request.url))
@@ -87,14 +86,12 @@ export async function middleware(request: NextRequest) {
     return supabaseResponse
   }
 
-  // Redirect logged-in user away from login
   if (pathname === '/login') {
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
   const role = user.user_metadata?.role || 'viewer'
 
-  // Role-based route protection
   if (!canAccess(role, pathname)) {
     const allowed = ROLE_ACCESS[role] || ['/dashboard']
     const firstPage = allowed[0] === '*' ? '/dashboard' : allowed[0]
