@@ -19,7 +19,7 @@ function canAccess(role: string, pathname: string): boolean {
 // Simple in-memory login attempt tracker (resets on cold start)
 // For production, replace with Redis/Upstash
 const loginAttempts = new Map<string, { count: number; resetAt: number }>()
-const MAX_ATTEMPTS  = 10
+const MAX_ATTEMPTS  = 5
 const WINDOW_MS     = 15 * 60 * 1000 // 15 minutes
 
 function checkRateLimit(ip: string): boolean {
@@ -62,7 +62,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // Rate limit login page POST attempts
-  if (pathname === '/login' || pathname.startsWith('/api/auth')) {
+  if ((pathname === '/login' || pathname.startsWith('/api/auth')) && request.method === 'POST') {
     const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown'
     if (!checkRateLimit(ip)) {
       return NextResponse.json(

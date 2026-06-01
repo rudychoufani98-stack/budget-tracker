@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
+import { requireAuth } from '@/lib/auth-guard'
 
 export async function GET(req: NextRequest) {
+  const deny = await requireAuth(req)
+  if (deny) return deny
   const contractId = req.nextUrl.searchParams.get('contract_id')
   let query = supabaseAdmin.from('contract_tranches').select('*').order('tranche_name')
   if (contractId) query = query.eq('contract_id', contractId)
@@ -11,6 +14,8 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const deny = await requireAuth(req)
+  if (deny) return deny
   const body = await req.json()
   const { contract_id, tranche_name, amount, scheduled_date, notes } = body
   if (!contract_id || !tranche_name) return NextResponse.json({ error: 'contract_id and tranche_name required' }, { status: 400 })

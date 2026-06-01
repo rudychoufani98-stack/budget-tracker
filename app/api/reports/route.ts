@@ -1,7 +1,10 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
+import { requireAuth } from '@/lib/auth-guard'
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const deny = await requireAuth(req)
+  if (deny) return deny
   const [tranches, invoices, providers, auditRows] = await Promise.all([
     supabaseAdmin.from('contract_tranches').select('*, contracts(contract_name, category, service_provider_id, service_providers(name))'),
     supabaseAdmin.from('invoices').select('*').eq('status', 'approved'),

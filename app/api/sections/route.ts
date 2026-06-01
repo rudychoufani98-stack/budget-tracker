@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
+import { requireAuth } from '@/lib/auth-guard'
 
 export async function GET(req: NextRequest) {
+  const deny = await requireAuth(req)
+  if (deny) return deny
   const { searchParams } = new URL(req.url)
   const projectId = searchParams.get('project_id')
   if (!projectId) return NextResponse.json([])
@@ -10,6 +13,8 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const deny = await requireAuth(req)
+  if (deny) return deny
   const body = await req.json()
   const { project_id, name, description, budget, currency, start_date, end_date, status } = body
   if (!project_id || !name?.trim()) return NextResponse.json({ error: 'project_id and name required' }, { status: 400 })

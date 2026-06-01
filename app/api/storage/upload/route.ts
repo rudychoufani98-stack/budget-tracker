@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
+import { requireAuth } from '@/lib/auth-guard'
 
 export async function POST(request: NextRequest) {
+  const deny = await requireAuth(request)
+  if (deny) return deny
   try {
     const formData = await request.formData()
     const file = formData.get('file') as File | null

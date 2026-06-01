@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
+import { requireAuth } from '@/lib/auth-guard'
 
 // DELETE — remove an invoice and all related data
 export async function DELETE(
   _request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const deny = await requireAuth(_request)
+  if (deny) return deny
   const { id } = params
 
   // Delete related records first

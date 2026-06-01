@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { requireAuth } from '@/lib/auth-guard'
 
 const PROMPT = `Extract all data from this invoice and return ONLY a valid JSON object with no markdown, no explanation, just raw JSON.
 
@@ -35,6 +36,8 @@ Rules:
 - Return ONLY the JSON, nothing else`
 
 export async function POST(request: NextRequest) {
+  const deny = await requireAuth(request)
+  if (deny) return deny
   const apiKey = process.env.GROQ_API_KEY
   if (!apiKey) {
     return NextResponse.json({ error: 'GROQ_API_KEY is not configured in environment variables' }, { status: 500 })

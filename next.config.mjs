@@ -14,6 +14,8 @@ const nextConfig = {
         { key: 'Permissions-Policy',        value: 'camera=(), microphone=(), geolocation=(), interest-cohort=()' },
         // Force HTTPS (1 year)
         { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' },
+        // Block reflected XSS attacks in older browsers
+        { key: 'X-XSS-Protection',          value: '1; mode=block' },
         // Basic CSP — allows Supabase, OXR, self
         {
           key: 'Content-Security-Policy',

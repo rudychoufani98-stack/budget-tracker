@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
+import { requireAuth } from '@/lib/auth-guard'
 
 export async function POST(request: NextRequest) {
+  const deny = await requireAuth(request)
+  if (deny) return deny
   try {
     const body = await request.json()
     const { invoice, line_items } = body

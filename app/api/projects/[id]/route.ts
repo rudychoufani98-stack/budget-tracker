@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
+import { requireAuth } from '@/lib/auth-guard'
 
 export async function GET(_: NextRequest, { params }: { params: { id: string } }) {
+  const deny = await requireAuth(_)
+  if (deny) return deny
   // Fetch project + sections + all contracts in parallel
   const [projRes, sectionsRes, contractsRes] = await Promise.all([
     supabaseAdmin.from('projects').select('*').eq('id', params.id).single(),
@@ -46,6 +49,8 @@ export async function GET(_: NextRequest, { params }: { params: { id: string } }
 }
 
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+  const deny = await requireAuth(req)
+  if (deny) return deny
   const body = await req.json()
   const { data, error } = await supabaseAdmin
     .from('projects')
@@ -58,6 +63,8 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 }
 
 export async function DELETE(_: NextRequest, { params }: { params: { id: string } }) {
+  const deny = await requireAuth(_)
+  if (deny) return deny
   await supabaseAdmin.from('contracts').update({ project_id: null }).eq('project_id', params.id)
   const { error } = await supabaseAdmin.from('projects').delete().eq('id', params.id)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })

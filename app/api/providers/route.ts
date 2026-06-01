@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
+import { requireAuth } from '@/lib/auth-guard'
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const deny = await requireAuth(req)
+  if (deny) return deny
   const { data, error } = await supabaseAdmin
     .from('service_providers')
     .select('*')
@@ -11,6 +14,8 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  const deny = await requireAuth(req)
+  if (deny) return deny
   const { name, email, country, category } = await req.json()
   if (!name) return NextResponse.json({ error: 'Name is required' }, { status: 400 })
   const { data, error } = await supabaseAdmin

@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
+import { requireAuth } from '@/lib/auth-guard'
 
 export async function GET(req: NextRequest) {
+  const deny = await requireAuth(req)
+  if (deny) return deny
   const contractId  = req.nextUrl.searchParams.get('contract_id')
   const providerId  = req.nextUrl.searchParams.get('provider_id')
   const invoiceId   = req.nextUrl.searchParams.get('invoice_id')
@@ -17,6 +20,8 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const deny = await requireAuth(req)
+  if (deny) return deny
   const body = await req.json()
   const { data, error } = await supabaseAdmin.from('documents').insert(body).select().single()
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })

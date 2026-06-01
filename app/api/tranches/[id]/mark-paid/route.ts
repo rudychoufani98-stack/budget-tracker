@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { writeAudit } from '@/lib/audit'
+import { requireAuth } from '@/lib/auth-guard'
 
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+  const deny = await requireAuth(req)
+  if (deny) return deny
   const { pop_reference } = await req.json().catch(() => ({}))
   const { data, error } = await supabaseAdmin
     .from('contract_tranches')
