@@ -164,6 +164,19 @@ export function Sidebar() {
               <p className="text-xs font-medium" style={{ color: '#F9FAFB' }}>{user?.name}</p>
               <p className="text-xs mt-0.5" style={{ color: '#5A6A8A' }}>{roleLabel[role] || role}</p>
             </div>
+            {role === 'admin' && (
+              <Link
+                href="/users"
+                onClick={() => setDropdownOpen(false)}
+                className="flex items-center gap-2 px-3 py-2.5 text-xs transition-colors"
+                style={{ color: '#9CA3AF' }}
+                onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = '#323D5E'}
+                onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}
+              >
+                <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                Manage Users
+              </Link>
+            )}
             <button
               onClick={handleLogout}
               className="w-full flex items-center gap-2 px-3 py-2.5 text-xs transition-colors"
