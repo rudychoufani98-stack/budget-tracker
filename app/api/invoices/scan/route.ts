@@ -30,7 +30,7 @@ Required format:
 Rules:
 - All monetary amounts must be numbers (not strings)
 - If a value is not found, use null
-- For currency: detect from symbols (€=EUR, $=USD, £=GBP, Fr=CHF, DH/MAD=MAD, FCFA=XOF, ₦=NGN) or explicit text. Default to EUR if unclear.
+- For currency: detect from symbols (€=EUR, $=USD, £=GBP, Fr=CHF, DH/MAD=MAD, FCFA=XOF, ₦=NGN) or explicit text. Default to NGN if unclear.
 - For category: consulting/services = Subcontracting, flights/trains/taxi = Travel, hotel = Accommodation, restaurants = Meals, hardware/software = Equipment
 - invoice_date must be YYYY-MM-DD or null
 - Return ONLY the JSON, nothing else`

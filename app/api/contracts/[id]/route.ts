@@ -15,7 +15,7 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
   const currencyMap: Record<string,string> = {}
   for (const c of currencies || []) currencyMap[c.invoice_id] = c.currency
   const invoicesWithCurrency = (invoices || []).map((inv: any) => ({
-    ...inv, currency: currencyMap[inv.id] || inv.currency || 'USD',
+    ...inv, currency: currencyMap[inv.id] || inv.currency || 'NGN',
   }))
   return NextResponse.json({ ...contract, invoices: invoicesWithCurrency })
 }
