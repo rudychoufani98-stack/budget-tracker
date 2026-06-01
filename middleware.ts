@@ -1,6 +1,22 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
+// Pages each role can access
+const ROLE_ACCESS: Record<string, string[]> = {
+  admin:    ['*'],  // everything
+  placide:  ['*'],  // everything (no users page enforced at component level)
+  uploader: ['/dashboard', '/upload'],
+  dani:     ['/dashboard', '/invoices', '/validations'],
+  fares:    ['/dashboard', '/invoices', '/validations'],
+  viewer:   ['/dashboard'],
+}
+
+function canAccess(role: string, pathname: string): boolean {
+  const allowed = ROLE_ACCESS[role] || ROLE_ACCESS.viewer
+  if (allowed.includes('*')) return true
+  return allowed.some(p => pathname === p || pathname.startsWith(p + '/'))
+}
+
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
 
@@ -24,14 +40,24 @@ export async function middleware(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   const { pathname } = request.nextUrl
 
-  // Allow login page and API routes
-  if (pathname.startsWith('/login') || pathname.startsWith('/api')) {
+  // Always allow login page and API routes
+  if (pathname.startsWith('/login') || pathname.startsWith('/api') || pathname.startsWith('/_next')) {
     return supabaseResponse
   }
 
   // Redirect to login if not authenticated
   if (!user) {
     return NextResponse.redirect(new URL('/login', request.url))
+  }
+
+  const role = user.user_metadata?.role || 'viewer'
+
+  // Check role-based access
+  if (!canAccess(role, pathname)) {
+    // Redirect to the first allowed page for this role
+    const allowed = ROLE_ACCESS[role] || ['/dashboard']
+    const firstPage = allowed[0] === '*' ? '/dashboard' : allowed[0]
+    return NextResponse.redirect(new URL(firstPage, request.url))
   }
 
   return supabaseResponse

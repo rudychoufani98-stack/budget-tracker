@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import Link from 'next/link'
 import Image from 'next/image'
@@ -9,82 +9,50 @@ import { createClient } from '@/utils/supabase/client'
 const BG   = '#1A1F35'
 const CARD = '#222A42'
 
-const nav = [
-  {
-    group: 'Overview',
-    items: [
-      {
-        href: '/dashboard', label: 'Dashboard',
-        icon: <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>,
-      },
-    ]
-  },
-  {
-    group: 'Finance',
-    items: [
-      {
-        href: '/projects', label: 'Projects',
-        icon: <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h3l2 3h9a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>,
-      },
-      {
-        href: '/contracts', label: 'Contracts',
-        icon: <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="12" y2="17"/></svg>,
-      },
-      {
-        href: '/payment-register', label: 'Payment Register',
-        icon: <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="9" x2="9" y2="21"/></svg>,
-      },
-    ]
-  },
-  {
-    group: 'Invoices',
-    items: [
-      {
-        href: '/invoices', label: 'All Invoices',
-        icon: <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>,
-      },
-      {
-        href: '/upload', label: 'Upload Invoice',
-        icon: <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>,
-      },
-      {
-        href: '/validations', label: 'Validations',
-        icon: <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>,
-      },
-    ]
-  },
-  {
-    group: 'Management',
-    items: [
-      {
-        href: '/providers', label: 'Consultants',
-        icon: <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,
-      },
-      {
-        href: '/vault', label: 'Document Vault',
-        icon: <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>,
-      },
-    ]
-  },
-  {
-    group: 'Analytics',
-    items: [
-      {
-        href: '/reports', label: 'Reports',
-        icon: <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>,
-      },
-    ]
-  },
-  {
-    group: 'System',
-    items: [
-      {
-        href: '/settings', label: 'Settings',
-        icon: <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
-      },
-    ]
-  },
+const ALL_NAV = [
+  { group:'Overview', items:[
+    { href:'/dashboard', label:'Dashboard', roles:'*',
+      icon:<svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg> },
+  ]},
+  { group:'Finance', items:[
+    { href:'/projects',         label:'Projects',          roles:['admin','placide'],
+      icon:<svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h3l2 3h9a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg> },
+    { href:'/contracts',        label:'Contracts',         roles:['admin','placide'],
+      icon:<svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> },
+    { href:'/payment-register', label:'Payment Register',  roles:['admin','placide'],
+      icon:<svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="9" x2="9" y2="21"/></svg> },
+  ]},
+  { group:'Invoices', items:[
+    { href:'/invoices',    label:'All Invoices',    roles:['admin','placide','dani','fares'],
+      icon:<svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg> },
+    { href:'/upload',      label:'Upload Invoice',  roles:['admin','placide','uploader'],
+      icon:<svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> },
+    { href:'/validations', label:'Validations',     roles:['admin','placide','dani','fares'],
+      icon:<svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg> },
+  ]},
+  { group:'Management', items:[
+    { href:'/providers', label:'Consultants',    roles:['admin','placide'],
+      icon:<svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> },
+    { href:'/vault',     label:'Document Vault', roles:['admin','placide'],
+      icon:<svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg> },
+  ]},
+  { group:'Analytics', items:[
+    { href:'/reports', label:'Reports', roles:['admin','placide'],
+      icon:<svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> },
+  ]},
+  { group:'System', items:[
+    { href:'/settings', label:'Settings', roles:['admin','placide'],
+      icon:<svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> },
+    { href:'/users', label:'Manage Users', roles:['admin'],
+      icon:<svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> },
+  ]},
 ]
+
+function hasAccess(roles: string | string[], userRole: string): boolean {
+  if (roles === '*') return true
+  if (Array.isArray(roles)) return roles.includes(userRole)
+  return roles === userRole
+}
 
 export function Sidebar() {
   const pathname = usePathname()
@@ -118,53 +86,60 @@ export function Sidebar() {
     router.push('/login')
   }
 
-  const initials = user?.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?'
+  const role     = user?.role || 'viewer'
+  const initials = user?.name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2) || '?'
+
+  const roleLabel: Record<string,string> = {
+    admin:'Administrator', placide:'Senior Validator', uploader:'Invoice Uploader',
+    dani:'Validator', fares:'Accountant', viewer:'Viewer'
+  }
 
   return (
     <aside className="w-56 min-h-screen flex flex-col shrink-0" style={{ background: BG, borderRight: '1px solid #323D5E' }}>
-      {/* Logo */}
       <div className="px-4 pt-5 pb-4" style={{ borderBottom: '1px solid #323D5E' }}>
         <div className="rounded-xl px-3 py-2.5 flex items-center justify-center" style={{ background: '#fff' }}>
           <Image src="/logo.png" alt="Skykapital" width={130} height={38} priority style={{ objectFit: 'contain' }} />
         </div>
       </div>
 
-      {/* Nav */}
       <nav className="flex-1 px-2 py-4 overflow-y-auto">
         <div className="space-y-4">
-          {nav.map(({ group, items }) => (
-            <div key={group}>
-              <p className="text-xs font-semibold uppercase tracking-widest px-3 mb-1" style={{ color: '#4A5568' }}>{group}</p>
-              <ul className="space-y-0.5">
-                {items.map(({ href, label, icon }) => {
-                  const active = href === '/dashboard'
-                    ? pathname === '/' || pathname.startsWith('/dashboard')
-                    : pathname.startsWith(href)
-                  return (
-                    <li key={href}>
-                      <Link
-                        href={href}
-                        className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all"
-                        style={active
-                          ? { background: 'rgba(59,130,246,0.15)', color: '#3B82F6', fontWeight: 500 }
-                          : { color: '#94A3B8' }
-                        }
-                        onMouseEnter={e => { if (!active) { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.06)'; (e.currentTarget as HTMLElement).style.color = '#E2E8F0' } }}
-                        onMouseLeave={e => { if (!active) { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = '#94A3B8' } }}
-                      >
-                        {icon}
-                        {label}
-                      </Link>
-                    </li>
-                  )
-                })}
-              </ul>
-            </div>
-          ))}
+          {ALL_NAV.map(({ group, items }) => {
+            const visible = items.filter(i => hasAccess(i.roles, role))
+            if (visible.length === 0) return null
+            return (
+              <div key={group}>
+                <p className="text-xs font-semibold uppercase tracking-widest px-3 mb-1" style={{ color: '#4A5568' }}>{group}</p>
+                <ul className="space-y-0.5">
+                  {visible.map(({ href, label, icon }) => {
+                    const active = href === '/dashboard'
+                      ? pathname === '/' || pathname.startsWith('/dashboard')
+                      : pathname.startsWith(href)
+                    return (
+                      <li key={href}>
+                        <Link
+                          href={href}
+                          className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all"
+                          style={active
+                            ? { background: 'rgba(59,130,246,0.15)', color: '#3B82F6', fontWeight: 500 }
+                            : { color: '#94A3B8' }
+                          }
+                          onMouseEnter={e => { if (!active) { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.06)'; (e.currentTarget as HTMLElement).style.color = '#E2E8F0' } }}
+                          onMouseLeave={e => { if (!active) { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = '#94A3B8' } }}
+                        >
+                          {icon}
+                          {label}
+                        </Link>
+                      </li>
+                    )
+                  })}
+                </ul>
+              </div>
+            )
+          })}
         </div>
       </nav>
 
-      {/* User */}
       <div className="px-3 py-3 relative" style={{ borderTop: '1px solid #323D5E' }} ref={dropdownRef}>
         <button
           onClick={() => setDropdownOpen(o => !o)}
@@ -178,7 +153,7 @@ export function Sidebar() {
           </div>
           <div className="min-w-0 flex-1 text-left">
             <p className="text-xs font-medium truncate" style={{ color: '#F9FAFB' }}>{user?.name || '...'}</p>
-            <p className="text-xs truncate" style={{ color: '#5A6A8A' }}>{user?.email || ''}</p>
+            <p className="text-xs truncate" style={{ color: '#5A6A8A' }}>{roleLabel[role] || role}</p>
           </div>
           <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" style={{ color: '#5A6A8A', flexShrink: 0 }}>
             <polyline points="6 9 12 15 18 9"/>
@@ -189,19 +164,8 @@ export function Sidebar() {
           <div className="absolute bottom-full left-3 right-3 mb-1 rounded-xl overflow-hidden shadow-xl z-50" style={{ background: '#2A3354', border: '1px solid #404F74' }}>
             <div className="px-3 py-2.5" style={{ borderBottom: '1px solid #323D5E' }}>
               <p className="text-xs font-medium" style={{ color: '#F9FAFB' }}>{user?.name}</p>
-              <p className="text-xs mt-0.5" style={{ color: '#5A6A8A' }}>{user?.role}</p>
+              <p className="text-xs mt-0.5" style={{ color: '#5A6A8A' }}>{roleLabel[role] || role}</p>
             </div>
-            <Link
-              href="/settings"
-              onClick={() => setDropdownOpen(false)}
-              className="flex items-center gap-2 px-3 py-2.5 text-xs transition-colors"
-              style={{ color: '#9CA3AF' }}
-              onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = '#323D5E'}
-              onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}
-            >
-              <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-              Manage Users
-            </Link>
             <button
               onClick={handleLogout}
               className="w-full flex items-center gap-2 px-3 py-2.5 text-xs transition-colors"

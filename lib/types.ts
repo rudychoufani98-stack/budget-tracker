@@ -2,7 +2,7 @@
 
 export type ContractStatus  = 'active' | 'completed' | 'cancelled'
 export type TrancheStatus   = 'unpaid' | 'scheduled' | 'paid'
-export type InvoiceStatus   = 'pending_review' | 'pending_placide' | 'pending_hitech' | 'approved' | 'rejected'
+export type InvoiceStatus   = 'pending_review' | 'pending_placide' | 'pending_dani' | 'pending_fares' | 'approved' | 'rejected'
 export type InvoiceCategory =
   | 'Subcontracting'
   | 'Consulting'
@@ -19,7 +19,7 @@ export type InvoiceCategory =
   | 'Legal & Compliance'
   | 'Medical & Health'
   | 'Other'
-export type ValidatorRole   = 'rudy' | 'placide' | 'hitech'
+export type ValidatorRole   = 'rudy' | 'placide' | 'dani' | 'fares'
 export type ValidationDecision = 'approved' | 'rejected'
 export type EsgCategory     = 'E' | 'S' | 'G' | 'Other'
 export type TrancheName     = 'T1' | 'T2' | 'T3' | 'T4' | 'One-Shot'

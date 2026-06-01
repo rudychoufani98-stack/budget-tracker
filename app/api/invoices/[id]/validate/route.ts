@@ -6,8 +6,9 @@ import type { InvoiceStatus } from '@/lib/types'
 
 const nextStatusOnApproval: Record<string, InvoiceStatus> = {
   pending_review:  'pending_placide',
-  pending_placide: 'pending_hitech',
-  pending_hitech:  'approved',
+  pending_placide: 'pending_dani',
+  pending_dani:    'pending_fares',
+  pending_fares:   'approved',
 }
 
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
@@ -18,7 +19,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     const { data: invoice, error: fetchError } = await supabaseAdmin.from('invoices').select('*').eq('id', params.id).single()
     if (fetchError || !invoice) return NextResponse.json({ error: 'Invoice not found' }, { status: 404 })
 
-    const roleMap: Record<string, string> = { pending_review: 'rudy', pending_placide: 'placide', pending_hitech: 'hitech' }
+    const roleMap: Record<string, string> = { pending_review: 'rudy', pending_placide: 'placide', pending_dani: 'dani', pending_fares: 'fares' }
     const validator_role = roleMap[invoice.status]
     if (!validator_role) return NextResponse.json({ error: 'Invoice cannot be validated in its current state' }, { status: 400 })
 
