@@ -88,20 +88,14 @@ export function InvoicesClient({ invoices }: { invoices: any[] }) {
           const active = selectedStatus === s.key
           return (
             <button key={s.key} onClick={() => setSelectedStatus(active ? 'ALL' : s.key)}
-              className="rounded-2xl p-4 text-left transition-all hover:shadow-md"
+              className="rounded-2xl p-4 text-left transition-all hover:shadow-sm"
               style={{
-                background: active ? s.bg : '#FFFFFF',
+                background: '#FFFFFF',
                 border: active ? `2px solid ${s.color}` : '1px solid #E2E8F0',
-                boxShadow: active ? `0 0 0 3px ${s.color}20` : 'none',
               }}
             >
-              <div className="flex items-center justify-between mb-3">
-                <p className="text-xs font-bold uppercase tracking-widest" style={{ color: active ? s.color : '#94A3B8' }}>{s.label}</p>
-                <div className="w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold" style={{ background: active ? s.color : '#F1F5F9', color: active ? '#fff' : '#94A3B8' }}>
-                  {s.icon}
-                </div>
-              </div>
-              <p className="text-3xl font-bold mb-1" style={{ color: s.color }}>{s.count}</p>
+              <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color:'#94A3B8' }}>{s.label}</p>
+              <p className="text-2xl font-bold mb-1" style={{ color: s.color }}>{s.count}</p>
               <p className="text-xs truncate" style={{ color:'#94A3B8' }}>{s.amount}</p>
             </button>
           )

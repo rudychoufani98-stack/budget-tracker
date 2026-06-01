@@ -19,7 +19,7 @@ const VALIDATOR_NAME: Record<string,string> = {
 function StepBar({ counts, userRole }: { counts: Record<string,number>; userRole: string }) {
   const myStep = STEPS.find(s => s.role === userRole || (userRole === 'admin' && s.role === 'rudy'))
   return (
-    <div className="rounded-2xl p-6 mb-6" style={{ background:'#FFFFFF', border:'1px solid #BFDBFE' }}>
+    <div className="rounded-2xl p-6 mb-6" style={{ background:'#FFFFFF', border:'1px solid #E2E8F0' }}>
       <div className="flex items-center">
         {STEPS.map((s, i) => {
           const count = counts[s.status] || 0
@@ -118,25 +118,24 @@ export default function ValidationsPage() {
   const total     = invoices.length
 
   return (
-    <div className="min-h-screen" style={{ background:'#EFF6FF' }}>
     <div className="px-6 py-8 max-w-5xl mx-auto">
 
       {/* Header */}
-      <div className="rounded-2xl px-6 py-5 mb-6 flex items-center justify-between" style={{ background:'linear-gradient(135deg,#1D4ED8,#3B82F6)', boxShadow:'0 4px 24px rgba(59,130,246,0.3)' }}>
+      <div className="flex items-center justify-between mb-6">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color:'rgba(255,255,255,0.7)' }}>Workflow</p>
-          <h1 className="text-2xl font-bold" style={{ color:'#fff' }}>Validations</h1>
-          <p className="text-sm mt-0.5" style={{ color:'rgba(255,255,255,0.75)' }}>
+          <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color:'#64748B' }}>Workflow</p>
+          <h1 className="text-2xl font-bold" style={{ color:'#0F172A' }}>Validations</h1>
+          <p className="text-sm mt-0.5" style={{ color:'#64748B' }}>
             {total > 0 ? `${total} invoice${total!==1?'s':''} in pipeline` : 'Pipeline is clear'}
           </p>
         </div>
         <div className="flex items-center gap-2">
           {(['queue','history'] as const).map(t => (
             <button key={t} onClick={()=>setTab(t)}
-              className="text-sm px-4 py-2 rounded-xl font-semibold capitalize"
+              className="text-sm px-4 py-2 rounded-xl font-medium capitalize"
               style={tab===t
-                ? {background:'#fff', color:'#1D4ED8'}
-                : {background:'rgba(255,255,255,0.15)', color:'#fff', border:'1px solid rgba(255,255,255,0.25)'}}
+                ? {background:'#0F172A', color:'#fff'}
+                : {background:'#F1F5F9', color:'#64748B'}}
             >
               {t === 'queue' ? `Queue (${total})` : `History (${history.length})`}
             </button>
@@ -160,9 +159,9 @@ export default function ValidationsPage() {
               </div>
 
               {myInvs.length === 0 ? (
-                <div className="rounded-2xl p-8 text-center" style={{ background:'#EFF6FF', border:'1px solid #BFDBFE' }}>
+                <div className="rounded-2xl p-8 text-center" style={{ background:'#F8FAFC', border:'1px solid #E2E8F0' }}>
                   <div className="text-2xl mb-2">OK</div>
-                  <p className="text-sm font-semibold" style={{ color:'#1D4ED8' }}>Nothing to do right now</p>
+                  <p className="text-sm font-semibold" style={{ color:'#0F172A' }}>Nothing to do right now</p>
                   <p className="text-xs mt-1" style={{ color:'#64748B' }}>Invoices will appear here when they reach your step</p>
                 </div>
               ) : (
@@ -303,11 +302,11 @@ export default function ValidationsPage() {
           )}
 
           {total === 0 && (
-            <div className="rounded-2xl p-16 text-center" style={{ background:'#FFFFFF', border:'1px solid #BFDBFE' }}>
-              <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background:'#EFF6FF' }}>
-                <svg width="24" height="24" fill="none" stroke="#3B82F6" strokeWidth="1.8" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            <div className="rounded-2xl p-16 text-center" style={{ background:'#FFFFFF', border:'1px solid #E2E8F0' }}>
+              <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background:'#F1F5F9' }}>
+                <svg width="24" height="24" fill="none" stroke="#64748B" strokeWidth="1.8" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
               </div>
-              <p className="text-base font-semibold mb-1" style={{ color:'#1D4ED8' }}>All clear</p>
+              <p className="text-base font-semibold mb-1" style={{ color:'#0F172A' }}>All clear</p>
               <p className="text-sm" style={{ color:'#64748B' }}>No invoices in the validation pipeline right now.</p>
               <Link href="/upload" className="inline-flex items-center gap-2 mt-4 text-sm font-semibold px-4 py-2.5 rounded-xl" style={{ background:'#3B82F6', color:'#fff' }}>
                 Upload an Invoice
@@ -388,7 +387,6 @@ export default function ValidationsPage() {
           </div>
         </div>
       )}
-    </div>
     </div>
   )
 }
