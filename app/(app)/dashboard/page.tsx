@@ -23,7 +23,7 @@ async function getData(projectId?: string, sectionId?: string) {
 
   const [tranchesRes, contractsRes, invoicesRes, allInvRes, currencyRes, providersRes, projectsRes, sectionsCountRes] = await Promise.all([
     supabaseAdmin.from('contract_tranches').select('*, contracts(id, contract_name, category, currency, project_id, section_id, service_providers(id, name))').order('scheduled_date', { ascending: true }),
-    supabaseAdmin.from('contracts').select('id, contract_name, category, currency, contract_amount, project_id, section_id, service_providers(id, name), contract_tranches(id, tranche_name, amount, status, scheduled_date, paid_date), invoices(id, status, submitted_at, amount_ttc)').order('created_at', { ascending: false }),
+    supabaseAdmin.from('contracts').select('id, contract_name, category, currency, contract_amount, start_date, end_date, project_id, section_id, service_providers(id, name), contract_tranches(id, tranche_name, amount, status, scheduled_date, paid_date), invoices(id, status, submitted_at, amount_ttc)').order('created_at', { ascending: false }),
     supabaseAdmin.from('invoices').select('id, status, subcontractor_name, submitted_at, amount_ttc, contract_id, tranche_id').order('submitted_at', { ascending: false }),
     supabaseAdmin.from('invoices').select('id, status, subcontractor_name, submitted_at, amount_ttc, contract_id'),
     supabaseAdmin.from('invoice_currency').select('invoice_id, currency'),
@@ -285,7 +285,7 @@ async function getData(projectId?: string, sectionId?: string) {
   // Contract timeline — one row per contract with start/end dates and tranche milestones
   const today = now.getTime()
   const contractTimeline = contracts
-    .filter((c:any) => c.start_date || c.end_date || (c.contract_tranches||[]).some((t:any) => t.scheduled_date))
+    .filter((c:any) => (c.contract_tranches||[]).length > 0 || c.start_date || c.end_date)
     .map((c:any) => {
       const ts: any[] = c.contract_tranches || []
       const datesWithData = [
@@ -293,8 +293,8 @@ async function getData(projectId?: string, sectionId?: string) {
         c.end_date,
         ...ts.map((t:any) => t.scheduled_date).filter(Boolean),
       ].filter(Boolean).map((d:string) => new Date(d).getTime())
-      const minDate = datesWithData.length ? Math.min(...datesWithData) : today
-      const maxDate = datesWithData.length ? Math.max(...datesWithData) : today + 30*86400000
+      const minDate = datesWithData.length ? Math.min(...datesWithData) : today - 30*86400000
+      const maxDate = datesWithData.length ? Math.max(...datesWithData) : today + 90*86400000
       const total = ts.reduce((s:number,t:any)=>s+(t.amount||0),0)
       const paid  = ts.filter((t:any)=>t.status==='paid').reduce((s:number,t:any)=>s+(t.amount||0),0)
       const pct   = total>0 ? Math.round((paid/total)*100) : 0
