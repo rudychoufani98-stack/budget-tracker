@@ -5,267 +5,345 @@ import { createClient } from '@/utils/supabase/client'
 import Link from 'next/link'
 import { formatCurrency } from '@/lib/format'
 
-const C = { card:'#FFFFFF', border:'#E2E8F0', green:'#10B981', amber:'#F59E0B', red:'#EF4444', blue:'#3B82F6', muted:'#6B7280' }
+const STEPS = [
+  { status:'pending_review',  label:'Rudy',    role:'rudy',    action:'Forward to Placide', color:'#F97316', step:1 },
+  { status:'pending_placide', label:'Placide',  role:'placide', action:'Forward to Dani',    color:'#8B5CF6', step:2 },
+  { status:'pending_dani',    label:'Dani',     role:'dani',    action:'Forward to Fares',   color:'#3B82F6', step:3 },
+  { status:'pending_fares',   label:'Fares',    role:'fares',   action:'Confirm Payment',    color:'#10B981', step:4 },
+]
 
-// Which status each role can action
-const ROLE_QUEUE: Record<string, string> = {
-  admin:    'pending_review',
-  rudy:     'pending_review',
-  placide:  'pending_placide',
-  dani:     'pending_dani',
-  fares:    'pending_fares',
-}
-
-const STEP_META: Record<string,{ label:string; nextLabel:string; color:string; bg:string; step:number }> = {
-  pending_review:  { label:'Awaiting Rudy',    nextLabel:'Send to Placide',  color:'#F97316', bg:'rgba(249,115,22,0.1)',  step:1 },
-  pending_placide: { label:'Awaiting Placide',  nextLabel:'Send to Dani',     color:'#8B5CF6', bg:'rgba(139,92,246,0.1)', step:2 },
-  pending_dani:    { label:'Awaiting Dani',     nextLabel:'Send to Fares',    color:'#3B82F6', bg:'rgba(59,130,246,0.1)', step:3 },
-  pending_fares:   { label:'Awaiting Fares',    nextLabel:'Confirm Payment',  color:'#10B981', bg:'rgba(16,185,129,0.1)', step:4 },
-  approved:        { label:'Approved',          nextLabel:'',                 color:'#10B981', bg:'rgba(16,185,129,0.1)', step:5 },
-  rejected:        { label:'Rejected',          nextLabel:'',                 color:'#EF4444', bg:'rgba(239,68,68,0.1)',  step:0 },
-}
-
-const VALIDATOR_NAMES: Record<string,string> = {
+const VALIDATOR_NAME: Record<string,string> = {
   admin:'Rudy', rudy:'Rudy', placide:'Placide', dani:'Dani', fares:'Fares'
 }
 
+function StepBar({ counts, userRole }: { counts: Record<string,number>; userRole: string }) {
+  const myStep = STEPS.find(s => s.role === userRole || (userRole === 'admin' && s.role === 'rudy'))
+  return (
+    <div className="rounded-2xl p-6 mb-6" style={{ background:'#FFFFFF', border:'1px solid #E2E8F0' }}>
+      <div className="flex items-center">
+        {STEPS.map((s, i) => {
+          const count = counts[s.status] || 0
+          const isMe  = s === myStep
+          const done  = myStep ? s.step < myStep.step : false
+          return (
+            <div key={s.status} className="flex items-center flex-1">
+              <div className="flex-1">
+                <div className="flex flex-col items-center">
+                  <div
+                    className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold mb-2 transition-all"
+                    style={{
+                      background: isMe ? s.color : count > 0 ? s.color + '25' : '#F1F5F9',
+                      color:      isMe ? '#fff'  : count > 0 ? s.color : '#94A3B8',
+                      boxShadow:  isMe ? `0 0 0 4px ${s.color}25` : 'none',
+                    }}
+                  >
+                    {done ? (
+                      <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                    ) : count > 0 ? count : s.step}
+                  </div>
+                  <p className="text-xs font-semibold text-center" style={{ color: isMe ? s.color : '#64748B' }}>
+                    {isMe ? 'You' : s.label}
+                  </p>
+                  <p className="text-xs text-center mt-0.5" style={{ color:'#94A3B8' }}>
+                    {s.step <= 3 ? 'Validation' : 'Payment'}
+                  </p>
+                </div>
+              </div>
+              {i < STEPS.length - 1 && (
+                <div className="shrink-0 flex items-center" style={{ width:40, marginTop:-20 }}>
+                  <div className="w-full h-0.5 rounded" style={{ background: count > 0 ? s.color + '50' : '#E2E8F0' }}/>
+                  <svg width="8" height="12" viewBox="0 0 8 12" fill="none" style={{ flexShrink:0, marginLeft:-1 }}>
+                    <path d="M1 1l6 5-6 5" stroke={count > 0 ? s.color : '#E2E8F0'} strokeWidth="1.5" strokeLinecap="round"/>
+                  </svg>
+                </div>
+              )}
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 export default function ValidationsPage() {
-  const [invoices,    setInvoices]    = useState<any[]>([])
-  const [userRole,    setUserRole]    = useState('')
-  const [history,     setHistory]     = useState<any[]>([])
-  const [loading,     setLoading]     = useState(true)
-  const [submitting,  setSubmitting]  = useState<string|null>(null)
-  const [comments,    setComments]    = useState<Record<string,string>>({})
-  const [rejectModal, setRejectModal] = useState<string|null>(null)
-  const [activeTab,   setActiveTab]   = useState<'queue'|'history'>('queue')
+  const [invoices,   setInvoices]   = useState<any[]>([])
+  const [userRole,   setUserRole]   = useState('')
+  const [history,    setHistory]    = useState<any[]>([])
+  const [loading,    setLoading]    = useState(true)
+  const [submitting, setSubmitting] = useState<string|null>(null)
+  const [comments,   setComments]   = useState<Record<string,string>>({})
+  const [reject,     setReject]     = useState<string|null>(null)
+  const [tab,        setTab]        = useState<'queue'|'history'>('queue')
 
   async function load() {
-    const allStatuses = ['pending_review','pending_placide','pending_dani','pending_fares']
+    const all = ['pending_review','pending_placide','pending_dani','pending_fares']
     const [invRes, curRes, valRes] = await Promise.all([
-      supabase.from('invoices').select('*').in('status', allStatuses).order('submitted_at'),
+      supabase.from('invoices').select('*, contracts(contract_name), service_providers(name)').in('status', all).order('submitted_at'),
       supabase.from('invoice_currency').select('invoice_id, currency'),
-      supabase.from('validations').select('*, invoices(subcontractor_name)').order('validated_at', { ascending:false }).limit(50),
+      supabase.from('validations').select('*, invoices(subcontractor_name)').order('validated_at', { ascending:false }).limit(60),
     ])
     const cmap: Record<string,string> = {}
     for (const c of curRes.data || []) cmap[c.invoice_id] = c.currency
-    setInvoices((invRes.data || []).map((inv: any) => ({
-      ...inv,
-      currency: cmap[inv.id] || inv.currency || 'NGN',
-    })))
+    setInvoices((invRes.data || []).map((i:any) => ({ ...i, currency: cmap[i.id] || i.currency || 'NGN' })))
     setHistory(valRes.data || [])
     setLoading(false)
   }
 
   useEffect(() => {
-    const auth = createClient()
-    auth.auth.getUser().then(({ data }) => {
-      const role = data.user?.user_metadata?.role || 'viewer'
-      setUserRole(role)
-    })
+    createClient().auth.getUser().then(({ data }) => setUserRole(data.user?.user_metadata?.role || 'viewer'))
     load()
   }, [])
 
-  async function validate(invoiceId: string, decision: 'approved'|'rejected') {
+  async function act(invoiceId: string, decision: 'approved'|'rejected') {
     setSubmitting(invoiceId)
-    const validatorName = VALIDATOR_NAMES[userRole] || userRole
     await fetch(`/api/invoices/${invoiceId}/validate`, {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ decision, validator_name: validatorName, comment: comments[invoiceId] || null }),
+      body: JSON.stringify({ decision, validator_name: VALIDATOR_NAME[userRole] || userRole, comment: comments[invoiceId] || null }),
     })
-    setSubmitting(null)
-    setRejectModal(null)
-    setComments(p=>{ const n={...p}; delete n[invoiceId]; return n })
+    setSubmitting(null); setReject(null)
+    setComments(p => { const n = {...p}; delete n[invoiceId]; return n })
     await load()
   }
 
-  const daysWaiting = (date: string) => Math.floor((Date.now() - new Date(date).getTime()) / 86400000)
+  if (loading) return (
+    <div className="flex items-center justify-center h-screen">
+      <div className="w-8 h-8 rounded-full border-2 border-blue-500 border-t-transparent animate-spin"/>
+    </div>
+  )
 
-  // Invoices this user can action
-  const myQueue = ROLE_QUEUE[userRole]
-  const myInvoices     = invoices.filter(i => i.status === myQueue)
-  const otherInvoices  = invoices.filter(i => i.status !== myQueue)
-
-  // Step progress display
-  const steps = ['pending_review','pending_placide','pending_dani','pending_fares','approved']
-  const stepNames = ['Rudy','Placide','Dani','Fares','Done']
-
-  if (loading) return <div className="flex items-center justify-center h-screen" style={{ color:C.muted }}>Loading...</div>
+  const myStep    = STEPS.find(s => s.role === userRole || (userRole === 'admin' && s.role === 'rudy'))
+  const myInvs    = invoices.filter(i => i.status === myStep?.status)
+  const otherInvs = invoices.filter(i => i.status !== myStep?.status)
+  const counts    = Object.fromEntries(STEPS.map(s => [s.status, invoices.filter(i=>i.status===s.status).length]))
+  const total     = invoices.length
 
   return (
-    <div className="px-6 py-8 max-w-6xl mx-auto">
+    <div className="px-6 py-8 max-w-5xl mx-auto">
+
+      {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color:C.muted }}>Invoices</p>
+          <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color:'#64748B' }}>Workflow</p>
           <h1 className="text-2xl font-bold" style={{ color:'#0F172A' }}>Validations</h1>
-          <p className="text-sm mt-0.5" style={{ color:C.muted }}>
-            {myQueue ? `Your queue: ${myInvoices.length} invoice${myInvoices.length!==1?'s':''} waiting` : 'Read-only view'}
-          </p>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={()=>setActiveTab('queue')} className="text-sm px-4 py-2 rounded-xl font-medium" style={activeTab==='queue'?{background:'#3B82F6',color:'#fff'}:{background:'#F1F5F9',color:'#64748B'}}>
-            Queue ({invoices.length})
-          </button>
-          <button onClick={()=>setActiveTab('history')} className="text-sm px-4 py-2 rounded-xl font-medium" style={activeTab==='history'?{background:'#3B82F6',color:'#fff'}:{background:'#F1F5F9',color:'#64748B'}}>
-            History ({history.length})
-          </button>
+          {(['queue','history'] as const).map(t => (
+            <button key={t} onClick={()=>setTab(t)}
+              className="text-sm px-4 py-2 rounded-xl font-medium capitalize"
+              style={tab===t ? {background:'#0F172A',color:'#fff'} : {background:'#F1F5F9',color:'#64748B'}}
+            >
+              {t === 'queue' ? `Queue (${total})` : `History (${history.length})`}
+            </button>
+          ))}
         </div>
       </div>
 
-      {activeTab === 'queue' && (
+      {tab === 'queue' && (
         <>
-          {/* Pipeline overview */}
-          <div className="rounded-2xl p-5 mb-6" style={{ background:C.card, border:`1px solid ${C.border}` }}>
-            <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color:'#94A3B8' }}>Validation Pipeline</p>
-            <div className="flex items-center gap-0">
-              {steps.map((s, i) => {
-                const count = s === 'approved' ? 0 : invoices.filter(inv => inv.status === s).length
-                const meta  = STEP_META[s]
-                const isMe  = s === myQueue
-                return (
-                  <div key={s} className="flex items-center flex-1">
-                    <div className="flex-1 text-center">
-                      <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold mx-auto mb-1.5"
-                        style={{ background: isMe ? meta.color : count > 0 ? `${meta.color}30` : '#F1F5F9',
-                                 color: isMe ? '#fff' : count > 0 ? meta.color : '#94A3B8',
-                                 border: isMe ? 'none' : '2px solid transparent' }}>
-                        {count > 0 ? count : i + 1}
-                      </div>
-                      <p className="text-xs font-semibold" style={{ color: isMe ? meta.color : '#64748B' }}>{stepNames[i]}</p>
-                      {isMe && <p className="text-xs" style={{ color:meta.color }}>Your turn</p>}
-                    </div>
-                    {i < steps.length - 1 && (
-                      <div className="h-0.5 flex-1 mx-1" style={{ background: count > 0 ? meta.color + '40' : '#E2E8F0' }}/>
-                    )}
-                  </div>
-                )
-              })}
-            </div>
-          </div>
+          <StepBar counts={counts} userRole={userRole} />
 
-          {/* My queue */}
-          {myQueue && myInvoices.length > 0 && (
-            <div className="rounded-2xl overflow-hidden mb-6" style={{ background:C.card, border:`2px solid ${STEP_META[myQueue]?.color}` }}>
-              <div className="px-5 py-4" style={{ background:`${STEP_META[myQueue]?.color}10`, borderBottom:`1px solid ${STEP_META[myQueue]?.color}30` }}>
-                <p className="text-sm font-bold" style={{ color:STEP_META[myQueue]?.color }}>
-                  Your queue - {myInvoices.length} invoice{myInvoices.length!==1?'s':''} waiting for you
-                </p>
-                <p className="text-xs mt-0.5" style={{ color:C.muted }}>
-                  {userRole === 'fares' ? 'Confirm payment received - this is the final step' : `Approve to forward to ${STEP_META[myQueue]?.nextLabel.replace('Send to ','')}`}
-                </p>
+          {/* My action section */}
+          {myStep && (
+            <div className="mb-6">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: myInvs.length > 0 ? myStep.color : '#94A3B8' }}/>
+                <h2 className="text-sm font-bold" style={{ color:'#0F172A' }}>
+                  {myInvs.length > 0 ? `${myInvs.length} invoice${myInvs.length!==1?'s':''} waiting for your action` : 'Your queue is clear'}
+                </h2>
+                {myStep.step === 4 && <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background:'rgba(16,185,129,0.1)', color:'#10B981' }}>Final step</span>}
               </div>
-              <div className="divide-y divide-[#F8FAFC]">
-                {myInvoices.map((inv: any) => {
-                  const days = daysWaiting(inv.submitted_at || inv.created_at)
-                  return (
-                    <div key={inv.id} className="px-5 py-4">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1 flex-wrap">
-                            <Link href={`/invoices/${inv.id}`} className="text-sm font-semibold hover:text-blue-600" style={{ color:'#0F172A' }}>
-                              {inv.subcontractor_name || 'Unknown Consultant'}
-                            </Link>
-                            {inv.invoice_number && <span className="text-xs px-2 py-0.5 rounded-full font-mono" style={{ background:'#F1F5F9', color:'#64748B' }}>#{inv.invoice_number}</span>}
-                            {days > 3 && <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background:'rgba(239,68,68,0.1)', color:'#EF4444' }}>{days}d waiting</span>}
+
+              {myInvs.length === 0 ? (
+                <div className="rounded-2xl p-8 text-center" style={{ background:'#F0FDF4', border:'1px solid rgba(16,185,129,0.2)' }}>
+                  <div className="text-2xl mb-2">OK</div>
+                  <p className="text-sm font-semibold" style={{ color:'#10B981' }}>Nothing to do right now</p>
+                  <p className="text-xs mt-1" style={{ color:'#64748B' }}>Invoices will appear here when they reach your step</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {myInvs.map((inv: any) => {
+                    const days  = Math.floor((Date.now() - new Date(inv.submitted_at || inv.created_at).getTime()) / 86400000)
+                    const urgent = days >= 3
+                    return (
+                      <div key={inv.id} className="rounded-2xl overflow-hidden transition-shadow hover:shadow-md"
+                        style={{ background:'#FFFFFF', border:`1.5px solid ${urgent ? '#FCA5A5' : myStep.color + '40'}` }}>
+                        <div style={{ height:3, background: myStep.color }}/>
+                        <div className="p-5">
+                          <div className="flex items-start gap-4">
+                            {/* Invoice info */}
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                <Link href={`/invoices/${inv.id}`} className="text-base font-bold hover:text-blue-600 transition-colors" style={{ color:'#0F172A' }}>
+                                  {inv.subcontractor_name || inv.service_providers?.name || 'Unknown'}
+                                </Link>
+                                {inv.invoice_number && (
+                                  <span className="text-xs px-2 py-0.5 rounded-lg font-mono" style={{ background:'#F1F5F9', color:'#64748B' }}>
+                                    #{inv.invoice_number}
+                                  </span>
+                                )}
+                                {urgent && (
+                                  <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background:'rgba(239,68,68,0.1)', color:'#EF4444' }}>
+                                    {days}d waiting
+                                  </span>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-3 text-xs mb-3" style={{ color:'#94A3B8' }}>
+                                {inv.contracts?.contract_name && <span>{inv.contracts.contract_name}</span>}
+                                {inv.invoice_date && <span>{inv.invoice_date}</span>}
+                                {inv.category && <span>{inv.category}</span>}
+                              </div>
+                              <p className="text-2xl font-bold" style={{ color:'#0F172A' }}>
+                                {formatCurrency(inv.amount_ttc, inv.currency || 'NGN')}
+                              </p>
+                              {inv.amount_ht && inv.vat_rate && (
+                                <p className="text-xs mt-0.5" style={{ color:'#94A3B8' }}>
+                                  HT {formatCurrency(inv.amount_ht, inv.currency||'NGN')} + VAT {inv.vat_rate}%
+                                </p>
+                              )}
+                            </div>
+
+                            {/* Actions */}
+                            <div className="shrink-0 flex flex-col gap-2 items-end">
+                              <div className="flex items-center gap-2">
+                                <button
+                                  onClick={() => act(inv.id, 'approved')}
+                                  disabled={submitting === inv.id}
+                                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold disabled:opacity-50 transition-all hover:opacity-90"
+                                  style={{ background: myStep.color, color:'#fff', minWidth:160 }}
+                                >
+                                  {submitting === inv.id ? (
+                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mx-auto"/>
+                                  ) : (
+                                    <>
+                                      <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                                      {myStep.step === 4 ? 'Confirm Payment' : myStep.action}
+                                    </>
+                                  )}
+                                </button>
+                                <button
+                                  onClick={() => setReject(inv.id)}
+                                  disabled={submitting === inv.id}
+                                  className="px-4 py-2.5 rounded-xl text-sm font-semibold disabled:opacity-50"
+                                  style={{ background:'rgba(239,68,68,0.08)', color:'#EF4444', border:'1px solid rgba(239,68,68,0.2)' }}
+                                >
+                                  Reject
+                                </button>
+                              </div>
+                              <textarea
+                                rows={1}
+                                value={comments[inv.id] || ''}
+                                onChange={e => setComments(p=>({...p,[inv.id]:e.target.value}))}
+                                placeholder="Add comment (optional)..."
+                                className="text-xs px-3 py-1.5 rounded-lg resize-none outline-none"
+                                style={{ background:'#F8FAFC', border:'1px solid #E2E8F0', color:'#0F172A', width:280 }}
+                              />
+                            </div>
                           </div>
-                          <p className="text-xs mb-2" style={{ color:C.muted }}>
-                            {inv.invoice_date} - {inv.category || 'General'}
-                          </p>
-                          <p className="text-lg font-bold" style={{ color:'#0F172A' }}>{formatCurrency(inv.amount_ttc, inv.currency || 'NGN')}</p>
-                        </div>
-                        <div className="flex flex-col items-end gap-2 shrink-0">
-                          <div className="flex items-center gap-2">
-                            <button
-                              onClick={() => validate(inv.id, 'approved')}
-                              disabled={submitting === inv.id}
-                              className="px-4 py-2 rounded-xl text-sm font-semibold disabled:opacity-50"
-                              style={{ background: userRole === 'fares' ? '#10B981' : '#3B82F6', color:'#fff' }}
-                            >
-                              {submitting === inv.id ? '...' : userRole === 'fares' ? 'Confirm Paid' : STEP_META[myQueue]?.nextLabel || 'Approve'}
-                            </button>
-                            <button
-                              onClick={() => setRejectModal(inv.id)}
-                              disabled={submitting === inv.id}
-                              className="px-4 py-2 rounded-xl text-sm font-semibold disabled:opacity-50"
-                              style={{ background:'rgba(239,68,68,0.08)', color:'#EF4444' }}
-                            >
-                              Reject
-                            </button>
-                          </div>
-                          <textarea
-                            rows={1}
-                            value={comments[inv.id] || ''}
-                            onChange={e => setComments(p=>({...p,[inv.id]:e.target.value}))}
-                            placeholder="Optional comment..."
-                            className="text-xs px-3 py-1.5 rounded-lg resize-none w-56 outline-none"
-                            style={{ background:'#F8FAFC', border:`1px solid ${C.border}`, color:'#0F172A' }}
-                          />
                         </div>
                       </div>
-                    </div>
-                  )
-                })}
-              </div>
+                    )
+                  })}
+                </div>
+              )}
             </div>
           )}
 
-          {myQueue && myInvoices.length === 0 && (
-            <div className="rounded-2xl p-10 text-center mb-6" style={{ background:'#F0FDF4', border:'1px solid rgba(16,185,129,0.2)' }}>
-              <p className="text-2xl mb-2">OK</p>
-              <p className="text-sm font-semibold" style={{ color:'#10B981' }}>Your queue is empty</p>
-              <p className="text-xs mt-1" style={{ color:'#64748B' }}>No invoices waiting for your validation right now</p>
-            </div>
-          )}
-
-          {/* Other steps - read only */}
-          {otherInvoices.length > 0 && (
-            <div className="rounded-2xl overflow-hidden" style={{ background:C.card, border:`1px solid ${C.border}` }}>
-              <div className="px-5 py-4" style={{ borderBottom:`1px solid #F1F5F9` }}>
-                <p className="text-sm font-bold" style={{ color:'#0F172A' }}>Other steps in progress</p>
-                <p className="text-xs mt-0.5" style={{ color:C.muted }}>Read only - waiting for other validators</p>
-              </div>
-              <div className="divide-y divide-[#F8FAFC]">
-                {otherInvoices.map((inv: any) => {
-                  const meta = STEP_META[inv.status] || STEP_META.pending_review
+          {/* Other steps in progress */}
+          {otherInvs.length > 0 && (
+            <div>
+              <h2 className="text-sm font-bold mb-3" style={{ color:'#64748B' }}>
+                Other invoices in pipeline ({otherInvs.length})
+              </h2>
+              <div className="rounded-2xl overflow-hidden" style={{ background:'#FFFFFF', border:'1px solid #E2E8F0' }}>
+                {otherInvs.map((inv: any, i: number) => {
+                  const step = STEPS.find(s => s.status === inv.status)
+                  if (!step) return null
+                  const days = Math.floor((Date.now() - new Date(inv.submitted_at || inv.created_at).getTime()) / 86400000)
                   return (
-                    <Link key={inv.id} href={`/invoices/${inv.id}`} className="flex items-center justify-between px-5 py-3.5 hover:bg-slate-50 transition-colors">
-                      <div>
-                        <p className="text-sm font-semibold" style={{ color:'#0F172A' }}>{inv.subcontractor_name || 'Unknown'}</p>
-                        <p className="text-xs mt-0.5" style={{ color:C.muted }}>{formatCurrency(inv.amount_ttc, inv.currency || 'NGN')}</p>
+                    <Link key={inv.id} href={`/invoices/${inv.id}`}
+                      className="flex items-center gap-4 px-5 py-4 hover:bg-slate-50 transition-colors"
+                      style={{ borderBottom: i < otherInvs.length - 1 ? '1px solid #F8FAFC' : 'none' }}
+                    >
+                      {/* Step badge */}
+                      <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
+                        style={{ background: step.color + '20', color: step.color }}>
+                        {step.step}
                       </div>
-                      <span className="text-xs px-2.5 py-1 rounded-full font-semibold" style={{ background:meta.bg, color:meta.color }}>{meta.label}</span>
+                      {/* Info */}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold truncate" style={{ color:'#0F172A' }}>
+                          {inv.subcontractor_name || 'Unknown'}
+                        </p>
+                        <p className="text-xs truncate" style={{ color:'#94A3B8' }}>
+                          {inv.contracts?.contract_name || ''} {inv.invoice_date ? '- ' + inv.invoice_date : ''}
+                        </p>
+                      </div>
+                      {/* Amount */}
+                      <p className="text-sm font-bold shrink-0" style={{ color:'#0F172A' }}>
+                        {formatCurrency(inv.amount_ttc, inv.currency || 'NGN')}
+                      </p>
+                      {/* Status badge */}
+                      <div className="shrink-0 flex items-center gap-2">
+                        {days > 3 && <span className="text-xs px-1.5 py-0.5 rounded-full" style={{ background:'rgba(239,68,68,0.1)', color:'#EF4444' }}>{days}d</span>}
+                        <span className="text-xs px-2.5 py-1 rounded-full font-semibold" style={{ background: step.color + '18', color: step.color }}>
+                          Awaiting {step.label}
+                        </span>
+                      </div>
                     </Link>
                   )
                 })}
               </div>
             </div>
           )}
+
+          {total === 0 && (
+            <div className="rounded-2xl p-16 text-center" style={{ background:'#FFFFFF', border:'1px solid #E2E8F0' }}>
+              <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background:'#F0FDF4' }}>
+                <svg width="24" height="24" fill="none" stroke="#10B981" strokeWidth="1.8" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+              </div>
+              <p className="text-base font-semibold mb-1" style={{ color:'#0F172A' }}>All clear</p>
+              <p className="text-sm" style={{ color:'#64748B' }}>No invoices in the validation pipeline right now.</p>
+              <Link href="/upload" className="inline-flex items-center gap-2 mt-4 text-sm font-semibold px-4 py-2.5 rounded-xl" style={{ background:'#3B82F6', color:'#fff' }}>
+                Upload an Invoice
+              </Link>
+            </div>
+          )}
         </>
       )}
 
-      {activeTab === 'history' && (
-        <div className="rounded-2xl overflow-hidden" style={{ background:C.card, border:`1px solid ${C.border}` }}>
-          <div className="px-5 py-4" style={{ borderBottom:`1px solid #F1F5F9` }}>
+      {tab === 'history' && (
+        <div className="rounded-2xl overflow-hidden" style={{ background:'#FFFFFF', border:'1px solid #E2E8F0' }}>
+          <div className="px-5 py-4" style={{ borderBottom:'1px solid #F1F5F9' }}>
             <p className="text-sm font-bold" style={{ color:'#0F172A' }}>Validation History</p>
+            <p className="text-xs mt-0.5" style={{ color:'#94A3B8' }}>Last 60 actions</p>
           </div>
           {history.length === 0 ? (
-            <p className="text-sm text-center py-10" style={{ color:C.muted }}>No validations yet</p>
+            <p className="text-sm text-center py-10" style={{ color:'#94A3B8' }}>No history yet</p>
           ) : (
             <div className="divide-y divide-[#F8FAFC]">
               {history.map((v: any) => {
-                const isApproved = v.decision === 'approved'
+                const approved = v.decision === 'approved'
                 return (
-                  <div key={v.id} className="flex items-center justify-between px-5 py-3.5">
-                    <div>
-                      <p className="text-sm font-semibold" style={{ color:'#0F172A' }}>
+                  <div key={v.id} className="flex items-center gap-4 px-5 py-3.5">
+                    <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0"
+                      style={{ background: approved ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)' }}>
+                      {approved
+                        ? <svg width="12" height="12" fill="none" stroke="#10B981" strokeWidth="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                        : <svg width="12" height="12" fill="none" stroke="#EF4444" strokeWidth="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                      }
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold truncate" style={{ color:'#0F172A' }}>
                         {v.invoices?.subcontractor_name || 'Invoice'}
                       </p>
-                      <p className="text-xs mt-0.5" style={{ color:C.muted }}>
-                        By {v.validator_name} - {new Date(v.validated_at).toLocaleDateString('en-GB')}
-                        {v.comment && ` - "${v.comment}"`}
+                      <p className="text-xs truncate" style={{ color:'#94A3B8' }}>
+                        By {v.validator_name} - {new Date(v.validated_at).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' })}
+                        {v.comment ? ` - "${v.comment}"` : ''}
                       </p>
                     </div>
-                    <span className="text-xs px-2.5 py-1 rounded-full font-semibold" style={{ background:isApproved?'rgba(16,185,129,0.1)':'rgba(239,68,68,0.1)', color:isApproved?'#10B981':'#EF4444' }}>
-                      {isApproved ? 'Approved' : 'Rejected'}
+                    <span className="text-xs px-2.5 py-1 rounded-full font-semibold shrink-0"
+                      style={{ background: approved ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)', color: approved ? '#10B981' : '#EF4444' }}>
+                      {approved ? 'Approved' : 'Rejected'}
                     </span>
                   </div>
                 )
@@ -276,25 +354,29 @@ export default function ValidationsPage() {
       )}
 
       {/* Reject modal */}
-      {rejectModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background:'rgba(0,0,0,0.5)' }} onClick={()=>setRejectModal(null)}>
-          <div className="rounded-2xl w-full max-w-md overflow-hidden shadow-2xl" style={{ background:'#fff' }} onClick={e=>e.stopPropagation()}>
+      {reject && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background:'rgba(0,0,0,0.5)' }} onClick={()=>setReject(null)}>
+          <div className="rounded-2xl w-full max-w-md shadow-2xl overflow-hidden" style={{ background:'#fff' }} onClick={e=>e.stopPropagation()}>
             <div style={{ height:4, background:'#EF4444' }}/>
             <div className="p-6">
-              <h3 className="text-base font-bold mb-4" style={{ color:'#0F172A' }}>Reject Invoice</h3>
-              <textarea
-                rows={3}
-                value={comments[rejectModal] || ''}
-                onChange={e => setComments(p=>({...p,[rejectModal]:e.target.value}))}
-                placeholder="Reason for rejection (recommended)..."
+              <h3 className="text-base font-bold mb-1" style={{ color:'#0F172A' }}>Reject Invoice</h3>
+              <p className="text-sm mb-4" style={{ color:'#64748B' }}>The consultant will be notified with your reason.</p>
+              <textarea rows={3}
+                value={comments[reject] || ''}
+                onChange={e => setComments(p=>({...p,[reject]:e.target.value}))}
+                placeholder="Reason for rejection..."
                 className="w-full px-3.5 py-2.5 text-sm rounded-xl outline-none resize-none"
                 style={{ background:'#F8FAFC', border:'1.5px solid #E2E8F0', color:'#0F172A' }}
               />
               <div className="flex gap-3 mt-4">
-                <button onClick={()=>validate(rejectModal,'rejected')} disabled={submitting===rejectModal} className="flex-1 py-3 rounded-xl text-sm font-semibold disabled:opacity-50" style={{ background:'#EF4444', color:'#fff' }}>
-                  {submitting===rejectModal?'...':'Confirm Reject'}
+                <button onClick={()=>act(reject,'rejected')} disabled={submitting===reject}
+                  className="flex-1 py-3 rounded-xl text-sm font-bold disabled:opacity-50"
+                  style={{ background:'#EF4444', color:'#fff' }}>
+                  {submitting===reject ? '...' : 'Confirm Rejection'}
                 </button>
-                <button onClick={()=>setRejectModal(null)} className="px-5 py-3 rounded-xl text-sm" style={{ background:'#F1F5F9', color:'#64748B' }}>Cancel</button>
+                <button onClick={()=>setReject(null)} className="px-6 py-3 rounded-xl text-sm font-medium" style={{ background:'#F1F5F9', color:'#64748B' }}>
+                  Cancel
+                </button>
               </div>
             </div>
           </div>
