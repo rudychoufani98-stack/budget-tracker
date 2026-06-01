@@ -126,8 +126,8 @@ export default function UploadPage() {
     if (c?.service_provider_id) setSelectedProvider(c.service_provider_id)
   },[selectedContract, contracts])
 
-  // All 4 mandatory before scanning
-  const allLinked = !!selectedProject && !!selectedSection && !!selectedContract && !!selectedProvider
+  // Section is optional — invoice can be linked to the whole project or to a specific section
+  const allLinked = !!selectedProject && !!selectedContract && !!selectedProvider
 
   async function handleScan() {
     if (!file) return
@@ -236,7 +236,7 @@ export default function UploadPage() {
               {scanError && <p className="text-sm px-3 py-2 rounded-xl mb-3" style={{ background:'rgba(239,68,68,0.08)',color:'#EF4444',border:'1px solid rgba(239,68,68,0.2)' }}>{scanError}</p>}
               {!allLinked && file && (
                 <p className="text-xs px-3 py-2 rounded-xl mb-3" style={{ background:'rgba(245,158,11,0.08)', color:'#D97706', border:'1px solid rgba(245,158,11,0.3)' }}>
-                  Fill in Project, Section, Contract and Consultant before scanning.
+                  Select a Project, Contract and Consultant before scanning. Section is optional.
                 </p>
               )}
               <button onClick={handleScan} disabled={!file||!allLinked||scanning} className="w-full py-3 rounded-xl text-sm font-semibold disabled:opacity-40 transition-all flex items-center justify-center gap-2" style={{ background:'#3B82F6',color:'#fff' }}>
@@ -275,7 +275,7 @@ export default function UploadPage() {
                 <div>
                   <label className="text-xs font-semibold uppercase tracking-widest mb-2 flex items-center gap-1.5" style={{ color:'#64748B' }}>
                     <span style={{ width:6,height:6,borderRadius:'50%',background:'#8B5CF6',display:'inline-block' }}/>
-                    Section *
+                    Section (optional)
                   </label>
                   <select className={inp} style={inpSt} value={selectedSection} onChange={e=>handleSectionChange(e.target.value)} disabled={!selectedProject}>
                     <option value="">Select section...</option>
@@ -294,14 +294,14 @@ export default function UploadPage() {
                     <span style={{ width:6,height:6,borderRadius:'50%',background:'#06B6D4',display:'inline-block' }}/>
                     Contract *
                   </label>
-                  <select className={inp} style={inpSt} value={selectedContract} onChange={e=>setSelectedContract(e.target.value)} disabled={!selectedSection}>
+                  <select className={inp} style={inpSt} value={selectedContract} onChange={e=>setSelectedContract(e.target.value)} disabled={!selectedProject}>
                     <option value="">Select contract...</option>
                     {filteredContracts.map((c:any)=>(
                       <option key={c.id} value={c.id}>{c.contract_name}</option>
                     ))}
                   </select>
-                  {selectedSection && filteredContracts.length===0 && (
-                    <p className="text-xs mt-1" style={{ color:'#94A3B8' }}>No contracts in this section - add one in the Projects tab</p>
+                  {selectedProject && filteredContracts.length===0 && (
+                    <p className="text-xs mt-1" style={{ color:'#94A3B8' }}>No contracts found - add one in the Projects tab</p>
                   )}
                 </div>
 
