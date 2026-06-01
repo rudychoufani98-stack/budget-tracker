@@ -13,13 +13,11 @@ const STATUS_META: Record<string,{ label:string; color:string; bg:string }> = {
 }
 
 async function getProjects() {
-  // Try the proper projects table first
   const { data: projData, error: projErr } = await supabaseAdmin
     .from('projects')
     .select('id, name, description, budget, currency, start_date, end_date, status, created_at')
     .order('created_at', { ascending: false })
 
-  // Get all contracts with tranche + invoice data (always needed)
   const { data: contractData } = await supabaseAdmin
     .from('contracts')
     .select('id, contract_name, project, project_id, contract_amount, contract_tranches(amount, status), invoices(id, status)')
@@ -27,7 +25,6 @@ async function getProjects() {
   const contracts = contractData || []
 
   if (!projErr && projData && projData.length > 0) {
-    // Projects table exists and has data - use it
     const projects = projData.map((p, i) => {
       const linked = contracts.filter((c:any) => c.project_id === p.id)
       const committed = linked.reduce((s:number,c:any)=>s+(c.contract_tranches||[]).reduce((ts:number,t:any)=>ts+(t.amount||0),0),0)
@@ -44,7 +41,6 @@ async function getProjects() {
     return { projects, useIdLinks: true }
   }
 
-  // Fallback: group contracts by project text field
   const map: Record<string,any[]> = {}
   for (const c of contracts) {
     const key = (c as any).project?.trim() || 'Unassigned'
@@ -82,7 +78,9 @@ export default async function ProjectsPage() {
         <div>
           <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color:'#64748B' }}>Finance</p>
           <h1 className="text-2xl font-bold" style={{ color:'#0F172A' }}>Projects</h1>
-          <p className="text-sm mt-0.5" style={{ color:'#64748B' }}>{projects.length} project{projects.length!==1?'s':''} · {globalPct}% paid overall</p>
+          <p className="text-sm mt-0.5" style={{ color:'#64748B' }}>
+            {projects.length} project{projects.length!==1?'s':''}{' - '}{globalPct}% paid overall
+          </p>
         </div>
         <Link href="/projects/new" className="text-sm font-semibold px-4 py-2.5 rounded-xl flex items-center gap-2" style={{ background:'#3B82F6', color:'#fff' }}>
           <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -94,10 +92,10 @@ export default async function ProjectsPage() {
       {projects.length > 0 && (
         <div className="grid grid-cols-4 gap-4 mb-6">
           {[
-            { label:'Total Budget',    value:formatCurrency(totalBudget),    sub:`${projects.length} projects`,               color:'#3B82F6' },
-            { label:'Total Committed', value:formatCurrency(totalCommitted), sub:'across all contracts',                      color:'#8B5CF6' },
-            { label:'Total Paid',      value:formatCurrency(totalPaid),      sub:`${globalPct}% payment rate`,                color:'#10B981' },
-            { label:'Pending Review',  value:String(pendingAll),              sub:`invoice${pendingAll!==1?'s':''} waiting`,  color:pendingAll>0?'#F59E0B':'#94A3B8' },
+            { label:'Total Budget',    value:formatCurrency(totalBudget),    sub:`${projects.length} projects`,              color:'#3B82F6' },
+            { label:'Total Committed', value:formatCurrency(totalCommitted), sub:'across all contracts',                     color:'#8B5CF6' },
+            { label:'Total Paid',      value:formatCurrency(totalPaid),      sub:`${globalPct}% payment rate`,               color:'#10B981' },
+            { label:'Pending Review',  value:String(pendingAll),             sub:`invoice${pendingAll!==1?'s':''} waiting`,  color:pendingAll>0?'#F59E0B':'#94A3B8' },
           ].map(k=>(
             <div key={k.label} className="rounded-2xl px-5 py-4" style={{ background:'#FFFFFF', border:'1px solid #E2E8F0' }}>
               <p className="text-xs font-medium uppercase tracking-widest mb-2" style={{ color:'#94A3B8' }}>{k.label}</p>
@@ -146,7 +144,7 @@ export default async function ProjectsPage() {
         <div className="grid grid-cols-2 gap-4">
           {projects.map(proj => {
             const sm = STATUS_META[proj.status] || STATUS_META.active
-            const href = useIdLinks ? `/projects/${proj.id}` : `/projects/${proj.id}`
+            const href = `/projects/${proj.id}`
             return (
               <Link key={proj.id} href={href} className="block group">
                 <div className="rounded-2xl overflow-hidden transition-all hover:shadow-lg hover:-translate-y-0.5" style={{ background:'#FFFFFF', border:'1px solid #E2E8F0' }}>
@@ -165,9 +163,11 @@ export default async function ProjectsPage() {
                         </div>
                         {proj.description && <p className="text-sm truncate" style={{ color:'#64748B' }}>{proj.description}</p>}
                         <p className="text-xs mt-1" style={{ color:'#94A3B8' }}>
-                          {proj.contractCount} contract{proj.contractCount!==1?’s’:’’} · {proj.invoices} invoice{proj.invoices!==1?’s’:’’}
-                          {proj.start_date && ` · ${new Date(proj.start_date).toLocaleDateString(‘en-GB’,{month:’short’,year:’numeric’})}`}
-                          {proj.end_date && ` → ${new Date(proj.end_date).toLocaleDateString(‘en-GB’,{month:’short’,year:’numeric’})}`}
+                          {proj.contractCount} contract{proj.contractCount!==1?'s':''}
+                          {' - '}
+                          {proj.invoices} invoice{proj.invoices!==1?'s':''}
+                          {proj.start_date && (' - ' + new Date(proj.start_date).toLocaleDateString('en-GB',{month:'short',year:'numeric'}))}
+                          {proj.end_date && (' to ' + new Date(proj.end_date).toLocaleDateString('en-GB',{month:'short',year:'numeric'}))}
                         </p>
                       </div>
                       <div className="text-right shrink-0">
@@ -195,8 +195,6 @@ export default async function ProjectsPage() {
                       </div>
                     ))}
                   </div>
-
-                  {/* Contracts (contracts) */}
                   {proj.sections && proj.sections.length > 0 && (
                     <div className="px-5 py-3" style={{ borderTop:'1px solid #F1F5F9', background:'#FAFBFC' }}>
                       <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color:'#94A3B8' }}>Contracts</p>
