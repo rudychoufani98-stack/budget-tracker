@@ -5,7 +5,7 @@ import Link from 'next/link'
 
 const C = { card: '#FFFFFF', border: '#E2E8F0', blue: '#3B82F6', muted: '#64748B' }
 const TRANCHE_NAMES = ['T1','T2','T3','T4','One-Shot']
-const CURRENCIES = ['USD','EUR','GBP','CHF','MAD','XOF','NGN','CAD','AED']
+const CURRENCIES = ['NGN','USD','EUR','GBP','CHF','MAD','XOF','NGN','CAD','AED']
 
 export default function NewContractPage() {
   const router = useRouter()
@@ -15,7 +15,7 @@ export default function NewContractPage() {
   const [error,  setError]  = useState('')
   const [form, setForm] = useState({
     contract_name:'', service_provider_id:'', project_id:'', project:'',
-    category:'E', description:'', currency:'USD',
+    category:'E', description:'', currency:'NGN',
     start_date:'', end_date:'', status:'active', notes:''
   })
   const [tranches, setTranches] = useState<{ name:string; amount:string; date:string }[]>([])

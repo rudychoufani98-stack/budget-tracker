@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
       name:        name.trim(),
       description: description || null,
       budget:      budget     || null,
-      currency:    currency   || 'USD',
+      currency:    currency   || 'NGN',
       start_date:  start_date || null,
       end_date:    end_date   || null,
       status:      status     || 'active',

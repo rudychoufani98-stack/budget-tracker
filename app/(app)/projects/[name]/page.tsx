@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { formatCurrency } from '@/lib/format'
 
-const CURRENCIES = ['USD','EUR','GBP','CHF','MAD','XOF','NGN','CAD']
+const CURRENCIES = ['NGN','USD','EUR','GBP','CHF','MAD','XOF','CAD']
 const PALETTE     = ['#3B82F6','#8B5CF6','#F59E0B','#EF4444','#10B981','#06B6D4','#F97316','#EC4899']
 
 const PROJ_STATUS: Record<string,{label:string;color:string;bg:string}> = {
@@ -40,14 +40,14 @@ export default function ProjectDetailPage({ params }: { params: { name: string }
 
   // Section modal
   const [showAddSection, setShowAddSection]   = useState(false)
-  const [sectionForm,    setSectionForm]      = useState({ name:'', description:'', budget:'', currency:'USD', start_date:'', end_date:'', status:'active' })
+  const [sectionForm,    setSectionForm]      = useState({ name:'', description:'', budget:'', currency:'NGN', start_date:'', end_date:'', status:'active' })
   const [addingSection,  setAddingSection]    = useState(false)
   const [sectionError,   setSectionError]     = useState('')
 
   // Contract modal
   const [showAddContract, setShowAddContract] = useState(false)
   const [contractSectionId, setContractSectionId] = useState('')
-  const [contractForm, setContractForm] = useState({ contract_name:'', service_provider_id:'', category:'E', currency:'USD', description:'' })
+  const [contractForm, setContractForm] = useState({ contract_name:'', service_provider_id:'', category:'E', currency:'NGN', description:'' })
   const [addingContract, setAddingContract]   = useState(false)
 
   function reload() {
@@ -59,7 +59,7 @@ export default function ProjectDetailPage({ params }: { params: { name: string }
     fetch(`/api/projects/${projectId}`).then(r=>r.json()).then(d=>{
       if (d.error) { setError(d.error); setLoading(false); return }
       setProject(d)
-      setEditData({ name:d.name||'', description:d.description||'', budget:d.budget||'', currency:d.currency||'USD', start_date:d.start_date||'', end_date:d.end_date||'', status:d.status||'active' })
+      setEditData({ name:d.name||'', description:d.description||'', budget:d.budget||'', currency:d.currency||'NGN', start_date:d.start_date||'', end_date:d.end_date||'', status:d.status||'active' })
       setLoading(false)
     }).catch(()=>{ setError('Failed to load'); setLoading(false) })
   }, [projectId])
@@ -89,7 +89,7 @@ export default function ProjectDetailPage({ params }: { params: { name: string }
     setAddingSection(false)
     if (!res.ok || data.error) { setSectionError(data.error || 'Failed to create section'); return }
     setShowAddSection(false)
-    setSectionForm({ name:'', description:'', budget:'', currency:'USD', start_date:'', end_date:'', status:'active' })
+    setSectionForm({ name:'', description:'', budget:'', currency:'NGN', start_date:'', end_date:'', status:'active' })
     setSectionError('')
     await reload()
   }
@@ -102,7 +102,7 @@ export default function ProjectDetailPage({ params }: { params: { name: string }
     setAddingContract(false)
     if (!res.ok || data.error) { alert(data.error || 'Failed to create contract'); return }
     setShowAddContract(false)
-    setContractForm({ contract_name:'', service_provider_id:'', category:'E', currency:'USD', description:'' })
+    setContractForm({ contract_name:'', service_provider_id:'', category:'E', currency:'NGN', description:'' })
     setContractSectionId('')
     await reload()
   }
@@ -121,7 +121,7 @@ export default function ProjectDetailPage({ params }: { params: { name: string }
   const allContracts   = project.allContracts || []
   const global         = stats(allContracts)
   const ps             = PROJ_STATUS[project.status] || PROJ_STATUS.active
-  const ccy            = project.currency || 'USD'
+  const ccy            = project.currency || 'NGN'
   const inp            = 'w-full px-3.5 py-2.5 text-sm rounded-xl outline-none'
   const inpSt          = { background:'#F8FAFC', border:'1.5px solid #E2E8F0', color:'#0F172A' }
 
@@ -253,7 +253,7 @@ export default function ProjectDetailPage({ params }: { params: { name: string }
                     {sec.description && <p className="text-xs mb-1" style={{ color:'#64748B' }}>{sec.description}</p>}
                     <p className="text-xs" style={{ color:'#94A3B8' }}>
                       {(sec.contracts||[]).length} contract{(sec.contracts||[]).length!==1?'s':''}
-                      {sec.budget && ` · Budget: ${formatCurrency(sec.budget, sec.currency||'USD')}`}
+                      {sec.budget && ` · Budget: ${formatCurrency(sec.budget, sec.currency||'NGN')}`}
                       {sec.start_date && ` · ${new Date(sec.start_date).toLocaleDateString('en-GB',{month:'short',year:'numeric'})} → ${new Date(sec.end_date||sec.start_date).toLocaleDateString('en-GB',{month:'short',year:'numeric'})}`}
                     </p>
                   </div>

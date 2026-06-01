@@ -16,12 +16,12 @@ const INV_STATUS: Record<string,{label:string;color:string;bg:string}> = {
   rejected:        { label:'Rejected',         color:'#EF4444', bg:'rgba(239,68,68,0.1)'   },
 }
 
-async function getData(projectId?: string, sectionId?: string) {
+async function getData(projectId?: string, sectionId?: string, baseCcy: string = 'EUR') {
   const now = new Date()
   const in30 = new Date(now.getTime() + 30*86400000)
   const in14 = new Date(now.getTime() + 14*86400000)
 
-  const [tranchesRes, contractsRes, invoicesRes, allInvRes, currencyRes, providersRes, projectsRes, sectionsCountRes] = await Promise.all([
+  const [tranchesRes, contractsRes, invoicesRes, allInvRes, currencyRes, providersRes, projectsRes, sectionsCountRes, fxRes] = await Promise.all([
     supabaseAdmin.from('contract_tranches').select('*, contracts(id, contract_name, category, currency, project_id, section_id, service_providers(id, name))').order('scheduled_date', { ascending: true }),
     supabaseAdmin.from('contracts').select('id, contract_name, category, currency, contract_amount, start_date, end_date, project_id, section_id, service_providers(id, name), contract_tranches(id, tranche_name, amount, status, scheduled_date, paid_date), invoices(id, status, submitted_at, amount_ttc)').order('created_at', { ascending: false }),
     supabaseAdmin.from('invoices').select('id, status, subcontractor_name, submitted_at, amount_ttc, contract_id, tranche_id').order('submitted_at', { ascending: false }),
@@ -30,6 +30,7 @@ async function getData(projectId?: string, sectionId?: string) {
     supabaseAdmin.from('service_providers').select('id, name'),
     supabaseAdmin.from('projects').select('id, name, status, currency'),
     supabaseAdmin.from('project_sections').select('id, project_id, name'),
+    supabaseAdmin.from('exchange_rates').select('currency, rate, fetched_at').eq('base', 'USD'),
   ])
 
   const allTranches  = tranchesRes.data  || []
@@ -39,6 +40,22 @@ async function getData(projectId?: string, sectionId?: string) {
   const providers    = providersRes.data || []
   const rawProjects  = projectsRes.data  || []
   const allSections  = sectionsCountRes.data || []
+
+  // FX rates (all vs USD as base)
+  const fxRates: Record<string, number> = { USD: 1 }
+  let fxFetchedAt = ''
+  for (const row of fxRes.data || []) {
+    fxRates[row.currency] = row.rate
+    if (!fxFetchedAt) fxFetchedAt = row.fetched_at
+  }
+
+  // Convert any amount from its native currency to baseCcy
+  function toBase(amount: number, fromCcy: string): number {
+    if (!amount) return 0
+    const from = fxRates[fromCcy] || 1
+    const to   = fxRates[baseCcy] || 1
+    return (amount / from) * to
+  }
 
   const currencyMap: Record<string,string> = {}
   for (const c of currencyRes.data || []) currencyMap[c.invoice_id] = c.currency
@@ -88,27 +105,32 @@ async function getData(projectId?: string, sectionId?: string) {
       pct,
       contractCount: pContracts.length,
       sectionCount: sectionCountByProject[p.id] || 0,
-      currency: p.currency || 'USD',
+      currency: p.currency || 'NGN',
     }
   })
 
-  // Row 1 metrics (filtered)
-  const totalCommitted = tranches.reduce((s:number,t:any) => s + (t.amount||0), 0)
-  const totalPaid      = tranches.filter((t:any) => t.status === 'paid').reduce((s:number,t:any) => s + (t.amount||0), 0)
+  // Row 1 metrics — converted to baseCcy using each contract's native currency
+  function trancheBase(t: any): number {
+    const ccy = (t.contracts as any)?.currency || 'NGN'
+    return toBase(t.amount || 0, ccy)
+  }
+
+  const totalCommitted = tranches.reduce((s:number,t:any) => s + trancheBase(t), 0)
+  const totalPaid      = tranches.filter((t:any) => t.status === 'paid').reduce((s:number,t:any) => s + trancheBase(t), 0)
 
   const pipeline30 = tranches.filter((t:any) => {
     if (t.status !== 'scheduled' && t.status !== 'unpaid') return false
     if (!t.scheduled_date) return false
     const d = new Date(t.scheduled_date)
     return d >= now && d <= in30
-  }).reduce((s:number,t:any) => s + (t.amount||0), 0)
+  }).reduce((s:number,t:any) => s + trancheBase(t), 0)
 
   const overdueTranches = tranches.filter((t:any) => {
     if (t.status === 'paid') return false
     if (!t.scheduled_date) return false
     return new Date(t.scheduled_date) < now
   })
-  const overdueAmount = overdueTranches.reduce((s:number,t:any) => s + (t.amount||0), 0)
+  const overdueAmount = overdueTranches.reduce((s:number,t:any) => s + trancheBase(t), 0)
 
   // Build invoice lookup
   const invoiceByTranche: Record<string,any> = {}
@@ -128,7 +150,7 @@ async function getData(projectId?: string, sectionId?: string) {
     const total = ts.reduce((s:number,t:any) => s + (t.amount||0), 0)
     const paid  = ts.filter((t:any) => t.status === 'paid').reduce((s:number,t:any) => s + (t.amount||0), 0)
     const pct   = total > 0 ? Math.round((paid/total)*100) : 0
-    const ccy   = c.currency || 'USD'
+    const ccy   = c.currency || 'NGN'
 
     const upcoming = ts
       .filter((t:any) => t.status !== 'paid' && t.scheduled_date)
@@ -163,7 +185,7 @@ async function getData(projectId?: string, sectionId?: string) {
         trancheName: t.tranche_name,
         scheduledDate: t.scheduled_date,
         amount: t.amount || 0,
-        currency: (t.contracts as any)?.currency || 'USD',
+        currency: (t.contracts as any)?.currency || 'NGN',
         status: t.status,
         isOverdue,
         isDueSoon,
@@ -194,7 +216,7 @@ async function getData(projectId?: string, sectionId?: string) {
     providerMap[pid].contracts.push({
       contractId: (c as any).id,
       contractName: (c as any).contract_name,
-      ccy: (c as any).currency || 'USD',
+      ccy: (c as any).currency || 'NGN',
       tranches: tranchesByName,
       totalPaid: totalPaidP,
       balance: totalAllP - totalPaidP,
@@ -303,7 +325,7 @@ async function getData(projectId?: string, sectionId?: string) {
         name: c.contract_name,
         provider: c.service_providers?.name || '',
         category: c.category || 'Other',
-        ccy: c.currency || 'USD',
+        ccy: c.currency || 'NGN',
         total, paid, pct,
         startDate: c.start_date || null,
         endDate: c.end_date || null,
@@ -332,6 +354,9 @@ async function getData(projectId?: string, sectionId?: string) {
     currentProject: projectId || '',
     currentSection: sectionId || '',
     contractTimeline,
+    baseCcy,
+    fxRates,
+    fxFetchedAt,
   }
 }
 
@@ -503,12 +528,26 @@ function ContractTimeline({ contracts, now }: { contracts: any[]; now: Date }) {
 export default async function DashboardPage({
   searchParams,
 }: {
-  searchParams: { project?: string; section?: string }
+  searchParams: { project?: string; section?: string; currency?: string }
 }) {
   const projectId = searchParams.project || ''
   const sectionId = searchParams.section || ''
-  const d = await getData(projectId || undefined, sectionId || undefined)
+  const baseCcy   = searchParams.currency || 'NGN'
+  const d = await getData(projectId || undefined, sectionId || undefined, baseCcy)
   const now = new Date()
+
+  // Build URL helper that preserves other params
+  function fxUrl(ccy: string) {
+    const p = new URLSearchParams()
+    if (projectId) p.set('project', projectId)
+    if (sectionId) p.set('section', sectionId)
+    p.set('currency', ccy)
+    return '/dashboard?' + p.toString()
+  }
+
+  const fxAge = d.fxFetchedAt
+    ? Math.floor((Date.now() - new Date(d.fxFetchedAt).getTime()) / 3600000)
+    : null
 
   return (
     <div className="px-6 py-8 max-w-7xl mx-auto space-y-6">

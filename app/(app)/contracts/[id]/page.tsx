@@ -78,7 +78,7 @@ export default function ContractDetailPage() {
 
   // ── Budget & invoice calculations ──────────────────────────────────
   const contractBudget  = contract.contract_amount || contract.total_budget || 0
-  const ccy             = contract.currency || 'USD'
+  const ccy             = contract.currency || 'NGN'
 
   // Invoice-based tracking (what matters for budget deduction)
   const nonRejected     = invoices.filter((i:any) => i.status !== 'rejected')

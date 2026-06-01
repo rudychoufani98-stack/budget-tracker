@@ -32,7 +32,7 @@ export default function ValidationsPage() {
     for (const c of curRes.data || []) cmap[c.invoice_id] = c.currency
     setInvoices((invRes.data || []).map((inv: any) => ({
       ...inv,
-      currency: cmap[inv.id] || inv.currency || 'USD',
+      currency: cmap[inv.id] || inv.currency || 'NGN',
     })))
     setHistory(valRes.data || [])
     setLoading(false)
@@ -95,7 +95,7 @@ export default function ValidationsPage() {
                         </div>
                         <span className="text-xs px-2 py-0.5 rounded-full" style={{ background:urgent?'rgba(239,68,68,0.15)':'rgba(107,114,128,0.15)', color:urgent?C.red:C.muted }}>{days}d</span>
                       </div>
-                      <p className="text-sm font-medium mb-3" style={{ color:col.color }}>{formatCurrency(inv.amount_ttc, inv.currency || 'USD')}</p>
+                      <p className="text-sm font-medium mb-3" style={{ color:col.color }}>{formatCurrency(inv.amount_ttc, inv.currency || 'NGN')}</p>
                       <Link href={`/invoices/${inv.id}`} className="block text-xs mb-3" style={{ color:C.blue }}>View details</Link>
                       {canAct && (
                         <div className="space-y-2">

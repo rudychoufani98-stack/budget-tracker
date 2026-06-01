@@ -1,4 +1,4 @@
-export function formatCurrency(amount: number | null, currency = 'USD'): string {
+export function formatCurrency(amount: number | null, currency = 'NGN'): string {
   if (amount === null || amount === undefined) return '—'
   return new Intl.NumberFormat('fr-FR', {
     style: 'currency',
