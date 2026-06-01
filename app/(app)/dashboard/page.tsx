@@ -1,6 +1,7 @@
 import { supabaseAdmin } from '@/lib/supabase'
 import { formatCurrency } from '@/lib/format'
 import Link from 'next/link'
+import { DashboardFilters } from './DashboardFilters'
 
 export const revalidate = 0
 
@@ -15,30 +16,83 @@ const INV_STATUS: Record<string,{label:string;color:string;bg:string}> = {
   rejected:        { label:'Rejected',         color:'#EF4444', bg:'rgba(239,68,68,0.1)'   },
 }
 
-async function getData() {
+async function getData(projectId?: string, sectionId?: string) {
   const now = new Date()
   const in30 = new Date(now.getTime() + 30*86400000)
   const in14 = new Date(now.getTime() + 14*86400000)
 
-  const [tranchesRes, contractsRes, invoicesRes, allInvRes, currencyRes, providersRes] = await Promise.all([
-    supabaseAdmin.from('contract_tranches').select('*, contracts(id, contract_name, category, currency, service_providers(id, name))').order('scheduled_date', { ascending: true }),
-    supabaseAdmin.from('contracts').select('id, contract_name, category, currency, contract_amount, service_providers(id, name), contract_tranches(id, tranche_name, amount, status, scheduled_date, paid_date), invoices(id, status, submitted_at, amount_ttc)').order('created_at', { ascending: false }),
+  const [tranchesRes, contractsRes, invoicesRes, allInvRes, currencyRes, providersRes, projectsRes, sectionsCountRes] = await Promise.all([
+    supabaseAdmin.from('contract_tranches').select('*, contracts(id, contract_name, category, currency, project_id, section_id, service_providers(id, name))').order('scheduled_date', { ascending: true }),
+    supabaseAdmin.from('contracts').select('id, contract_name, category, currency, contract_amount, project_id, section_id, service_providers(id, name), contract_tranches(id, tranche_name, amount, status, scheduled_date, paid_date), invoices(id, status, submitted_at, amount_ttc)').order('created_at', { ascending: false }),
     supabaseAdmin.from('invoices').select('id, status, subcontractor_name, submitted_at, amount_ttc, contract_id, tranche_id').order('submitted_at', { ascending: false }),
     supabaseAdmin.from('invoices').select('id, status, subcontractor_name, submitted_at, amount_ttc, contract_id'),
     supabaseAdmin.from('invoice_currency').select('invoice_id, currency'),
     supabaseAdmin.from('service_providers').select('id, name'),
+    supabaseAdmin.from('projects').select('id, name, status, currency'),
+    supabaseAdmin.from('project_sections').select('id, project_id, name'),
   ])
 
-  const tranches   = tranchesRes.data  || []
-  const contracts  = contractsRes.data || []
-  const invoices   = invoicesRes.data  || []
-  const allInv     = allInvRes.data    || []
-  const providers  = providersRes.data || []
+  const allTranches  = tranchesRes.data  || []
+  const allContracts = contractsRes.data || []
+  const invoices     = invoicesRes.data  || []
+  const allInv       = allInvRes.data    || []
+  const providers    = providersRes.data || []
+  const rawProjects  = projectsRes.data  || []
+  const allSections  = sectionsCountRes.data || []
 
   const currencyMap: Record<string,string> = {}
   for (const c of currencyRes.data || []) currencyMap[c.invoice_id] = c.currency
 
-  // Row 1 metrics
+  // Filter contracts by project/section
+  const contracts = allContracts.filter((c: any) => {
+    if (projectId && c.project_id !== projectId) return false
+    if (sectionId && c.section_id !== sectionId) return false
+    return true
+  })
+
+  const contractIds = new Set(contracts.map((c: any) => c.id))
+
+  // Filter tranches to only those belonging to filtered contracts
+  const tranches = allTranches.filter((t: any) => {
+    const cid = (t.contracts as any)?.id
+    if (!cid) return false
+    if (projectId) {
+      const pid = (t.contracts as any)?.project_id
+      if (pid !== projectId) return false
+    }
+    if (sectionId) {
+      const sid = (t.contracts as any)?.section_id
+      if (sid !== sectionId) return false
+    }
+    return true
+  })
+
+  // Compute per-project stats for the filter cards
+  const sectionCountByProject: Record<string, number> = {}
+  for (const s of allSections) {
+    sectionCountByProject[s.project_id] = (sectionCountByProject[s.project_id] || 0) + 1
+  }
+
+  const projectsWithStats = rawProjects.map((p: any) => {
+    const pContracts = allContracts.filter((c: any) => c.project_id === p.id)
+    const pTranches = allTranches.filter((t: any) => (t.contracts as any)?.project_id === p.id)
+    const committed = pTranches.reduce((s: number, t: any) => s + (t.amount || 0), 0)
+    const paid = pTranches.filter((t: any) => t.status === 'paid').reduce((s: number, t: any) => s + (t.amount || 0), 0)
+    const pct = committed > 0 ? Math.round((paid / committed) * 100) : 0
+    return {
+      id: p.id,
+      name: p.name,
+      status: p.status || 'active',
+      committed,
+      paid,
+      pct,
+      contractCount: pContracts.length,
+      sectionCount: sectionCountByProject[p.id] || 0,
+      currency: p.currency || 'USD',
+    }
+  })
+
+  // Row 1 metrics (filtered)
   const totalCommitted = tranches.reduce((s:number,t:any) => s + (t.amount||0), 0)
   const totalPaid      = tranches.filter((t:any) => t.status === 'paid').reduce((s:number,t:any) => s + (t.amount||0), 0)
 
@@ -56,7 +110,7 @@ async function getData() {
   })
   const overdueAmount = overdueTranches.reduce((s:number,t:any) => s + (t.amount||0), 0)
 
-  // Build invoice lookup by tranche_id
+  // Build invoice lookup
   const invoiceByTranche: Record<string,any> = {}
   const invoiceByContract: Record<string,any[]> = {}
   for (const inv of invoices) {
@@ -68,7 +122,7 @@ async function getData() {
     }
   }
 
-  // Contract payment advancement (left panel row 2)
+  // Contract advancement (filtered)
   const contractAdvancement = contracts.map((c:any) => {
     const ts: any[] = c.contract_tranches || []
     const total = ts.reduce((s:number,t:any) => s + (t.amount||0), 0)
@@ -76,15 +130,12 @@ async function getData() {
     const pct   = total > 0 ? Math.round((paid/total)*100) : 0
     const ccy   = c.currency || 'USD'
 
-    // Next deadline: earliest unpaid/scheduled tranche with a date
     const upcoming = ts
       .filter((t:any) => t.status !== 'paid' && t.scheduled_date)
       .sort((a:any,b:any) => new Date(a.scheduled_date).getTime() - new Date(b.scheduled_date).getTime())
     const nextDeadline = upcoming[0] || null
     const nextDate = nextDeadline?.scheduled_date ? new Date(nextDeadline.scheduled_date) : null
     const daysToNext = nextDate ? Math.floor((nextDate.getTime() - now.getTime()) / 86400000) : null
-
-    // Current tranche status: last non-paid tranche
     const currentTranche = upcoming[0] || ts[ts.length - 1] || null
 
     return { id:c.id, name:c.contract_name, provider:c.service_providers?.name||'',
@@ -93,7 +144,7 @@ async function getData() {
              trancheStatus:currentTranche?.status||'unpaid' }
   }).filter((c:any) => c.total > 0)
 
-  // Timeline: all tranches ordered overdue first, then by date (right panel row 2)
+  // Timeline (filtered)
   const timeline = tranches
     .filter((t:any) => t.scheduled_date)
     .map((t:any) => {
@@ -128,7 +179,7 @@ async function getData() {
     })
     .slice(0, 20)
 
-  // Tranche tracker per provider (left panel row 3)
+  // Provider tracker (filtered)
   const providerMap: Record<string, any> = {}
   for (const c of contracts) {
     const pid = (c as any).service_providers?.id
@@ -151,10 +202,9 @@ async function getData() {
   }
   const providerRows = Object.values(providerMap).slice(0, 12)
 
-  // Alerts (right panel row 3)
+  // Alerts (use unfiltered allInv for global alerts, but filtered tranches for overdue/upcoming)
   const alerts: any[] = []
 
-  // Red: overdue payments
   for (const t of overdueTranches.slice(0,5)) {
     const daysOver = Math.floor((now.getTime() - new Date(t.scheduled_date).getTime()) / 86400000)
     alerts.push({
@@ -165,7 +215,6 @@ async function getData() {
     })
   }
 
-  // Red: invoices stuck > 3 days
   for (const inv of allInv.filter((i:any) => ['pending_review','pending_placide','pending_hitech'].includes(i.status))) {
     if (!(inv as any).submitted_at) continue
     const daysStuck = Math.floor((now.getTime() - new Date((inv as any).submitted_at).getTime()) / 86400000)
@@ -179,7 +228,6 @@ async function getData() {
     }
   }
 
-  // Amber: payments due in 14 days
   const dueSoon = tranches.filter((t:any) => {
     if (t.status === 'paid') return false
     if (!t.scheduled_date) return false
@@ -196,7 +244,6 @@ async function getData() {
     })
   }
 
-  // Amber: invoices awaiting Rudy
   const awaitingRudy = allInv.filter((i:any) => i.status === 'pending_review').length
   if (awaitingRudy > 0) {
     alerts.push({
@@ -207,7 +254,6 @@ async function getData() {
     })
   }
 
-  // Amber: contracts at 80%+ budget
   for (const c of contractAdvancement.filter((c:any) => c.pct >= 80 && c.pct < 100)) {
     alerts.push({
       color:'amber', priority:4,
@@ -217,7 +263,6 @@ async function getData() {
     })
   }
 
-  // Blue: upcoming 30 day tranches with no invoice
   for (const t of tranches.filter((t:any) => {
     if (t.status === 'paid') return false
     if (!t.scheduled_date) return false
@@ -245,6 +290,9 @@ async function getData() {
     providerRows,
     invoiceByTranche,
     alerts: alerts.slice(0, 12),
+    projects: projectsWithStats,
+    currentProject: projectId || '',
+    currentSection: sectionId || '',
   }
 }
 
@@ -273,8 +321,14 @@ function invStatusLabel(status: string) {
   return INV_STATUS[status] || { label:status, color:'#64748B', bg:'#F8FAFC' }
 }
 
-export default async function DashboardPage() {
-  const d = await getData()
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: { project?: string; section?: string }
+}) {
+  const projectId = searchParams.project || ''
+  const sectionId = searchParams.section || ''
+  const d = await getData(projectId || undefined, sectionId || undefined)
   const now = new Date()
 
   return (
@@ -292,7 +346,14 @@ export default async function DashboardPage() {
         </Link>
       </div>
 
-      {/* ROW 1 — 4 metric cards */}
+      {/* Project filter */}
+      <DashboardFilters
+        projects={d.projects}
+        currentProject={d.currentProject}
+        currentSection={d.currentSection}
+      />
+
+      {/* ROW 1 - 4 metric cards */}
       <div className="grid grid-cols-4 gap-4">
         <Link href="/contracts" className="rounded-2xl px-5 py-5 block hover:shadow-md transition-shadow" style={{ background:'#FFFFFF', border:'1px solid #E2E8F0' }}>
           <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color:'#94A3B8' }}>Total Committed</p>
@@ -319,7 +380,7 @@ export default async function DashboardPage() {
         </Link>
       </div>
 
-      {/* ROW 2 — Contract advancement + Timeline */}
+      {/* ROW 2 - Contract advancement + Timeline */}
       <div className="grid grid-cols-2 gap-5">
 
         {/* Left: Contract payment advancement */}
@@ -424,7 +485,7 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {/* ROW 3 — Tranche tracker + Alerts */}
+      {/* ROW 3 - Tranche tracker + Alerts */}
       <div className="grid grid-cols-2 gap-5">
 
         {/* Left: Tranche tracker per provider */}

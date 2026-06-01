@@ -8,14 +8,13 @@ export default async function InvoicesPage() {
   const [{ data: invoiceData }, { data: currencyData }] = await Promise.all([
     supabaseAdmin
       .from('invoices')
-      .select('*, service_providers(name), contracts(contract_name, project)')
+      .select('*, service_providers(name), contracts(contract_name, project, project_id, projects(id, name), project_sections(id, name))')
       .order('created_at', { ascending: false }),
     supabaseAdmin
       .from('invoice_currency')
       .select('invoice_id, currency'),
   ])
 
-  // Build currency lookup map
   const currencyMap: Record<string, string> = {}
   for (const c of currencyData || []) currencyMap[c.invoice_id] = c.currency
 
@@ -26,7 +25,6 @@ export default async function InvoicesPage() {
 
   return (
     <div className="px-6 py-8 max-w-7xl mx-auto">
-      {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
           <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color:'#64748B' }}>Invoices</p>
