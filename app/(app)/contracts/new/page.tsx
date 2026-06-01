@@ -16,17 +16,21 @@ export default function NewContractPage() {
   const [form, setForm] = useState({
     contract_name:'', service_provider_id:'', project_id:'', project:'',
     category:'E', description:'', currency:'NGN',
-    start_date:'', end_date:'', status:'active', notes:''
+    start_date:'', end_date:'', status:'active', notes:'',
+    fx_rate_at_signing: ''
   })
+  const [fxLoading, setFxLoading] = useState(false)
   const [tranches, setTranches] = useState<{ name:string; amount:string; date:string }[]>([])
 
   useEffect(() => {
     Promise.all([
       fetch('/api/providers').then(r=>r.json()),
       fetch('/api/projects').then(r=>r.json()).catch(()=>[]),
-    ]).then(([p, proj]) => {
+      fetch('/api/fx').then(r=>r.json()).catch(()=>null),
+    ]).then(([p, proj, fx]) => {
       setProviders(p || [])
       setProjects(Array.isArray(proj) ? proj : [])
+      if (fx?.rates?.NGN) setForm(f => ({ ...f, fx_rate_at_signing: String(fx.rates.NGN) }))
     })
   }, [])
 
@@ -46,7 +50,7 @@ export default function NewContractPage() {
     const totalAmount = tranches.reduce((s,t) => s+(parseFloat(t.amount)||0), 0)
     const res = await fetch('/api/contracts', {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ ...form, contract_amount: totalAmount })
+      body: JSON.stringify({ ...form, contract_amount: totalAmount, fx_rate_at_signing: form.fx_rate_at_signing ? parseFloat(form.fx_rate_at_signing) : null })
     })
     const data = await res.json()
     if (!res.ok) { setError(data.error || 'Failed'); setSaving(false); return }
@@ -134,6 +138,17 @@ export default function NewContractPage() {
                 <select className={inp} style={inpStyle} value={form.currency} onChange={e=>setForm(p=>({...p,currency:e.target.value}))}>
                   {CURRENCIES.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
+              </div>
+
+              {/* FX Rate at Signing */}
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-widest mb-1 block" style={{ color: C.muted }}>
+                  Rate at Signing (1 USD = &#8358; X)
+                </label>
+                <p className="text-xs mb-2" style={{ color:'#94A3B8' }}>Auto-fetched today. Edit if contract was signed earlier.</p>
+                <input type="number" className={inp} style={inpStyle} value={form.fx_rate_at_signing}
+                  onChange={e=>setForm(p=>({...p,fx_rate_at_signing:e.target.value}))}
+                  placeholder="e.g. 1580" step="0.01" />
               </div>
 
               {/* Start Date */}

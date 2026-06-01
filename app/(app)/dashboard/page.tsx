@@ -16,14 +16,14 @@ const INV_STATUS: Record<string,{label:string;color:string;bg:string}> = {
   rejected:        { label:'Rejected',         color:'#EF4444', bg:'rgba(239,68,68,0.1)'   },
 }
 
-async function getData(projectId?: string, sectionId?: string, baseCcy: string = 'EUR') {
+async function getData(projectId?: string, sectionId?: string, baseCcy: string = 'NGN') {
   const now = new Date()
   const in30 = new Date(now.getTime() + 30*86400000)
   const in14 = new Date(now.getTime() + 14*86400000)
 
   const [tranchesRes, contractsRes, invoicesRes, allInvRes, currencyRes, providersRes, projectsRes, sectionsCountRes, fxRes] = await Promise.all([
-    supabaseAdmin.from('contract_tranches').select('*, contracts(id, contract_name, category, currency, project_id, section_id, service_providers(id, name))').order('scheduled_date', { ascending: true }),
-    supabaseAdmin.from('contracts').select('id, contract_name, category, currency, contract_amount, start_date, end_date, project_id, section_id, service_providers(id, name), contract_tranches(id, tranche_name, amount, status, scheduled_date, paid_date), invoices(id, status, submitted_at, amount_ttc)').order('created_at', { ascending: false }),
+    supabaseAdmin.from('contract_tranches').select('*, contracts(id, contract_name, category, currency, fx_rate_at_signing, project_id, section_id, service_providers(id, name))').order('scheduled_date', { ascending: true }),
+    supabaseAdmin.from('contracts').select('id, contract_name, category, currency, fx_rate_at_signing, contract_amount, start_date, end_date, project_id, section_id, service_providers(id, name), contract_tranches(id, tranche_name, amount, status, scheduled_date, paid_date), invoices(id, status, submitted_at, amount_ttc)').order('created_at', { ascending: false }),
     supabaseAdmin.from('invoices').select('id, status, subcontractor_name, submitted_at, amount_ttc, contract_id, tranche_id').order('submitted_at', { ascending: false }),
     supabaseAdmin.from('invoices').select('id, status, subcontractor_name, submitted_at, amount_ttc, contract_id'),
     supabaseAdmin.from('invoice_currency').select('invoice_id, currency'),
@@ -109,10 +109,23 @@ async function getData(projectId?: string, sectionId?: string, baseCcy: string =
     }
   })
 
-  // Row 1 metrics — converted to baseCcy using each contract's native currency
+  // Row 1 metrics — convert using fx_rate_at_signing when available
+  // baseCcy='NGN': NGN stays, USD*signingRate; baseCcy='USD': NGN/signingRate, USD stays
   function trancheBase(t: any): number {
-    const ccy = (t.contracts as any)?.currency || 'NGN'
-    return toBase(t.amount || 0, ccy)
+    const amount = t.amount || 0
+    const ccy    = (t.contracts as any)?.currency || 'NGN'
+    const signingRate = (t.contracts as any)?.fx_rate_at_signing || fxRates['NGN'] || 1580
+
+    if (baseCcy === 'NGN') {
+      if (ccy === 'NGN') return amount
+      if (ccy === 'USD') return amount * signingRate
+      return toBase(amount, ccy) * signingRate  // other ccy -> USD -> NGN
+    } else {
+      // USD view
+      if (ccy === 'USD') return amount
+      if (ccy === 'NGN') return amount / signingRate
+      return toBase(amount, ccy)  // already in USD via fxRates
+    }
   }
 
   const totalCommitted = tranches.reduce((s:number,t:any) => s + trancheBase(t), 0)
@@ -528,20 +541,20 @@ function ContractTimeline({ contracts, now }: { contracts: any[]; now: Date }) {
 export default async function DashboardPage({
   searchParams,
 }: {
-  searchParams: { project?: string; section?: string; currency?: string }
+  searchParams: { project?: string; section?: string; view?: string }
 }) {
   const projectId = searchParams.project || ''
   const sectionId = searchParams.section || ''
-  const baseCcy   = searchParams.currency || 'NGN'
+  const view      = searchParams.view === 'usd' ? 'usd' : 'ngn'
+  const baseCcy   = view === 'usd' ? 'USD' : 'NGN'
   const d = await getData(projectId || undefined, sectionId || undefined, baseCcy)
   const now = new Date()
 
-  // Build URL helper that preserves other params
-  function fxUrl(ccy: string) {
+  function viewUrl(v: string) {
     const p = new URLSearchParams()
     if (projectId) p.set('project', projectId)
     if (sectionId) p.set('section', sectionId)
-    p.set('currency', ccy)
+    p.set('view', v)
     return '/dashboard?' + p.toString()
   }
 
@@ -558,10 +571,29 @@ export default async function DashboardPage({
           <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color:'#64748B' }}>Overview</p>
           <h1 className="text-2xl font-bold" style={{ color:'#0F172A' }}>Dashboard</h1>
         </div>
-        <Link href="/upload" className="flex items-center gap-2 text-sm font-semibold px-4 py-2.5 rounded-xl" style={{ background:'#3B82F6', color:'#fff' }}>
-          <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Upload Invoice
-        </Link>
+        <div className="flex items-center gap-3">
+          {/* NGN / USD toggle */}
+          <div className="flex items-center rounded-xl overflow-hidden" style={{ border:'1px solid #E2E8F0' }}>
+            <Link href={viewUrl('ngn')}
+              className="px-4 py-2 text-sm font-bold transition-colors"
+              style={view === 'ngn'
+                ? { background:'#0F172A', color:'#fff' }
+                : { background:'#FFFFFF', color:'#64748B' }}>
+              &#8358; NGN
+            </Link>
+            <Link href={viewUrl('usd')}
+              className="px-4 py-2 text-sm font-bold transition-colors"
+              style={view === 'usd'
+                ? { background:'#0F172A', color:'#fff' }
+                : { background:'#FFFFFF', color:'#64748B' }}>
+              $ USD
+            </Link>
+          </div>
+          <Link href="/upload" className="flex items-center gap-2 text-sm font-semibold px-4 py-2.5 rounded-xl" style={{ background:'#3B82F6', color:'#fff' }}>
+            <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Upload Invoice
+          </Link>
+        </div>
       </div>
 
       {/* Project filter */}
@@ -575,25 +607,25 @@ export default async function DashboardPage({
       <div className="grid grid-cols-4 gap-4">
         <Link href="/contracts" className="rounded-2xl px-5 py-5 block hover:shadow-md transition-shadow" style={{ background:'#FFFFFF', border:'1px solid #E2E8F0' }}>
           <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color:'#94A3B8' }}>Total Committed</p>
-          <p className="text-2xl font-bold mb-1" style={{ color:'#3B82F6' }}>{formatCurrency(d.totalCommitted)}</p>
-          <p className="text-xs" style={{ color:'#94A3B8' }}>across all contracts</p>
+          <p className="text-2xl font-bold mb-1" style={{ color:'#3B82F6' }}>{formatCurrency(d.totalCommitted, baseCcy)}</p>
+          <p className="text-xs" style={{ color:'#94A3B8' }}>across all contracts {view === 'usd' ? '(at signing rate)' : ''}</p>
         </Link>
 
         <Link href="/payment-register?filter=paid" className="rounded-2xl px-5 py-5 block hover:shadow-md transition-shadow" style={{ background:'#FFFFFF', border:'1px solid #E2E8F0' }}>
           <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color:'#94A3B8' }}>Total Paid</p>
-          <p className="text-2xl font-bold mb-1" style={{ color:'#10B981' }}>{formatCurrency(d.totalPaid)}</p>
+          <p className="text-2xl font-bold mb-1" style={{ color:'#10B981' }}>{formatCurrency(d.totalPaid, baseCcy)}</p>
           <p className="text-xs" style={{ color:'#94A3B8' }}>confirmed payments</p>
         </Link>
 
         <Link href="/payment-register?filter=upcoming" className="rounded-2xl px-5 py-5 block hover:shadow-md transition-shadow" style={{ background:'#FFFFFF', border:'1px solid #E2E8F0' }}>
           <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color:'#94A3B8' }}>Pipeline next 30 days</p>
-          <p className="text-2xl font-bold mb-1" style={{ color:'#F59E0B' }}>{formatCurrency(d.pipeline30)}</p>
+          <p className="text-2xl font-bold mb-1" style={{ color:'#F59E0B' }}>{formatCurrency(d.pipeline30, baseCcy)}</p>
           <p className="text-xs" style={{ color:'#94A3B8' }}>scheduled tranches</p>
         </Link>
 
         <Link href="/payment-register?filter=overdue" className="rounded-2xl px-5 py-5 block hover:shadow-md transition-shadow" style={{ background: d.overdueAmount > 0 ? '#FEF2F2' : '#FFFFFF', border: d.overdueAmount > 0 ? '1px solid rgba(239,68,68,0.3)' : '1px solid #E2E8F0' }}>
           <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: d.overdueAmount > 0 ? '#EF4444' : '#94A3B8' }}>Overdue Payments</p>
-          <p className="text-2xl font-bold mb-1" style={{ color:'#EF4444' }}>{formatCurrency(d.overdueAmount)}</p>
+          <p className="text-2xl font-bold mb-1" style={{ color:'#EF4444' }}>{formatCurrency(d.overdueAmount, baseCcy)}</p>
           <p className="text-xs" style={{ color:'#EF4444' }}>{d.overdueCount} tranche{d.overdueCount!==1?'s':''} overdue</p>
         </Link>
       </div>

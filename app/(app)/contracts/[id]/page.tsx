@@ -31,6 +31,17 @@ export default function ContractDetailPage() {
   const [popRefs,  setPopRefs]  = useState<Record<string,string>>({})
   const [marking,  setMarking]  = useState<string|null>(null)
   const [deleting, setDeleting] = useState(false)
+  const [editingRate, setEditingRate] = useState(false)
+  const [rateInput,   setRateInput]   = useState('')
+  const [savingRate,  setSavingRate]  = useState(false)
+
+  async function saveRate() {
+    setSavingRate(true)
+    await fetch(`/api/contracts/${id}`, { method:'PATCH', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ fx_rate_at_signing: parseFloat(rateInput) || null }) })
+    await load()
+    setSavingRate(false); setEditingRate(false)
+  }
 
   async function load() {
     const res  = await fetch(`/api/contracts/${id}`)
@@ -122,9 +133,38 @@ export default function ContractDetailPage() {
               <span className="text-xs px-2.5 py-1 rounded-full font-semibold capitalize" style={{ background:'rgba(59,130,246,0.1)', color:'#3B82F6' }}>{contract.status}</span>
             </div>
             <div className="flex items-center gap-3 text-sm flex-wrap" style={{ color:C.muted }}>
-              {contract.service_providers?.name && <span>👤 {contract.service_providers.name}</span>}
-              {contract.project && <span>📁 {contract.project}</span>}
-              {contract.start_date && <span>📅 {formatDate(contract.start_date)} → {formatDate(contract.end_date)}</span>}
+              {contract.service_providers?.name && <span>{contract.service_providers.name}</span>}
+              {contract.project && <span>{contract.project}</span>}
+              {contract.start_date && <span>{formatDate(contract.start_date)}</span>}
+            </div>
+            {/* FX Rate at Signing */}
+            <div className="flex items-center gap-2 mt-2">
+              {!editingRate ? (
+                <>
+                  <span className="text-xs px-2.5 py-1 rounded-full font-medium" style={{ background:'rgba(59,130,246,0.08)', color:'#3B82F6' }}>
+                    {contract.fx_rate_at_signing
+                      ? `1 USD = ₦${Number(contract.fx_rate_at_signing).toLocaleString()} at signing`
+                      : 'No signing rate set'}
+                  </span>
+                  <button onClick={() => { setRateInput(contract.fx_rate_at_signing ? String(contract.fx_rate_at_signing) : ''); setEditingRate(true) }}
+                    className="text-xs px-2 py-0.5 rounded-lg" style={{ color:'#64748B', background:'#F1F5F9' }}>
+                    Edit rate
+                  </button>
+                </>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <span className="text-xs" style={{ color:C.muted }}>1 USD =</span>
+                  <input type="number" value={rateInput} onChange={e=>setRateInput(e.target.value)}
+                    className="text-xs px-2.5 py-1 rounded-lg w-28 outline-none"
+                    style={{ background:'#F8FAFC', border:'1.5px solid #3B82F6', color:'#0F172A' }}
+                    placeholder="e.g. 1580" step="0.01" />
+                  <span className="text-xs" style={{ color:C.muted }}>NGN</span>
+                  <button onClick={saveRate} disabled={savingRate} className="text-xs px-2.5 py-1 rounded-lg font-semibold disabled:opacity-50" style={{ background:'#3B82F6', color:'#fff' }}>
+                    {savingRate ? '...' : 'Save'}
+                  </button>
+                  <button onClick={()=>setEditingRate(false)} className="text-xs px-2 py-1 rounded-lg" style={{ color:'#64748B', background:'#F1F5F9' }}>Cancel</button>
+                </div>
+              )}
             </div>
           </div>
           <button onClick={handleDelete} disabled={deleting} className="text-xs font-medium px-3 py-2 rounded-xl disabled:opacity-50" style={{ background:'rgba(239,68,68,0.08)', color:'#EF4444' }}>
