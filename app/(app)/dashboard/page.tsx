@@ -360,6 +360,146 @@ function invStatusLabel(status: string) {
   return INV_STATUS[status] || { label:status, color:'#64748B', bg:'#F8FAFC' }
 }
 
+function ContractTimeline({ contracts, now }: { contracts: any[]; now: Date }) {
+  if (contracts.length === 0) {
+    return (
+      <div className="rounded-2xl p-10 text-center" style={{ background:'#FFFFFF', border:'1px solid #E2E8F0' }}>
+        <p className="text-sm font-semibold mb-1" style={{ color:'#0F172A' }}>Contract Timeline</p>
+        <p className="text-xs" style={{ color:'#94A3B8' }}>Add contracts with start/end dates or payment tranches to see the timeline.</p>
+      </div>
+    )
+  }
+
+  const todayMs = now.getTime()
+  const allMs = contracts.flatMap((c:any) => [c.minDate, c.maxDate])
+  const windowStart = Math.min(...allMs)
+  const windowEnd   = Math.max(...allMs)
+  const windowLen   = Math.max(windowEnd - windowStart, 86400000)
+
+  const todayPct = Math.min(100, Math.max(0, ((todayMs - windowStart) / windowLen) * 100))
+
+  const months: { label: string; pct: number }[] = []
+  const cursor = new Date(windowStart)
+  cursor.setDate(1)
+  while (cursor.getTime() <= windowEnd) {
+    const pct = ((cursor.getTime() - windowStart) / windowLen) * 100
+    if (pct >= 0 && pct <= 102) {
+      months.push({ label: cursor.toLocaleDateString('en-GB', { month:'short', year:'2-digit' }), pct })
+    }
+    cursor.setMonth(cursor.getMonth() + 1)
+  }
+
+  function pos(ts: number) {
+    return Math.min(100, Math.max(0, ((ts - windowStart) / windowLen) * 100))
+  }
+
+  function dotColor(status: string, ts: number) {
+    if (status === 'paid') return '#10B981'
+    if (ts < todayMs) return '#EF4444'
+    if (ts - todayMs < 14 * 86400000) return '#F59E0B'
+    return '#3B82F6'
+  }
+
+  return (
+    <div className="rounded-2xl overflow-hidden" style={{ background:'#FFFFFF', border:'1px solid #E2E8F0' }}>
+      {/* Header */}
+      <div className="px-6 py-4 flex items-center justify-between" style={{ borderBottom:'1px solid #F1F5F9' }}>
+        <div>
+          <p className="text-sm font-bold" style={{ color:'#0F172A' }}>Contract Timeline</p>
+          <p className="text-xs mt-0.5" style={{ color:'#94A3B8' }}>One row per contract - dots = payment tranches</p>
+        </div>
+        <div className="flex items-center gap-4 text-xs" style={{ color:'#94A3B8' }}>
+          {[['#10B981','Paid'],['#EF4444','Overdue'],['#F59E0B','Due soon'],['#3B82F6','Upcoming']].map(([color,label]) => (
+            <div key={label} className="flex items-center gap-1.5">
+              <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background:color }}/>
+              {label}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="px-6 pt-4 pb-5">
+        {/* Month axis */}
+        <div className="flex mb-3" style={{ paddingLeft:192 }}>
+          <div className="relative flex-1" style={{ height:16 }}>
+            {months.map((m,i) => (
+              <span key={i} className="absolute text-xs" style={{ left:`${m.pct}%`, color:'#94A3B8', transform:'translateX(-50%)', whiteSpace:'nowrap', fontSize:10 }}>
+                {m.label}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* Rows */}
+        <div className="space-y-2">
+          {contracts.map((c:any) => {
+            const catC     = ESG_COLOR[c.category] || ESG_COLOR.Other
+            const pctColor = c.pct >= 80 ? '#EF4444' : c.pct >= 50 ? '#F59E0B' : '#10B981'
+            const barL     = pos(c.startDate ? new Date(c.startDate).getTime() : c.minDate)
+            const barR     = pos(c.endDate   ? new Date(c.endDate).getTime()   : c.maxDate)
+            const barW     = Math.max(1, barR - barL)
+
+            return (
+              <div key={c.id} className="flex items-center gap-3" style={{ minHeight:36 }}>
+                {/* Label */}
+                <div className="shrink-0 flex items-center gap-2" style={{ width:184 }}>
+                  <span className="text-xs px-1.5 py-0.5 rounded font-semibold shrink-0" style={{ background:`${catC}18`, color:catC }}>{c.category}</span>
+                  <div className="min-w-0">
+                    <Link href={`/contracts/${c.id}`} className="text-xs font-semibold block truncate hover:underline" style={{ color:'#0F172A', maxWidth:130 }}>
+                      {c.name}
+                    </Link>
+                    <p className="text-xs truncate" style={{ color:'#94A3B8', maxWidth:130 }}>{c.provider}</p>
+                  </div>
+                </div>
+
+                {/* Bar */}
+                <div className="relative flex-1 h-8 rounded" style={{ background:'#F8FAFC' }}>
+                  {/* Duration bar background */}
+                  <div className="absolute h-full rounded overflow-hidden" style={{ left:`${barL}%`, width:`${barW}%`, background:`${catC}20`, border:`1px solid ${catC}40` }}>
+                    {/* Progress fill */}
+                    <div className="h-full" style={{ width:`${c.pct}%`, background:`${catC}60` }}/>
+                  </div>
+
+                  {/* % label */}
+                  <div className="absolute inset-y-0 flex items-center text-xs font-bold" style={{ left:`${barL + barW / 2}%`, transform:'translateX(-50%)', color:catC, pointerEvents:'none', fontSize:11 }}>
+                    {c.pct}%
+                  </div>
+
+                  {/* Today line */}
+                  <div className="absolute top-0 bottom-0 w-px" style={{ left:`${todayPct}%`, background:'rgba(239,68,68,0.6)', zIndex:10 }}/>
+
+                  {/* Tranche dots */}
+                  {c.tranches.map((t:any) => (
+                    <div
+                      key={t.id}
+                      title={`${t.name} - ${t.status} - ${fmtDate(t.date)}`}
+                      className="absolute rounded-full border-2 border-white"
+                      style={{ width:13, height:13, left:`${pos(t.ts)}%`, top:'50%', transform:'translate(-50%,-50%)', background:dotColor(t.status, t.ts), zIndex:20, cursor:'default' }}
+                    />
+                  ))}
+                </div>
+
+                {/* Right stats */}
+                <div className="shrink-0 text-right" style={{ width:80 }}>
+                  <p className="text-xs font-bold" style={{ color:pctColor }}>{c.pct}% paid</p>
+                  <p className="text-xs" style={{ color:'#94A3B8' }}>{formatCurrency(c.paid, c.ccy)}</p>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+
+        {/* Today label at bottom */}
+        <div className="relative mt-1" style={{ paddingLeft:192 }}>
+          <div className="relative flex-1" style={{ height:14 }}>
+            <span className="absolute text-xs font-semibold" style={{ left:`${todayPct}%`, transform:'translateX(-50%)', color:'#EF4444', fontSize:10 }}>Today</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default async function DashboardPage({
   searchParams,
 }: {
@@ -632,145 +772,7 @@ export default async function DashboardPage({
       </div>
 
       {/* ROW 4 — Contract Timeline (Gantt) */}
-      {d.contractTimeline.length > 0 && (() => {
-        // Global time window: earliest start to latest end across all contracts
-        const allMs = d.contractTimeline.flatMap((c:any) => [c.minDate, c.maxDate])
-        const windowStart = Math.min(...allMs)
-        const windowEnd   = Math.max(...allMs)
-        const windowLen   = Math.max(windowEnd - windowStart, 1)
-        const todayMs     = now.getTime()
-        const todayPct    = Math.min(100, Math.max(0, ((todayMs - windowStart) / windowLen) * 100))
-
-        // Generate month labels
-        const months: { label: string; pct: number }[] = []
-        const d0 = new Date(windowStart)
-        d0.setDate(1)
-        while (d0.getTime() <= windowEnd) {
-          const pct = ((d0.getTime() - windowStart) / windowLen) * 100
-          if (pct >= 0 && pct <= 100) {
-            months.push({ label: d0.toLocaleDateString('en-GB', { month:'short', year:'2-digit' }), pct })
-          }
-          d0.setMonth(d0.getMonth() + 1)
-        }
-
-        function posPct(ts: number) {
-          return Math.min(100, Math.max(0, ((ts - windowStart) / windowLen) * 100))
-        }
-
-        function tColor(status: string, ts: number) {
-          if (status === 'paid') return '#10B981'
-          if (ts < todayMs) return '#EF4444'
-          if (ts - todayMs < 14*86400000) return '#F59E0B'
-          return '#3B82F6'
-        }
-
-        return (
-          <div className="rounded-2xl overflow-hidden" style={{ background:'#FFFFFF', border:'1px solid #E2E8F0' }}>
-            <div className="px-6 py-4 flex items-center justify-between" style={{ borderBottom:'1px solid #F1F5F9' }}>
-              <div>
-                <p className="text-sm font-bold" style={{ color:'#0F172A' }}>Contract Timeline</p>
-                <p className="text-xs mt-0.5" style={{ color:'#94A3B8' }}>
-                  Gantt view per contract - dots are payment tranches (green=paid, red=overdue, amber=due soon, blue=upcoming)
-                </p>
-              </div>
-              <div className="flex items-center gap-4 text-xs" style={{ color:'#94A3B8' }}>
-                {[
-                  { color:'#10B981', label:'Paid' },
-                  { color:'#EF4444', label:'Overdue' },
-                  { color:'#F59E0B', label:'Due soon' },
-                  { color:'#3B82F6', label:'Upcoming' },
-                ].map(l => (
-                  <div key={l.label} className="flex items-center gap-1.5">
-                    <div className="w-3 h-3 rounded-full" style={{ background:l.color }}/>
-                    {l.label}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="px-6 pt-3 pb-2">
-              {/* Month axis */}
-              <div className="relative h-5 mb-1 ml-48">
-                {months.map((m,i) => (
-                  <span key={i} className="absolute text-xs" style={{ left:`${m.pct}%`, color:'#94A3B8', transform:'translateX(-50%)', whiteSpace:'nowrap' }}>
-                    {m.label}
-                  </span>
-                ))}
-              </div>
-
-              {/* Today line + rows */}
-              <div className="relative ml-48">
-                {/* Today vertical line */}
-                <div className="absolute top-0 bottom-0 w-px z-10" style={{ left:`${todayPct}%`, background:'rgba(239,68,68,0.5)' }}/>
-                <div className="absolute -top-4 text-xs font-semibold px-1 rounded" style={{ left:`${todayPct}%`, transform:'translateX(-50%)', background:'rgba(239,68,68,0.1)', color:'#EF4444' }}>
-                  Today
-                </div>
-
-                {d.contractTimeline.map((c:any, ci:number) => {
-                  const catC = ESG_COLOR[c.category] || ESG_COLOR.Other
-                  const pctColor = c.pct >= 80 ? '#EF4444' : c.pct >= 50 ? '#F59E0B' : '#10B981'
-                  const barLeft  = c.startDate ? posPct(new Date(c.startDate).getTime()) : posPct(c.minDate)
-                  const barRight = c.endDate   ? posPct(new Date(c.endDate).getTime())   : posPct(c.maxDate)
-                  const barWidth = Math.max(0.5, barRight - barLeft)
-
-                  return (
-                    <div key={c.id} className="flex items-center mb-2" style={{ minHeight:36 }}>
-                      {/* Left label — positioned absolutely outside the bar area */}
-                      <div className="absolute flex items-center gap-2 min-w-0" style={{ left:0, width:184 }}>
-                        <span className="text-xs px-1.5 py-0.5 rounded font-semibold shrink-0" style={{ background:`${catC}18`, color:catC }}>{c.category}</span>
-                        <div className="min-w-0">
-                          <Link href={`/contracts/${c.id}`} className="text-xs font-semibold truncate block hover:text-blue-600 transition-colors" style={{ color:'#0F172A', maxWidth:120 }}>
-                            {c.name}
-                          </Link>
-                          <p className="text-xs truncate" style={{ color:'#94A3B8', maxWidth:120 }}>{c.provider}</p>
-                        </div>
-                      </div>
-
-                      {/* Bar track */}
-                      <div className="relative w-full h-8 rounded" style={{ background:'#F8FAFC' }}>
-                        {/* Contract duration bar */}
-                        <div
-                          className="absolute h-full rounded"
-                          style={{
-                            left:`${barLeft}%`,
-                            width:`${barWidth}%`,
-                            background:`${catC}22`,
-                            border:`1px solid ${catC}44`,
-                          }}
-                        >
-                          {/* Progress fill */}
-                          <div className="h-full rounded" style={{ width:`${c.pct}%`, background:`${catC}55` }}/>
-                        </div>
-
-                        {/* % label inside bar */}
-                        {barWidth > 8 && (
-                          <div className="absolute inset-y-0 flex items-center text-xs font-bold" style={{ left:`${barLeft + barWidth/2}%`, transform:'translateX(-50%)', color:catC, pointerEvents:'none' }}>
-                            {c.pct}%
-                          </div>
-                        )}
-
-                        {/* Tranche dots */}
-                        {c.tranches.map((t:any) => {
-                          const dotPct  = posPct(t.ts)
-                          const dotColor = tColor(t.status, t.ts)
-                          return (
-                            <div
-                              key={t.id}
-                              title={`${t.name}: ${t.status} - ${formatCurrency(t.amount, c.ccy)} - ${fmtDate(t.date)}`}
-                              className="absolute w-3.5 h-3.5 rounded-full border-2 border-white cursor-pointer hover:scale-125 transition-transform z-20"
-                              style={{ left:`${dotPct}%`, top:'50%', transform:'translate(-50%,-50%)', background:dotColor }}
-                            />
-                          )
-                        })}
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          </div>
-        )
-      })()}
+      <ContractTimeline contracts={d.contractTimeline} now={now} />
 
     </div>
   )
