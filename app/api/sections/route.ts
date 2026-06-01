@@ -1,6 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url)
+  const projectId = searchParams.get('project_id')
+  if (!projectId) return NextResponse.json([])
+  const { data } = await supabaseAdmin.from('project_sections').select('*').eq('project_id', projectId).order('created_at')
+  return NextResponse.json(data || [])
+}
+
 export async function POST(req: NextRequest) {
   const body = await req.json()
   const { project_id, name, description, budget, currency, start_date, end_date, status } = body

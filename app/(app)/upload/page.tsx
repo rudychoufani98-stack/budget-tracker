@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 
@@ -17,27 +17,27 @@ interface ScannedData {
 }
 
 const CATEGORIES: { label:string; icon:string; color:string }[] = [
-  { label:'Subcontracting',   icon:'🤝', color:'#3B82F6' },
-  { label:'Consulting',       icon:'💼', color:'#8B5CF6' },
-  { label:'Travel',           icon:'✈️', color:'#06B6D4' },
-  { label:'Accommodation',    icon:'🏨', color:'#F59E0B' },
-  { label:'Meals',            icon:'🍽️', color:'#F97316' },
-  { label:'Fuel & Transport', icon:'⛽', color:'#EF4444' },
-  { label:'Equipment',        icon:'🔧', color:'#64748B' },
-  { label:'Software & IT',    icon:'💻', color:'#10B981' },
-  { label:'Security',         icon:'🛡️', color:'#1D4ED8' },
-  { label:'Logistics',        icon:'📦', color:'#D97706' },
-  { label:'Communication',    icon:'📡', color:'#7C3AED' },
-  { label:'Training',         icon:'📚', color:'#059669' },
-  { label:'Legal & Compliance',icon:'⚖️',color:'#475569' },
-  { label:'Medical & Health', icon:'🏥', color:'#DC2626' },
-  { label:'Other',            icon:'📋', color:'#94A3B8' },
+  { label:'Subcontracting',   icon:'ðŸ¤', color:'#3B82F6' },
+  { label:'Consulting',       icon:'ðŸ’¼', color:'#8B5CF6' },
+  { label:'Travel',           icon:'âœˆï¸', color:'#06B6D4' },
+  { label:'Accommodation',    icon:'ðŸ¨', color:'#F59E0B' },
+  { label:'Meals',            icon:'ðŸ½ï¸', color:'#F97316' },
+  { label:'Fuel & Transport', icon:'â›½', color:'#EF4444' },
+  { label:'Equipment',        icon:'ðŸ”§', color:'#64748B' },
+  { label:'Software & IT',    icon:'ðŸ’»', color:'#10B981' },
+  { label:'Security',         icon:'ðŸ›¡ï¸', color:'#1D4ED8' },
+  { label:'Logistics',        icon:'ðŸ“¦', color:'#D97706' },
+  { label:'Communication',    icon:'ðŸ“¡', color:'#7C3AED' },
+  { label:'Training',         icon:'ðŸ“š', color:'#059669' },
+  { label:'Legal & Compliance',icon:'âš–ï¸',color:'#475569' },
+  { label:'Medical & Health', icon:'ðŸ¥', color:'#DC2626' },
+  { label:'Other',            icon:'ðŸ“‹', color:'#94A3B8' },
 ]
 
 const CURRENCIES = ['USD','EUR','GBP','CHF','MAD','XOF','NGN','CAD','AED','JPY']
 
 function cs(v:number|null, currency:string) {
-  if (v===null||v===undefined) return '—'
+  if (v===null||v===undefined) return 'â€”'
   return new Intl.NumberFormat('fr-FR',{style:'currency',currency,minimumFractionDigits:2}).format(v)
 }
 
@@ -53,13 +53,15 @@ export default function UploadPage() {
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState('')
 
-  const [projects,         setProjects]         = useState<any[]>([])
-  const [providers,        setProviders]        = useState<any[]>([])
-  const [contracts,        setContracts]        = useState<any[]>([])
-  const [tranches,         setTranches]         = useState<any[]>([])
-  const [useRealProjects,  setUseRealProjects]  = useState(false)
+  const [projects,        setProjects]        = useState<any[]>([])
+  const [providers,       setProviders]       = useState<any[]>([])
+  const [contracts,       setContracts]       = useState<any[]>([])
+  const [sections,        setSections]        = useState<any[]>([])
+  const [tranches,        setTranches]        = useState<any[]>([])
+  const [useRealProjects, setUseRealProjects] = useState(false)
 
   const [selectedProject,  setSelectedProject]  = useState('')
+  const [selectedSection,  setSelectedSection]  = useState('')
   const [selectedContract, setSelectedContract] = useState('')
   const [selectedProvider, setSelectedProvider] = useState('')
   const [selectedTranche,  setSelectedTranche]  = useState('')
@@ -73,33 +75,48 @@ export default function UploadPage() {
       setProviders(p||[])
       setContracts(c||[])
       if (Array.isArray(proj) && proj.length > 0) {
-        // Projects table exists — use it
-        setProjects(proj)
-        setUseRealProjects(true)
+        setProjects(proj); setUseRealProjects(true)
       } else {
-        // Fallback: derive unique project names from contracts.project text field
         const seen = new Set<string>()
         const derived: any[] = []
         for (const contract of (c||[])) {
           const name = (contract as any).project?.trim()
           if (name && !seen.has(name)) { seen.add(name); derived.push({ id: name, name }) }
         }
-        setProjects(derived)
-        setUseRealProjects(false)
+        setProjects(derived); setUseRealProjects(false)
       }
     })
   },[])
 
-  // Filter contracts by selected project — matches by project_id OR by project name text
-  const filteredContracts = selectedProject
-    ? (() => {
-        const projName = projects.find((p:any) => p.id === selectedProject)?.name || selectedProject
-        return contracts.filter((c:any) =>
-          c.project_id === selectedProject ||
-          c.project?.trim() === projName
-        )
-      })()
-    : contracts
+  // When project changes â€” fetch sections + reset downstream
+  function handleProjectChange(id:string) {
+    setSelectedProject(id)
+    setSelectedSection('')
+    setSelectedContract('')
+    setSelectedProvider('')
+    setSelectedTranche('')
+    setTranches([])
+    setSections([])
+    if (id) fetch(`/api/sections?project_id=${id}`).then(r=>r.json()).then(d=>setSections(Array.isArray(d)?d:[]))
+  }
+
+  // When section changes â€” reset contract
+  function handleSectionChange(id:string) {
+    setSelectedSection(id)
+    setSelectedContract('')
+    setSelectedTranche('')
+    setTranches([])
+  }
+
+  // Filter contracts: by section if selected, else by project
+  const filteredContracts = (() => {
+    if (selectedSection) return contracts.filter((c:any) => c.section_id === selectedSection)
+    if (selectedProject) {
+      const projName = projects.find((p:any) => p.id === selectedProject)?.name || selectedProject
+      return contracts.filter((c:any) => c.project_id === selectedProject || c.project?.trim() === projName)
+    }
+    return contracts
+  })()
 
   // When contract changes: update tranches + auto-fill provider
   useEffect(()=>{
@@ -109,14 +126,8 @@ export default function UploadPage() {
     if (c?.service_provider_id) setSelectedProvider(c.service_provider_id)
   },[selectedContract, contracts])
 
-  // When project changes: reset contract + provider
-  function handleProjectChange(id:string) {
-    setSelectedProject(id)
-    setSelectedContract('')
-    setSelectedProvider('')
-    setSelectedTranche('')
-    setTranches([])
-  }
+  // All 4 mandatory before scanning
+  const allLinked = !!selectedProject && !!selectedSection && !!selectedContract && !!selectedProvider
 
   async function handleScan() {
     if (!file) return
@@ -179,7 +190,7 @@ export default function UploadPage() {
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all"
                   style={done?{background:'#10B981',color:'#fff'}:active?{background:'#3B82F6',color:'#fff'}:{background:'#F1F5F9',color:'#94A3B8'}}>
-                  {done?'✓':i+1}
+                  {done?'âœ“':i+1}
                 </div>
                 <span className="text-sm font-medium" style={{ color:active?'#0F172A':done?'#10B981':'#94A3B8' }}>{label}</span>
               </div>
@@ -189,7 +200,7 @@ export default function UploadPage() {
         })}
       </div>
 
-      {/* ── STEP 1 ── */}
+      {/* â”€â”€ STEP 1 â”€â”€ */}
       {step===1 && (
         <div className="grid grid-cols-2 gap-6">
           {/* PDF upload */}
@@ -206,7 +217,7 @@ export default function UploadPage() {
               >
                 {file ? (
                   <div className="text-center p-4">
-                    <div className="text-3xl mb-2">📄</div>
+                    <div className="text-3xl mb-2">ðŸ“„</div>
                     <p className="text-sm font-semibold" style={{ color:'#0F172A' }}>{file.name}</p>
                     <p className="text-xs mt-1" style={{ color:'#64748B' }}>{(file.size/1024).toFixed(0)} KB</p>
                     <p className="text-xs mt-2 px-2.5 py-1 rounded-full inline-block" style={{ background:'rgba(59,130,246,0.1)', color:'#3B82F6' }}>Click to change</p>
@@ -223,9 +234,14 @@ export default function UploadPage() {
               </div>
               <input ref={fileRef} type="file" accept=".pdf" className="hidden" onChange={e=>{const f=e.target.files?.[0];if(f)setFile(f)}}/>
               {scanError && <p className="text-sm px-3 py-2 rounded-xl mb-3" style={{ background:'rgba(239,68,68,0.08)',color:'#EF4444',border:'1px solid rgba(239,68,68,0.2)' }}>{scanError}</p>}
-              <button onClick={handleScan} disabled={!file||scanning} className="w-full py-3 rounded-xl text-sm font-semibold disabled:opacity-40 transition-all flex items-center justify-center gap-2" style={{ background:'#3B82F6',color:'#fff' }}>
+              {!allLinked && file && (
+                <p className="text-xs px-3 py-2 rounded-xl mb-3" style={{ background:'rgba(245,158,11,0.08)', color:'#D97706', border:'1px solid rgba(245,158,11,0.3)' }}>
+                  Fill in Project, Section, Contract and Consultant before scanning.
+                </p>
+              )}
+              <button onClick={handleScan} disabled={!file||!allLinked||scanning} className="w-full py-3 rounded-xl text-sm font-semibold disabled:opacity-40 transition-all flex items-center justify-center gap-2" style={{ background:'#3B82F6',color:'#fff' }}>
                 {scanning?(
-                  <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"/>Scanning with AI…</>
+                  <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"/>Scanning with AIâ€¦</>
                 ):(
                   <><svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Scan Invoice</>
                 )}
@@ -233,7 +249,7 @@ export default function UploadPage() {
             </div>
           </div>
 
-          {/* Link panel: Project → Contract → Provider → Tranche */}
+          {/* Link panel: Project â†’ Contract â†’ Provider â†’ Tranche */}
           <div className="rounded-2xl overflow-hidden" style={{ background:'#FFFFFF', border:'1px solid #E2E8F0' }}>
             <div style={{ height:3, background:'linear-gradient(90deg,#10B981,#3B82F6)' }}/>
             <div className="p-6">
@@ -244,10 +260,10 @@ export default function UploadPage() {
                 <div>
                   <label className="text-xs font-semibold uppercase tracking-widest mb-2 flex items-center gap-1.5" style={{ color:'#64748B' }}>
                     <span style={{ width:6,height:6,borderRadius:'50%',background:'#3B82F6',display:'inline-block' }}/>
-                    Project
+                    Project *
                   </label>
                   <select className={inp} style={inpSt} value={selectedProject} onChange={e=>handleProjectChange(e.target.value)}>
-                    <option value="">All projects…</option>
+                    <option value="">All projectsâ€¦</option>
                     {projects.map((p:any)=><option key={p.id} value={p.id}>{p.name}</option>)}
                   </select>
                   {projects.length===0 && contracts.length>0 && (
@@ -255,25 +271,37 @@ export default function UploadPage() {
                   )}
                 </div>
 
-                {/* Contract */}
+                {/* Section */}
                 <div>
                   <label className="text-xs font-semibold uppercase tracking-widest mb-2 flex items-center gap-1.5" style={{ color:'#64748B' }}>
                     <span style={{ width:6,height:6,borderRadius:'50%',background:'#8B5CF6',display:'inline-block' }}/>
-                    Contract
+                    Section *
                   </label>
-                  <select className={inp} style={inpSt} value={selectedContract} onChange={e=>setSelectedContract(e.target.value)}>
-                    <option value="">Select contract…</option>
+                  <select className={inp} style={inpSt} value={selectedSection} onChange={e=>handleSectionChange(e.target.value)} disabled={!selectedProject}>
+                    <option value="">Select sectionâ€¦</option>
+                    {sections.map((s:any)=>(
+                      <option key={s.id} value={s.id}>{s.name}</option>
+                    ))}
+                  </select>
+                  {selectedProject && sections.length===0 && (
+                    <p className="text-xs mt-1" style={{ color:'#94A3B8' }}>No sections in this project â€” create one in Projects tab</p>
+                  )}
+                </div>
+
+                {/* Contract */}
+                <div>
+                  <label className="text-xs font-semibold uppercase tracking-widest mb-2 flex items-center gap-1.5" style={{ color:'#64748B' }}>
+                    <span style={{ width:6,height:6,borderRadius:'50%',background:'#06B6D4',display:'inline-block' }}/>
+                    Contract *
+                  </label>
+                  <select className={inp} style={inpSt} value={selectedContract} onChange={e=>setSelectedContract(e.target.value)} disabled={!selectedSection}>
+                    <option value="">Select contractâ€¦</option>
                     {filteredContracts.map((c:any)=>(
                       <option key={c.id} value={c.id}>{c.contract_name}</option>
                     ))}
                   </select>
-                  {selectedProject && filteredContracts.length===0 && (
-                    <div className="mt-2 px-3 py-2 rounded-xl" style={{ background:'rgba(245,158,11,0.08)', border:'1px solid rgba(245,158,11,0.3)' }}>
-                      <p className="text-xs font-medium mb-1" style={{ color:'#F59E0B' }}>No contracts linked to this project</p>
-                      <p className="text-xs" style={{ color:'#92400E' }}>
-                        Create a contract in the <strong>Contracts</strong> section and set its project to link it here.
-                      </p>
-                    </div>
+                  {selectedSection && filteredContracts.length===0 && (
+                    <p className="text-xs mt-1" style={{ color:'#94A3B8' }}>No contracts in this section â€” add one in the Projects tab</p>
                   )}
                 </div>
 
@@ -281,13 +309,13 @@ export default function UploadPage() {
                 <div>
                   <label className="text-xs font-semibold uppercase tracking-widest mb-2 flex items-center gap-1.5" style={{ color:'#64748B' }}>
                     <span style={{ width:6,height:6,borderRadius:'50%',background:'#10B981',display:'inline-block' }}/>
-                    Consultant
+                    Consultant *
                     {selectedContract && providers.find((p:any)=>p.id===selectedProvider) && (
                       <span className="text-xs px-2 py-0.5 rounded-full font-normal" style={{ background:'rgba(16,185,129,0.1)',color:'#10B981' }}>auto-filled</span>
                     )}
                   </label>
                   <select className={inp} style={inpSt} value={selectedProvider} onChange={e=>setSelectedProvider(e.target.value)}>
-                    <option value="">Select provider…</option>
+                    <option value="">Select providerâ€¦</option>
                     {providers.map((p:any)=><option key={p.id} value={p.id}>{p.name}</option>)}
                   </select>
                 </div>
@@ -300,8 +328,8 @@ export default function UploadPage() {
                       Tranche
                     </label>
                     <select className={inp} style={inpSt} value={selectedTranche} onChange={e=>setSelectedTranche(e.target.value)}>
-                      <option value="">Select tranche…</option>
-                      {tranches.map((t:any)=><option key={t.id} value={t.id}>{t.tranche_name} — {t.amount?.toLocaleString()} ({t.status})</option>)}
+                      <option value="">Select trancheâ€¦</option>
+                      {tranches.map((t:any)=><option key={t.id} value={t.id}>{t.tranche_name} â€” {t.amount?.toLocaleString()} ({t.status})</option>)}
                     </select>
                   </div>
                 )}
@@ -314,7 +342,7 @@ export default function UploadPage() {
                   { step:'1', text:'Upload the PDF invoice' },
                   { step:'2', text:'AI extracts all data automatically' },
                   { step:'3', text:'Review and correct if needed' },
-                  { step:'4', text:'Submit — Rudy receives email to validate' },
+                  { step:'4', text:'Submit â€” Rudy receives email to validate' },
                 ].map(s=>(
                   <div key={s.step} className="flex items-start gap-2.5 mb-2">
                     <div className="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold shrink-0" style={{ background:'#E2E8F0', color:'#64748B' }}>{s.step}</div>
@@ -327,7 +355,7 @@ export default function UploadPage() {
         </div>
       )}
 
-      {/* ── STEP 2 ── */}
+      {/* â”€â”€ STEP 2 â”€â”€ */}
       {step===2 && scanned && (
         <div className="grid grid-cols-2 gap-6">
           <div className="space-y-5">
@@ -336,10 +364,10 @@ export default function UploadPage() {
               <div className="p-6">
                 <div className="flex items-center justify-between mb-5">
                   <p className="text-sm font-semibold" style={{ color:'#0F172A' }}>Extracted Data</p>
-                  <span className="text-xs px-2.5 py-1 rounded-full font-semibold" style={{ background:'rgba(16,185,129,0.1)',color:'#10B981' }}>✓ AI Scanned</span>
+                  <span className="text-xs px-2.5 py-1 rounded-full font-semibold" style={{ background:'rgba(16,185,129,0.1)',color:'#10B981' }}>âœ“ AI Scanned</span>
                 </div>
                 <div className="space-y-3">
-                  {/* Consultant — dropdown, not free text */}
+                  {/* Consultant â€” dropdown, not free text */}
                   <div>
                     <label className="text-xs font-semibold uppercase tracking-widest mb-1.5 block" style={{ color:'#64748B' }}>Consultant</label>
                     <select
@@ -426,9 +454,9 @@ export default function UploadPage() {
             </div>
             {submitError && <p className="text-sm px-4 py-3 rounded-xl" style={{ background:'rgba(239,68,68,0.08)',color:'#EF4444',border:'1px solid rgba(239,68,68,0.2)' }}>{submitError}</p>}
             <div className="flex gap-3">
-              <button onClick={()=>setStep(1)} className="px-5 py-3 rounded-xl text-sm font-medium" style={{ background:'#F1F5F9',color:'#64748B' }}>← Back</button>
+              <button onClick={()=>setStep(1)} className="px-5 py-3 rounded-xl text-sm font-medium" style={{ background:'#F1F5F9',color:'#64748B' }}>â† Back</button>
               <button onClick={handleSubmit} disabled={submitting} className="flex-1 py-3 rounded-xl text-sm font-semibold disabled:opacity-50 flex items-center justify-center gap-2" style={{ background:'#10B981',color:'#fff' }}>
-                {submitting?(<><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"/>Submitting…</>):'✓ Submit Invoice'}
+                {submitting?(<><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"/>Submittingâ€¦</>):'âœ“ Submit Invoice'}
               </button>
             </div>
           </div>
@@ -459,7 +487,7 @@ export default function UploadPage() {
                     <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color:'#94A3B8' }}>Line Items ({scanned.line_items.length})</p>
                     {scanned.line_items.slice(0,5).map((li,i)=>(
                       <div key={i} className="flex justify-between text-xs py-1.5" style={{ borderBottom:'1px solid #F8FAFC' }}>
-                        <span className="truncate mr-4" style={{ color:'#374151' }}>{li.description||'—'}</span>
+                        <span className="truncate mr-4" style={{ color:'#374151' }}>{li.description||'â€”'}</span>
                         <span style={{ color:'#64748B' }}>{cs(li.total_ht, scanned.currency||'USD')}</span>
                       </div>
                     ))}
@@ -479,12 +507,12 @@ export default function UploadPage() {
         </div>
       )}
 
-      {/* ── STEP 3 ── */}
+      {/* â”€â”€ STEP 3 â”€â”€ */}
       {step===3 && (
         <div className="flex flex-col items-center justify-center py-20">
-          <div className="w-20 h-20 rounded-full flex items-center justify-center text-3xl mb-5" style={{ background:'rgba(16,185,129,0.12)' }}>✓</div>
+          <div className="w-20 h-20 rounded-full flex items-center justify-center text-3xl mb-5" style={{ background:'rgba(16,185,129,0.12)' }}>âœ“</div>
           <h2 className="text-xl font-bold mb-2" style={{ color:'#0F172A' }}>Invoice Submitted!</h2>
-          <p className="text-sm" style={{ color:'#64748B' }}>Redirecting to invoice detail…</p>
+          <p className="text-sm" style={{ color:'#64748B' }}>Redirecting to invoice detailâ€¦</p>
         </div>
       )}
     </div>

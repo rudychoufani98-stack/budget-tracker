@@ -38,7 +38,7 @@ export default function ProjectDetailPage({ params }: { params: { name: string }
   const [deleting,   setDeleting]   = useState(false)
   const [providers,  setProviders]  = useState<any[]>([])
 
-  // Sub-section modal
+  // Section modal
   const [showAddSection, setShowAddSection]   = useState(false)
   const [sectionForm,    setSectionForm]      = useState({ name:'', description:'', budget:'', currency:'USD', start_date:'', end_date:'', status:'active' })
   const [addingSection,  setAddingSection]    = useState(false)
@@ -98,7 +98,7 @@ export default function ProjectDetailPage({ params }: { params: { name: string }
   }
 
   async function deleteSection(sectionId: string) {
-    if (!confirm('Delete this sub-section? Contracts in it will be unlinked.')) return
+    if (!confirm('Delete this section? Contracts in it will be unlinked.')) return
     await fetch(`/api/sections/${sectionId}`, { method:'DELETE' })
     reload()
   }
@@ -140,7 +140,7 @@ export default function ProjectDetailPage({ params }: { params: { name: string }
                   </div>
                   {project.description && <p className="text-sm mb-1" style={{ color:'#64748B' }}>{project.description}</p>}
                   <p className="text-xs" style={{ color:'#94A3B8' }}>
-                    {sections.length} sub-section{sections.length!==1?'s':''}
+                    {sections.length} section{sections.length!==1?'s':''}
                     {' · '}{directContracts.length} direct contract{directContracts.length!==1?'s':''}
                     {' · '}{global.invoices} invoice{global.invoices!==1?'s':''}
                     {project.budget && ` · Budget: ${formatCurrency(project.budget, ccy)}`}
@@ -208,19 +208,19 @@ export default function ProjectDetailPage({ params }: { params: { name: string }
       {/* ── 2. SUB-SECTIONS ── */}
       <div className="flex items-center justify-between mb-3">
         <div>
-          <h2 className="text-base font-bold" style={{ color:'#0F172A' }}>Sub-sections</h2>
+          <h2 className="text-base font-bold" style={{ color:'#0F172A' }}>Sections</h2>
           <p className="text-xs mt-0.5" style={{ color:'#94A3B8' }}>Groupings within this project — each has its own budget and contracts</p>
         </div>
         <button onClick={()=>setShowAddSection(true)} className="text-sm font-semibold px-4 py-2.5 rounded-xl flex items-center gap-2" style={{ background:'#8B5CF6', color:'#fff' }}>
           <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Add Sub-section
+          Add Section
         </button>
       </div>
 
       {sections.length === 0 && (
         <div className="rounded-2xl p-8 text-center mb-6" style={{ background:'#FFFFFF', border:'1px dashed #E2E8F0' }}>
-          <p className="text-sm" style={{ color:'#64748B' }}>No sub-sections yet.</p>
-          <p className="text-xs mt-1" style={{ color:'#94A3B8' }}>Create sub-sections to group contracts by phase, location, or theme.</p>
+          <p className="text-sm" style={{ color:'#64748B' }}>No sections yet.</p>
+          <p className="text-xs mt-1" style={{ color:'#94A3B8' }}>Create sections to group contracts by phase, location, or theme.</p>
         </div>
       )}
 
@@ -311,7 +311,7 @@ export default function ProjectDetailPage({ params }: { params: { name: string }
                   className="mt-3 w-full py-2 rounded-xl text-xs font-semibold transition-colors hover:bg-slate-100"
                   style={{ border:`1px dashed ${secColor}40`, color:secColor }}
                 >
-                  + Add Contract to this sub-section
+                  + Add Contract to this section
                 </button>
               </div>
             </div>
@@ -323,7 +323,7 @@ export default function ProjectDetailPage({ params }: { params: { name: string }
       <div className="flex items-center justify-between mb-3">
         <div>
           <h2 className="text-base font-bold" style={{ color:'#0F172A' }}>Direct Contracts</h2>
-          <p className="text-xs mt-0.5" style={{ color:'#94A3B8' }}>Contracts linked directly to this project (no sub-section)</p>
+          <p className="text-xs mt-0.5" style={{ color:'#94A3B8' }}>Contracts linked directly to this project (no section)</p>
         </div>
         <button
           onClick={()=>{ setContractSectionId(''); setShowAddContract(true) }}
@@ -338,7 +338,7 @@ export default function ProjectDetailPage({ params }: { params: { name: string }
       {directContracts.length === 0 ? (
         <div className="rounded-2xl p-8 text-center" style={{ background:'#FFFFFF', border:'1px dashed #E2E8F0' }}>
           <p className="text-sm" style={{ color:'#64748B' }}>No direct contracts yet.</p>
-          <p className="text-xs mt-1" style={{ color:'#94A3B8' }}>Add a contract directly to this project, or use sub-sections to group them.</p>
+          <p className="text-xs mt-1" style={{ color:'#94A3B8' }}>Add a contract directly to this project, or use sections to group them.</p>
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-4">
@@ -396,10 +396,10 @@ export default function ProjectDetailPage({ params }: { params: { name: string }
           <div className="rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl" style={{ background:'#FFFFFF' }} onClick={e=>e.stopPropagation()}>
             <div style={{ height:4, background:'linear-gradient(90deg,#8B5CF6,#3B82F6)' }}/>
             <div className="p-6">
-              <h3 className="text-lg font-bold mb-5" style={{ color:'#0F172A' }}>Add Sub-section</h3>
+              <h3 className="text-lg font-bold mb-5" style={{ color:'#0F172A' }}>Add Section</h3>
               <form onSubmit={handleAddSection} className="space-y-4">
                 <div>
-                  <label className="text-xs font-semibold uppercase tracking-widest mb-2 block" style={{ color:'#64748B' }}>Sub-section Name *</label>
+                  <label className="text-xs font-semibold uppercase tracking-widest mb-2 block" style={{ color:'#64748B' }}>Section Name *</label>
                   <input className="w-full px-3.5 py-2.5 text-sm rounded-xl outline-none" style={inpSt} placeholder="e.g. Phase 1 - Environmental" value={sectionForm.name} onChange={e=>setSectionForm(p=>({...p,name:e.target.value}))} required/>
                 </div>
                 <div>
@@ -427,7 +427,7 @@ export default function ProjectDetailPage({ params }: { params: { name: string }
                   </div>
                 </div>
                 <div className="flex gap-3 pt-1">
-                  <button type="submit" disabled={addingSection} className="flex-1 py-3 rounded-xl text-sm font-semibold disabled:opacity-50" style={{ background:'#8B5CF6', color:'#fff' }}>{addingSection?'Creating...':'Create Sub-section'}</button>
+                  <button type="submit" disabled={addingSection} className="flex-1 py-3 rounded-xl text-sm font-semibold disabled:opacity-50" style={{ background:'#8B5CF6', color:'#fff' }}>{addingSection?'Creating...':'Create Section'}</button>
                   <button type="button" onClick={()=>setShowAddSection(false)} className="px-5 py-3 rounded-xl text-sm" style={{ background:'#F1F5F9', color:'#64748B' }}>Cancel</button>
                 </div>
               </form>
@@ -455,9 +455,9 @@ export default function ProjectDetailPage({ params }: { params: { name: string }
                 </div>
                 {sections.length > 0 && (
                   <div>
-                    <label className="text-xs font-semibold uppercase tracking-widest mb-2 block" style={{ color:'#64748B' }}>Sub-section (optional)</label>
+                    <label className="text-xs font-semibold uppercase tracking-widest mb-2 block" style={{ color:'#64748B' }}>Section (optional)</label>
                     <select className="w-full px-3.5 py-2.5 text-sm rounded-xl outline-none" style={inpSt} value={contractSectionId} onChange={e=>setContractSectionId(e.target.value)}>
-                      <option value="">Direct to project (no sub-section)</option>
+                      <option value="">Direct to project (no section)</option>
                       {sections.map((s:any)=><option key={s.id} value={s.id}>{s.name}</option>)}
                     </select>
                   </div>

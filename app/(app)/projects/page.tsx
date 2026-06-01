@@ -1,4 +1,4 @@
-import { supabaseAdmin } from '@/lib/supabase'
+﻿import { supabaseAdmin } from '@/lib/supabase'
 import { formatCurrency } from '@/lib/format'
 import Link from 'next/link'
 
@@ -27,7 +27,7 @@ async function getProjects() {
   const contracts = contractData || []
 
   if (!projErr && projData && projData.length > 0) {
-    // Projects table exists and has data — use it
+    // Projects table exists and has data â€” use it
     const projects = projData.map((p, i) => {
       const linked = contracts.filter((c:any) => c.project_id === p.id)
       const committed = linked.reduce((s:number,c:any)=>s+(c.contract_tranches||[]).reduce((ts:number,t:any)=>ts+(t.amount||0),0),0)
@@ -82,7 +82,7 @@ export default async function ProjectsPage() {
         <div>
           <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color:'#64748B' }}>Finance</p>
           <h1 className="text-2xl font-bold" style={{ color:'#0F172A' }}>Projects</h1>
-          <p className="text-sm mt-0.5" style={{ color:'#64748B' }}>{projects.length} project{projects.length!==1?'s':''} · {globalPct}% paid overall</p>
+          <p className="text-sm mt-0.5" style={{ color:'#64748B' }}>{projects.length} project{projects.length!==1?'s':''} Â· {globalPct}% paid overall</p>
         </div>
         <Link href="/projects/new" className="text-sm font-semibold px-4 py-2.5 rounded-xl flex items-center gap-2" style={{ background:'#3B82F6', color:'#fff' }}>
           <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -165,9 +165,9 @@ export default async function ProjectsPage() {
                         </div>
                         {proj.description && <p className="text-sm truncate" style={{ color:'#64748B' }}>{proj.description}</p>}
                         <p className="text-xs mt-1" style={{ color:'#94A3B8' }}>
-                          {proj.contractCount} contract{proj.contractCount!==1?'s':''} · {proj.invoices} invoice{proj.invoices!==1?'s':''}
-                          {proj.start_date && ` · ${new Date(proj.start_date).toLocaleDateString('en-GB',{month:'short',year:'numeric'})}`}
-                          {proj.end_date && ` → ${new Date(proj.end_date).toLocaleDateString('en-GB',{month:'short',year:'numeric'})}`}
+                          {proj.contractCount} contract{proj.contractCount!==1?'s':''} Â· {proj.invoices} invoice{proj.invoices!==1?'s':''}
+                          {proj.start_date && ` Â· ${new Date(proj.start_date).toLocaleDateString('en-GB',{month:'short',year:'numeric'})}`}
+                          {proj.end_date && ` â†’ ${new Date(proj.end_date).toLocaleDateString('en-GB',{month:'short',year:'numeric'})}`}
                         </p>
                       </div>
                       <div className="text-right shrink-0">
