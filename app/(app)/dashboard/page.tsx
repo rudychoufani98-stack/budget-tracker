@@ -1,80 +1,11 @@
 import { supabaseAdmin } from '@/lib/supabase'
 import { formatCurrency } from '@/lib/format'
 import Link from 'next/link'
-import { DashboardCharts } from './DashboardCharts'
 
 export const revalidate = 0
 
-async function getData() {
-  const [tranchesRes, invoicesRes, allInvRes, currencyRes, contractsRes] = await Promise.all([
-    supabaseAdmin.from('contract_tranches').select('*, contracts(contract_name, id, project, service_providers(name))'),
-    supabaseAdmin.from('invoices').select('*').order('created_at', { ascending: false }).limit(8),
-    supabaseAdmin.from('invoices').select('id, status, subcontractor_name, submitted_at, amount_ttc'),
-    supabaseAdmin.from('invoice_currency').select('invoice_id, currency'),
-    supabaseAdmin.from('contracts').select('id, contract_name, project, status, contract_amount, service_providers(name), contract_tranches(amount, status)').order('created_at', { ascending: false }).limit(6),
-  ])
-  const tranches  = tranchesRes.data  || []
-  const currencyMap: Record<string,string> = {}
-  for (const c of currencyRes.data || []) currencyMap[c.invoice_id] = c.currency
-  const invoices  = (invoicesRes.data || []).map((inv: any) => ({
-    ...inv, currency: currencyMap[inv.id] || inv.currency || 'USD',
-  }))
-  const allInv    = allInvRes.data    || []
-  const contracts = contractsRes.data || []
-
-  const total_committed   = tranches.reduce((s:number,t:any)=>s+(t.amount||0),0)
-  const total_paid        = tranches.filter((t:any)=>t.status==='paid').reduce((s:number,t:any)=>s+t.amount,0)
-  const total_pipeline    = tranches.filter((t:any)=>t.status==='scheduled').reduce((s:number,t:any)=>s+t.amount,0)
-  const payment_rate      = total_committed>0 ? Math.round((total_paid/total_committed)*100) : 0
-  const pending_rudy      = allInv.filter((i:any)=>i.status==='pending_review').length
-  const pending_placide   = allInv.filter((i:any)=>i.status==='pending_placide').length
-  const pending_hitech    = allInv.filter((i:any)=>i.status==='pending_hitech').length
-  const total_pending     = pending_rudy + pending_placide + pending_hitech
-  const total_approved    = allInv.filter((i:any)=>i.status==='approved').length
-
-  const monthly: Record<string,number> = {}
-  for (const t of tranches.filter((t:any)=>t.status==='paid'&&t.paid_date)) {
-    const key = (t.paid_date as string).slice(0,7)
-    monthly[key] = (monthly[key]||0)+(t.amount as number)
-  }
-  const monthlyData = Object.entries(monthly).sort(([a],[b])=>a.localeCompare(b)).slice(-6).map(([month,amount])=>({month,amount}))
-
-  const now = Date.now()
-  const alerts: { type:string; message:string; severity:string; id?:string }[] = []
-  for (const t of tranches) {
-    if ((t.status as string)==='scheduled' && t.scheduled_date) {
-      const days = Math.floor((new Date(t.scheduled_date as string).getTime()-now)/86400000)
-      if (days>=0 && days<=7) {
-        const cn = (t.contracts as any)?.contract_name||'Contract'
-        const sev = days<=2?'high':days<=5?'medium':'low'
-        alerts.push({ type:'upcoming', severity:sev, message:`${cn} — tranche due in ${days}d`, id:(t.contracts as any)?.id })
-      }
-    }
-  }
-  for (const i of allInv.filter((i:any)=>i.status==='pending_review')) {
-    const days = Math.floor((now-new Date((i as any).submitted_at).getTime())/86400000)
-    if (days>3) alerts.push({ type:'overdue', severity:days>7?'high':'medium', message:`${(i as any).subcontractor_name||'Invoice'} pending ${days}d`, id:(i as any).id })
-  }
-
-  const trancheCounts = {
-    paid:      tranches.filter((t:any)=>t.status==='paid').length,
-    scheduled: tranches.filter((t:any)=>t.status==='scheduled').length,
-    unpaid:    tranches.filter((t:any)=>t.status==='unpaid').length,
-  }
-
-  // Build contract cards
-  const contractCards = contracts.map((c:any) => {
-    const ts = (c.contract_tranches||[]) as any[]
-    const total = ts.reduce((s:number,t:any)=>s+(t.amount||0),0)
-    const paid  = ts.filter((t:any)=>t.status==='paid').reduce((s:number,t:any)=>s+(t.amount||0),0)
-    const pct   = total>0 ? Math.round((paid/total)*100) : 0
-    return { ...c, total, paid, pct }
-  })
-
-  return { total_committed, total_paid, total_pipeline, payment_rate,
-           total_pending, total_approved, pending_rudy, pending_placide, pending_hitech,
-           monthlyData, trancheCounts, alerts, recentInvoices: invoices, contractCards }
-}
+const ESG_COLOR: Record<string,string> = { E:'#10B981', S:'#3B82F6', G:'#8B5CF6', Other:'#6B7280' }
+const TRANCHE_ORDER = ['T1','T2','T3','T4','One-Shot']
 
 const INV_STATUS: Record<string,{label:string;color:string;bg:string}> = {
   pending_review:  { label:'Awaiting Rudy',    color:'#F97316', bg:'rgba(249,115,22,0.1)'  },
@@ -84,8 +15,266 @@ const INV_STATUS: Record<string,{label:string;color:string;bg:string}> = {
   rejected:        { label:'Rejected',         color:'#EF4444', bg:'rgba(239,68,68,0.1)'   },
 }
 
+async function getData() {
+  const now = new Date()
+  const in30 = new Date(now.getTime() + 30*86400000)
+  const in14 = new Date(now.getTime() + 14*86400000)
+
+  const [tranchesRes, contractsRes, invoicesRes, allInvRes, currencyRes, providersRes] = await Promise.all([
+    supabaseAdmin.from('contract_tranches').select('*, contracts(id, contract_name, category, currency, service_providers(id, name))').order('scheduled_date', { ascending: true }),
+    supabaseAdmin.from('contracts').select('id, contract_name, category, currency, contract_amount, service_providers(id, name), contract_tranches(id, tranche_name, amount, status, scheduled_date, paid_date), invoices(id, status, submitted_at, amount_ttc)').order('created_at', { ascending: false }),
+    supabaseAdmin.from('invoices').select('id, status, subcontractor_name, submitted_at, amount_ttc, contract_id, tranche_id').order('submitted_at', { ascending: false }),
+    supabaseAdmin.from('invoices').select('id, status, subcontractor_name, submitted_at, amount_ttc, contract_id'),
+    supabaseAdmin.from('invoice_currency').select('invoice_id, currency'),
+    supabaseAdmin.from('service_providers').select('id, name'),
+  ])
+
+  const tranches   = tranchesRes.data  || []
+  const contracts  = contractsRes.data || []
+  const invoices   = invoicesRes.data  || []
+  const allInv     = allInvRes.data    || []
+  const providers  = providersRes.data || []
+
+  const currencyMap: Record<string,string> = {}
+  for (const c of currencyRes.data || []) currencyMap[c.invoice_id] = c.currency
+
+  // Row 1 metrics
+  const totalCommitted = tranches.reduce((s:number,t:any) => s + (t.amount||0), 0)
+  const totalPaid      = tranches.filter((t:any) => t.status === 'paid').reduce((s:number,t:any) => s + (t.amount||0), 0)
+
+  const pipeline30 = tranches.filter((t:any) => {
+    if (t.status !== 'scheduled' && t.status !== 'unpaid') return false
+    if (!t.scheduled_date) return false
+    const d = new Date(t.scheduled_date)
+    return d >= now && d <= in30
+  }).reduce((s:number,t:any) => s + (t.amount||0), 0)
+
+  const overdueTranches = tranches.filter((t:any) => {
+    if (t.status === 'paid') return false
+    if (!t.scheduled_date) return false
+    return new Date(t.scheduled_date) < now
+  })
+  const overdueAmount = overdueTranches.reduce((s:number,t:any) => s + (t.amount||0), 0)
+
+  // Build invoice lookup by tranche_id
+  const invoiceByTranche: Record<string,any> = {}
+  const invoiceByContract: Record<string,any[]> = {}
+  for (const inv of invoices) {
+    if ((inv as any).tranche_id) invoiceByTranche[(inv as any).tranche_id] = inv
+    const cid = (inv as any).contract_id
+    if (cid) {
+      if (!invoiceByContract[cid]) invoiceByContract[cid] = []
+      invoiceByContract[cid].push(inv)
+    }
+  }
+
+  // Contract payment advancement (left panel row 2)
+  const contractAdvancement = contracts.map((c:any) => {
+    const ts: any[] = c.contract_tranches || []
+    const total = ts.reduce((s:number,t:any) => s + (t.amount||0), 0)
+    const paid  = ts.filter((t:any) => t.status === 'paid').reduce((s:number,t:any) => s + (t.amount||0), 0)
+    const pct   = total > 0 ? Math.round((paid/total)*100) : 0
+    const ccy   = c.currency || 'USD'
+
+    // Next deadline: earliest unpaid/scheduled tranche with a date
+    const upcoming = ts
+      .filter((t:any) => t.status !== 'paid' && t.scheduled_date)
+      .sort((a:any,b:any) => new Date(a.scheduled_date).getTime() - new Date(b.scheduled_date).getTime())
+    const nextDeadline = upcoming[0] || null
+    const nextDate = nextDeadline?.scheduled_date ? new Date(nextDeadline.scheduled_date) : null
+    const daysToNext = nextDate ? Math.floor((nextDate.getTime() - now.getTime()) / 86400000) : null
+
+    // Current tranche status: last non-paid tranche
+    const currentTranche = upcoming[0] || ts[ts.length - 1] || null
+
+    return { id:c.id, name:c.contract_name, provider:c.service_providers?.name||'',
+             category:c.category||'Other', total, paid, pct, ccy,
+             nextDeadline:nextDeadline?.scheduled_date||null, daysToNext,
+             trancheStatus:currentTranche?.status||'unpaid' }
+  }).filter((c:any) => c.total > 0)
+
+  // Timeline: all tranches ordered overdue first, then by date (right panel row 2)
+  const timeline = tranches
+    .filter((t:any) => t.scheduled_date)
+    .map((t:any) => {
+      const d = new Date(t.scheduled_date)
+      const daysAway = Math.floor((d.getTime() - now.getTime()) / 86400000)
+      const isOverdue = t.status !== 'paid' && d < now
+      const isDueSoon = !isOverdue && daysAway <= 14
+      const inv = invoiceByTranche[t.id] || null
+      let invStatus = 'no_invoice'
+      if (inv) invStatus = inv.status
+      return {
+        trancheId: t.id,
+        contractId: (t.contracts as any)?.id,
+        contractName: (t.contracts as any)?.contract_name || '',
+        provider: (t.contracts as any)?.service_providers?.name || '',
+        trancheName: t.tranche_name,
+        scheduledDate: t.scheduled_date,
+        amount: t.amount || 0,
+        currency: (t.contracts as any)?.currency || 'USD',
+        status: t.status,
+        isOverdue,
+        isDueSoon,
+        daysAway,
+        invId: inv?.id || null,
+        invStatus,
+      }
+    })
+    .sort((a:any, b:any) => {
+      if (a.isOverdue && !b.isOverdue) return -1
+      if (!a.isOverdue && b.isOverdue) return 1
+      return new Date(a.scheduledDate).getTime() - new Date(b.scheduledDate).getTime()
+    })
+    .slice(0, 20)
+
+  // Tranche tracker per provider (left panel row 3)
+  const providerMap: Record<string, any> = {}
+  for (const c of contracts) {
+    const pid = (c as any).service_providers?.id
+    const pname = (c as any).service_providers?.name
+    if (!pid) continue
+    if (!providerMap[pid]) providerMap[pid] = { id:pid, name:pname, contracts:[] }
+    const ts: any[] = (c as any).contract_tranches || []
+    const tranchesByName: Record<string,any> = {}
+    for (const t of ts) tranchesByName[t.tranche_name] = t
+    const totalPaidP = ts.filter((t:any) => t.status==='paid').reduce((s:number,t:any)=>s+(t.amount||0),0)
+    const totalAllP  = ts.reduce((s:number,t:any)=>s+(t.amount||0),0)
+    providerMap[pid].contracts.push({
+      contractId: (c as any).id,
+      contractName: (c as any).contract_name,
+      ccy: (c as any).currency || 'USD',
+      tranches: tranchesByName,
+      totalPaid: totalPaidP,
+      balance: totalAllP - totalPaidP,
+    })
+  }
+  const providerRows = Object.values(providerMap).slice(0, 12)
+
+  // Alerts (right panel row 3)
+  const alerts: any[] = []
+
+  // Red: overdue payments
+  for (const t of overdueTranches.slice(0,5)) {
+    const daysOver = Math.floor((now.getTime() - new Date(t.scheduled_date).getTime()) / 86400000)
+    alerts.push({
+      color:'red', priority:0,
+      title:`Overdue: ${(t.contracts as any)?.contract_name || 'Contract'}`,
+      sub:`${t.tranche_name} - ${daysOver} day${daysOver!==1?'s':''} overdue`,
+      href:`/contracts/${(t.contracts as any)?.id}`,
+    })
+  }
+
+  // Red: invoices stuck > 3 days
+  for (const inv of allInv.filter((i:any) => ['pending_review','pending_placide','pending_hitech'].includes(i.status))) {
+    if (!(inv as any).submitted_at) continue
+    const daysStuck = Math.floor((now.getTime() - new Date((inv as any).submitted_at).getTime()) / 86400000)
+    if (daysStuck > 3) {
+      alerts.push({
+        color:'red', priority:1,
+        title:`Stuck: ${(inv as any).subcontractor_name || 'Invoice'}`,
+        sub:`In validation ${daysStuck} days - ${INV_STATUS[(inv as any).status]?.label||'Pending'}`,
+        href:`/invoices/${(inv as any).id}`,
+      })
+    }
+  }
+
+  // Amber: payments due in 14 days
+  const dueSoon = tranches.filter((t:any) => {
+    if (t.status === 'paid') return false
+    if (!t.scheduled_date) return false
+    const d = new Date(t.scheduled_date)
+    return d >= now && d <= in14
+  })
+  for (const t of dueSoon.slice(0,4)) {
+    const daysAway = Math.floor((new Date(t.scheduled_date).getTime() - now.getTime()) / 86400000)
+    alerts.push({
+      color:'amber', priority:2,
+      title:`Due soon: ${(t.contracts as any)?.contract_name || 'Contract'}`,
+      sub:`${t.tranche_name} due in ${daysAway} day${daysAway!==1?'s':''}`,
+      href:`/contracts/${(t.contracts as any)?.id}`,
+    })
+  }
+
+  // Amber: invoices awaiting Rudy
+  const awaitingRudy = allInv.filter((i:any) => i.status === 'pending_review').length
+  if (awaitingRudy > 0) {
+    alerts.push({
+      color:'amber', priority:3,
+      title:`${awaitingRudy} invoice${awaitingRudy!==1?'s':''} awaiting Rudy review`,
+      sub:'Validation chain blocked at step 1',
+      href:'/validations',
+    })
+  }
+
+  // Amber: contracts at 80%+ budget
+  for (const c of contractAdvancement.filter((c:any) => c.pct >= 80 && c.pct < 100)) {
+    alerts.push({
+      color:'amber', priority:4,
+      title:`Budget warning: ${c.name}`,
+      sub:`${c.pct}% of contract budget consumed`,
+      href:`/contracts/${c.id}`,
+    })
+  }
+
+  // Blue: upcoming 30 day tranches with no invoice
+  for (const t of tranches.filter((t:any) => {
+    if (t.status === 'paid') return false
+    if (!t.scheduled_date) return false
+    const d = new Date(t.scheduled_date)
+    return d > in14 && d <= in30
+  }).slice(0,4)) {
+    const hasInv = !!invoiceByTranche[t.id]
+    if (!hasInv) {
+      alerts.push({
+        color:'blue', priority:5,
+        title:`No invoice: ${(t.contracts as any)?.contract_name || 'Contract'}`,
+        sub:`${t.tranche_name} due ${new Date(t.scheduled_date).toLocaleDateString('en-GB',{day:'2-digit',month:'short'})} - no invoice uploaded yet`,
+        href:`/contracts/${(t.contracts as any)?.id}`,
+      })
+    }
+  }
+
+  alerts.sort((a,b) => a.priority - b.priority)
+
+  return {
+    totalCommitted, totalPaid, pipeline30, overdueAmount,
+    overdueCount: overdueTranches.length,
+    contractAdvancement,
+    timeline,
+    providerRows,
+    alerts: alerts.slice(0, 12),
+  }
+}
+
+function fmtDate(d: string | null) {
+  if (!d) return ''
+  return new Date(d).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' })
+}
+
+function trancheColor(t: any, now: Date) {
+  if (!t) return '#E2E8F0'
+  if (t.status === 'paid') return '#10B981'
+  if (t.status === 'scheduled' || t.status === 'unpaid') {
+    if (t.scheduled_date && new Date(t.scheduled_date) < now) return '#EF4444'
+    if (t.scheduled_date) {
+      const days = Math.floor((new Date(t.scheduled_date).getTime() - now.getTime()) / 86400000)
+      if (days <= 14) return '#F59E0B'
+      return '#3B82F6'
+    }
+    return '#94A3B8'
+  }
+  return '#94A3B8'
+}
+
+function invStatusLabel(status: string) {
+  if (status === 'no_invoice') return { label:'No invoice', color:'#94A3B8', bg:'#F1F5F9' }
+  return INV_STATUS[status] || { label:status, color:'#64748B', bg:'#F8FAFC' }
+}
+
 export default async function DashboardPage() {
   const d = await getData()
+  const now = new Date()
 
   return (
     <div className="px-6 py-8 max-w-7xl mx-auto space-y-6">
@@ -102,167 +291,243 @@ export default async function DashboardPage() {
         </Link>
       </div>
 
-      {/* KPI cards */}
+      {/* ROW 1 — 4 metric cards */}
       <div className="grid grid-cols-4 gap-4">
-        {[
-          { label:'Total Committed', value:formatCurrency(d.total_committed), sub:`${d.trancheCounts.paid+d.trancheCounts.scheduled+d.trancheCounts.unpaid} tranches`, color:'#3B82F6', bg:'#EFF6FF', icon:'💰' },
-          { label:'Total Paid',      value:formatCurrency(d.total_paid),      sub:`${d.trancheCounts.paid} tranches paid`,                                             color:'#10B981', bg:'#F0FDF4', icon:'✅' },
-          { label:'Pipeline',        value:formatCurrency(d.total_pipeline),   sub:`${d.trancheCounts.scheduled} scheduled`,                                           color:'#F59E0B', bg:'#FFFBEB', icon:'📅' },
-          { label:'Pending Invoices',value:String(d.total_pending),           sub:`${d.total_approved} approved total`,                                               color:d.total_pending>0?'#EF4444':'#94A3B8', bg:d.total_pending>0?'#FEF2F2':'#F8FAFC', icon:'🧾' },
-        ].map(k=>(
-          <div key={k.label} className="rounded-2xl px-5 py-5" style={{ background:'#FFFFFF', border:'1px solid #E2E8F0' }}>
-            <div className="flex items-start justify-between mb-3">
-              <p className="text-xs font-semibold uppercase tracking-widest" style={{ color:'#94A3B8' }}>{k.label}</p>
-              <span className="text-lg">{k.icon}</span>
-            </div>
-            <p className="text-2xl font-bold mb-1" style={{ color:k.color }}>{k.value}</p>
-            <p className="text-xs" style={{ color:'#94A3B8' }}>{k.sub}</p>
-          </div>
-        ))}
+        <Link href="/contracts" className="rounded-2xl px-5 py-5 block hover:shadow-md transition-shadow" style={{ background:'#FFFFFF', border:'1px solid #E2E8F0' }}>
+          <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color:'#94A3B8' }}>Total Committed</p>
+          <p className="text-2xl font-bold mb-1" style={{ color:'#3B82F6' }}>{formatCurrency(d.totalCommitted)}</p>
+          <p className="text-xs" style={{ color:'#94A3B8' }}>across all contracts</p>
+        </Link>
+
+        <Link href="/payment-register?filter=paid" className="rounded-2xl px-5 py-5 block hover:shadow-md transition-shadow" style={{ background:'#FFFFFF', border:'1px solid #E2E8F0' }}>
+          <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color:'#94A3B8' }}>Total Paid</p>
+          <p className="text-2xl font-bold mb-1" style={{ color:'#10B981' }}>{formatCurrency(d.totalPaid)}</p>
+          <p className="text-xs" style={{ color:'#94A3B8' }}>confirmed payments</p>
+        </Link>
+
+        <Link href="/payment-register?filter=upcoming" className="rounded-2xl px-5 py-5 block hover:shadow-md transition-shadow" style={{ background:'#FFFFFF', border:'1px solid #E2E8F0' }}>
+          <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color:'#94A3B8' }}>Pipeline next 30 days</p>
+          <p className="text-2xl font-bold mb-1" style={{ color:'#F59E0B' }}>{formatCurrency(d.pipeline30)}</p>
+          <p className="text-xs" style={{ color:'#94A3B8' }}>scheduled tranches</p>
+        </Link>
+
+        <Link href="/payment-register?filter=overdue" className="rounded-2xl px-5 py-5 block hover:shadow-md transition-shadow" style={{ background: d.overdueAmount > 0 ? '#FEF2F2' : '#FFFFFF', border: d.overdueAmount > 0 ? '1px solid rgba(239,68,68,0.3)' : '1px solid #E2E8F0' }}>
+          <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: d.overdueAmount > 0 ? '#EF4444' : '#94A3B8' }}>Overdue Payments</p>
+          <p className="text-2xl font-bold mb-1" style={{ color:'#EF4444' }}>{formatCurrency(d.overdueAmount)}</p>
+          <p className="text-xs" style={{ color:'#EF4444' }}>{d.overdueCount} tranche{d.overdueCount!==1?'s':''} overdue</p>
+        </Link>
       </div>
 
-      {/* Payment rate bar */}
-      <div className="rounded-2xl px-6 py-5" style={{ background:'#FFFFFF', border:'1px solid #E2E8F0' }}>
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <p className="text-sm font-semibold" style={{ color:'#0F172A' }}>Overall Payment Rate</p>
-            <p className="text-xs mt-0.5" style={{ color:'#94A3B8' }}>{formatCurrency(d.total_paid)} paid of {formatCurrency(d.total_committed)} committed</p>
-          </div>
-          <p className="text-3xl font-bold" style={{ color:d.payment_rate>=80?'#10B981':d.payment_rate>=40?'#F59E0B':'#EF4444' }}>{d.payment_rate}%</p>
-        </div>
-        <div className="h-3 rounded-full overflow-hidden" style={{ background:'#F1F5F9' }}>
-          <div className="h-full rounded-full transition-all" style={{ width:`${d.payment_rate}%`, background:d.payment_rate>=80?'linear-gradient(90deg,#10B981,#34D399)':d.payment_rate>=40?'linear-gradient(90deg,#F59E0B,#FCD34D)':'linear-gradient(90deg,#EF4444,#F87171)' }}/>
-        </div>
-        <div className="flex justify-between mt-2">
-          <span className="text-xs" style={{ color:'#94A3B8' }}>0%</span>
-          <span className="text-xs" style={{ color:'#94A3B8' }}>100%</span>
-        </div>
-      </div>
+      {/* ROW 2 — Contract advancement + Timeline */}
+      <div className="grid grid-cols-2 gap-5">
 
-      {/* Recent contracts */}
-      {d.contractCards.length > 0 && (
+        {/* Left: Contract payment advancement */}
         <div className="rounded-2xl overflow-hidden" style={{ background:'#FFFFFF', border:'1px solid #E2E8F0' }}>
-          <div className="px-6 py-4 flex items-center justify-between" style={{ borderBottom:'1px solid #F1F5F9' }}>
-            <p className="text-sm font-semibold" style={{ color:'#0F172A' }}>Active Contracts</p>
-            <Link href="/contracts" className="text-xs font-semibold" style={{ color:'#3B82F6' }}>View all →</Link>
+          <div className="px-5 py-4 flex items-center justify-between" style={{ borderBottom:'1px solid #F1F5F9' }}>
+            <div>
+              <p className="text-sm font-bold" style={{ color:'#0F172A' }}>Contract Payment Advancement</p>
+              <p className="text-xs mt-0.5" style={{ color:'#94A3B8' }}>Click any row to open the contract</p>
+            </div>
+            <Link href="/contracts" className="text-xs font-semibold" style={{ color:'#3B82F6' }}>View all</Link>
           </div>
-          <div className="grid grid-cols-3 gap-0 divide-x divide-[#F1F5F9]">
-            {d.contractCards.slice(0,3).map((c:any,i:number)=>{
-              const colors = ['#3B82F6','#8B5CF6','#10B981','#F59E0B','#EF4444','#06B6D4']
-              const col = colors[i % colors.length]
+          <div className="divide-y divide-[#F8FAFC]">
+            {d.contractAdvancement.length === 0 && (
+              <p className="text-sm text-center py-10" style={{ color:'#94A3B8' }}>No contracts yet</p>
+            )}
+            {d.contractAdvancement.slice(0,8).map((c:any) => {
+              const catC = ESG_COLOR[c.category] || ESG_COLOR.Other
+              const deadlineColor = c.daysToNext === null ? '#94A3B8'
+                : c.daysToNext < 0 ? '#EF4444'
+                : c.daysToNext <= 14 ? '#F59E0B'
+                : '#94A3B8'
+              const pctColor = c.pct >= 80 ? '#EF4444' : c.pct >= 50 ? '#F59E0B' : '#10B981'
               return (
-                <Link key={c.id} href={`/contracts/${c.id}`} className="p-5 hover:bg-slate-50 transition-colors block">
-                  <div style={{ height:3, background:col, borderRadius:2, marginBottom:12 }}/>
-                  <p className="text-sm font-semibold mb-0.5 truncate" style={{ color:'#0F172A' }}>{c.contract_name}</p>
-                  <p className="text-xs mb-3 truncate" style={{ color:'#94A3B8' }}>{c.service_providers?.name||c.project||'—'}</p>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-semibold" style={{ color:col }}>{c.pct}%</span>
-                    <span className="text-xs" style={{ color:'#94A3B8' }}>{formatCurrency(c.total)}</span>
+                <Link key={c.id} href={`/contracts/${c.id}`}
+                  className="flex items-center gap-3 px-5 py-3.5 hover:bg-slate-50 transition-colors"
+                >
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-xs px-1.5 py-0.5 rounded font-semibold" style={{ background:`${catC}18`, color:catC }}>{c.category}</span>
+                      <p className="text-sm font-semibold truncate" style={{ color:'#0F172A' }}>{c.name}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <p className="text-xs truncate" style={{ color:'#94A3B8' }}>{c.provider}</p>
+                      {c.nextDeadline && (
+                        <p className="text-xs font-medium" style={{ color:deadlineColor }}>
+                          {c.daysToNext !== null && c.daysToNext < 0
+                            ? `${Math.abs(c.daysToNext)}d overdue`
+                            : c.daysToNext !== null && c.daysToNext <= 14
+                              ? `Due in ${c.daysToNext}d`
+                              : fmtDate(c.nextDeadline)
+                          }
+                        </p>
+                      )}
+                    </div>
                   </div>
-                  <div className="h-1.5 rounded-full overflow-hidden" style={{ background:'#F1F5F9' }}>
-                    <div style={{ width:`${c.pct}%`, height:'100%', background:col, borderRadius:4 }}/>
+                  <div className="w-28 shrink-0">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-bold" style={{ color:pctColor }}>{c.pct}%</span>
+                      <span className="text-xs" style={{ color:'#94A3B8' }}>{formatCurrency(c.paid, c.ccy)}</span>
+                    </div>
+                    <div className="h-1.5 rounded-full overflow-hidden" style={{ background:'#F1F5F9' }}>
+                      <div style={{ width:`${c.pct}%`, height:'100%', background:pctColor, borderRadius:4 }}/>
+                    </div>
                   </div>
                 </Link>
               )
             })}
           </div>
         </div>
-      )}
 
-      {/* Charts + Sidebar */}
-      <div className="grid grid-cols-3 gap-5">
-        {/* Chart */}
-        <div className="col-span-2 rounded-2xl p-5" style={{ background:'#FFFFFF', border:'1px solid #E2E8F0' }}>
-          <p className="text-sm font-semibold mb-4" style={{ color:'#0F172A' }}>Monthly Payments — last 6 months</p>
-          <DashboardCharts monthlyData={d.monthlyData} trancheCounts={d.trancheCounts} />
-        </div>
-
-        {/* Right column */}
-        <div className="space-y-4">
-          {/* Validation queue */}
-          <div className="rounded-2xl p-5" style={{ background:'#FFFFFF', border:'1px solid #E2E8F0' }}>
-            <div className="flex items-center justify-between mb-4">
-              <p className="text-sm font-semibold" style={{ color:'#0F172A' }}>Validation Queue</p>
-              {(d.pending_rudy+d.pending_placide+d.pending_hitech)>0 && (
-                <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ background:'rgba(239,68,68,0.1)', color:'#EF4444' }}>
-                  {d.pending_rudy+d.pending_placide+d.pending_hitech}
-                </span>
-              )}
-            </div>
-            <div className="space-y-3">
-              {[
-                { label:'Awaiting Rudy',    count:d.pending_rudy,    color:'#F97316', bg:'rgba(249,115,22,0.1)' },
-                { label:'Awaiting Placide', count:d.pending_placide, color:'#D97706', bg:'rgba(217,119,6,0.1)'  },
-                { label:'Awaiting Dani',    count:d.pending_hitech,  color:'#7C3AED', bg:'rgba(124,58,237,0.1)' },
-              ].map(v=>(
-                <div key={v.label} className="flex items-center justify-between py-2 px-3 rounded-xl" style={{ background:v.count>0?v.bg:'#F8FAFC' }}>
-                  <span className="text-xs font-medium" style={{ color:v.count>0?v.color:'#94A3B8' }}>{v.label}</span>
-                  <span className="text-sm font-bold" style={{ color:v.count>0?v.color:'#94A3B8' }}>{v.count}</span>
-                </div>
-              ))}
-            </div>
-            <Link href="/validations" className="mt-4 block text-center text-xs font-semibold py-2.5 rounded-xl transition-colors hover:bg-blue-50" style={{ color:'#3B82F6', border:'1px solid #E2E8F0' }}>
-              Go to Validations →
-            </Link>
+        {/* Right: Payment deadline timeline */}
+        <div className="rounded-2xl overflow-hidden" style={{ background:'#FFFFFF', border:'1px solid #E2E8F0' }}>
+          <div className="px-5 py-4" style={{ borderBottom:'1px solid #F1F5F9' }}>
+            <p className="text-sm font-bold" style={{ color:'#0F172A' }}>Upcoming and Overdue Deadlines</p>
+            <p className="text-xs mt-0.5" style={{ color:'#94A3B8' }}>Chronological - overdue first</p>
           </div>
-
-          {/* Alerts */}
-          {d.alerts.length > 0 && (
-            <div className="rounded-2xl p-5" style={{ background:'#FFFFFF', border:'1px solid #E2E8F0' }}>
-              <p className="text-sm font-semibold mb-3" style={{ color:'#0F172A' }}>⚡ Alerts</p>
-              <div className="space-y-2">
-                {d.alerts.slice(0,4).map((a,i)=>{
-                  const isHigh = a.severity==='high'
-                  const isMed  = a.severity==='medium'
-                  const color  = isHigh?'#EF4444':isMed?'#F59E0B':'#3B82F6'
-                  const bg     = isHigh?'rgba(239,68,68,0.08)':isMed?'rgba(245,158,11,0.08)':'rgba(59,130,246,0.08)'
-                  return (
-                    <div key={i} className="flex items-start gap-2.5 px-3 py-2.5 rounded-xl text-xs" style={{ background:bg }}>
-                      <span style={{ color, flexShrink:0 }}>{isHigh?'🔴':isMed?'🟡':'🔵'}</span>
-                      <span style={{ color }}>{a.message}</span>
+          <div className="divide-y divide-[#F8FAFC] overflow-y-auto" style={{ maxHeight:380 }}>
+            {d.timeline.length === 0 && (
+              <p className="text-sm text-center py-10" style={{ color:'#94A3B8' }}>No scheduled tranches</p>
+            )}
+            {d.timeline.map((item:any) => {
+              const dotColor = item.isOverdue ? '#EF4444' : item.isDueSoon ? '#F59E0B' : '#94A3B8'
+              const st = invStatusLabel(item.invStatus)
+              const href = item.invId ? `/invoices/${item.invId}` : `/contracts/${item.contractId}`
+              return (
+                <Link key={item.trancheId} href={href}
+                  className="flex items-start gap-3 px-5 py-3.5 hover:bg-slate-50 transition-colors"
+                >
+                  <div className="mt-1.5 shrink-0 w-2.5 h-2.5 rounded-full" style={{ background:dotColor }}/>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5 mb-0.5 flex-wrap">
+                      <p className="text-sm font-semibold truncate" style={{ color:'#0F172A' }}>{item.contractName}</p>
+                      <span className="text-xs px-1.5 py-0.5 rounded font-medium" style={{ background:'#F1F5F9', color:'#64748B' }}>{item.trancheName}</span>
                     </div>
-                  )
-                })}
-              </div>
-            </div>
-          )}
+                    <p className="text-xs truncate mb-1" style={{ color:'#94A3B8' }}>{item.provider}</p>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-xs font-medium" style={{ color:dotColor }}>
+                        {item.isOverdue
+                          ? `${Math.abs(item.daysAway)}d overdue`
+                          : item.daysAway === 0 ? 'Due today'
+                          : `Due in ${item.daysAway}d`}
+                      </span>
+                      <span className="text-xs" style={{ color:'#94A3B8' }}>{fmtDate(item.scheduledDate)}</span>
+                      <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background:st.bg, color:st.color }}>{st.label}</span>
+                    </div>
+                  </div>
+                  <p className="text-sm font-bold shrink-0" style={{ color:'#0F172A' }}>{formatCurrency(item.amount, item.currency)}</p>
+                </Link>
+              )
+            })}
+          </div>
         </div>
       </div>
 
-      {/* Recent invoices */}
-      <div className="rounded-2xl overflow-hidden" style={{ background:'#FFFFFF', border:'1px solid #E2E8F0' }}>
-        <div className="px-6 py-4 flex items-center justify-between" style={{ borderBottom:'1px solid #F1F5F9' }}>
-          <p className="text-sm font-semibold" style={{ color:'#0F172A' }}>Recent Invoices</p>
-          <Link href="/invoices" className="text-xs font-semibold" style={{ color:'#3B82F6' }}>View all →</Link>
+      {/* ROW 3 — Tranche tracker + Alerts */}
+      <div className="grid grid-cols-2 gap-5">
+
+        {/* Left: Tranche tracker per provider */}
+        <div className="rounded-2xl overflow-hidden" style={{ background:'#FFFFFF', border:'1px solid #E2E8F0' }}>
+          <div className="px-5 py-4" style={{ borderBottom:'1px solid #F1F5F9' }}>
+            <p className="text-sm font-bold" style={{ color:'#0F172A' }}>Tranche Tracker by Consultant</p>
+            <p className="text-xs mt-0.5" style={{ color:'#94A3B8' }}>Green=paid, Amber=pending, Blue=upcoming, Red=overdue</p>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs">
+              <thead>
+                <tr style={{ background:'#FAFBFC', borderBottom:'1px solid #F1F5F9' }}>
+                  <th className="px-4 py-2.5 text-left font-semibold uppercase tracking-widest" style={{ color:'#94A3B8' }}>Consultant</th>
+                  <th className="px-4 py-2.5 text-left font-semibold uppercase tracking-widest" style={{ color:'#94A3B8' }}>Contract</th>
+                  {TRANCHE_ORDER.map(t => (
+                    <th key={t} className="px-2 py-2.5 text-center font-semibold uppercase tracking-widest" style={{ color:'#94A3B8' }}>{t}</th>
+                  ))}
+                  <th className="px-4 py-2.5 text-right font-semibold uppercase tracking-widest" style={{ color:'#94A3B8' }}>Paid</th>
+                  <th className="px-4 py-2.5 text-right font-semibold uppercase tracking-widest" style={{ color:'#94A3B8' }}>Balance</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#F8FAFC]">
+                {d.providerRows.length === 0 && (
+                  <tr><td colSpan={9} className="text-center py-8" style={{ color:'#94A3B8' }}>No data</td></tr>
+                )}
+                {d.providerRows.map((prov:any) =>
+                  prov.contracts.map((c:any, ci:number) => (
+                    <tr key={`${prov.id}-${c.contractId}`} className="hover:bg-slate-50 transition-colors">
+                      {ci === 0 ? (
+                        <td className="px-4 py-2.5" rowSpan={prov.contracts.length}>
+                          <Link href={`/providers/${prov.id}`} className="font-semibold hover:text-blue-600 transition-colors" style={{ color:'#0F172A' }}>
+                            {prov.name}
+                          </Link>
+                        </td>
+                      ) : null}
+                      <td className="px-4 py-2.5 max-w-[120px]">
+                        <Link href={`/contracts/${c.contractId}`} className="truncate block hover:text-blue-600 transition-colors" style={{ color:'#64748B' }}>
+                          {c.contractName}
+                        </Link>
+                      </td>
+                      {TRANCHE_ORDER.map(tn => {
+                        const t = c.tranches[tn]
+                        const col = trancheColor(t, now)
+                        if (!t) return (
+                          <td key={tn} className="px-2 py-2.5 text-center">
+                            <div className="w-5 h-5 rounded mx-auto" style={{ background:'#F1F5F9' }}/>
+                          </td>
+                        )
+                        const href = t.id && invoiceByTranche[t.id] ? `/invoices/${invoiceByTranche[t.id].id}` : `/contracts/${c.contractId}`
+                        return (
+                          <td key={tn} className="px-2 py-2.5 text-center">
+                            <Link href={href} title={`${tn}: ${t.status} - ${formatCurrency(t.amount, c.ccy)}`}>
+                              <div className="w-5 h-5 rounded mx-auto hover:scale-125 transition-transform" style={{ background:col }}/>
+                            </Link>
+                          </td>
+                        )
+                      })}
+                      <td className="px-4 py-2.5 text-right font-semibold" style={{ color:'#10B981' }}>{formatCurrency(c.totalPaid, c.ccy)}</td>
+                      <td className="px-4 py-2.5 text-right font-semibold" style={{ color:c.balance>0?'#F59E0B':'#94A3B8' }}>{formatCurrency(c.balance, c.ccy)}</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
-        {d.recentInvoices.length===0 ? (
-          <p className="text-sm text-center py-10" style={{ color:'#94A3B8' }}>No invoices yet</p>
-        ) : (
-          d.recentInvoices.slice(0,6).map((inv:any)=>{
-            const st = INV_STATUS[inv.status] || INV_STATUS.pending_review
-            return (
-              <Link key={inv.id} href={`/invoices/${inv.id}`}
-                className="flex items-center justify-between px-6 py-3.5 transition-colors hover:bg-slate-50"
-                style={{ borderBottom:'1px solid #F8FAFC' }}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-xl flex items-center justify-center text-sm" style={{ background:`${st.color}15` }}>
-                    🧾
+
+        {/* Right: Alerts */}
+        <div className="rounded-2xl overflow-hidden" style={{ background:'#FFFFFF', border:'1px solid #E2E8F0' }}>
+          <div className="px-5 py-4" style={{ borderBottom:'1px solid #F1F5F9' }}>
+            <p className="text-sm font-bold" style={{ color:'#0F172A' }}>Alerts and Actions Required</p>
+            <p className="text-xs mt-0.5" style={{ color:'#94A3B8' }}>Auto-generated from live data, ordered by urgency</p>
+          </div>
+          <div className="divide-y divide-[#F8FAFC] overflow-y-auto" style={{ maxHeight:420 }}>
+            {d.alerts.length === 0 && (
+              <div className="py-12 text-center">
+                <div className="text-2xl mb-2">OK</div>
+                <p className="text-sm font-medium" style={{ color:'#10B981' }}>All clear</p>
+                <p className="text-xs mt-1" style={{ color:'#94A3B8' }}>No alerts at this time</p>
+              </div>
+            )}
+            {d.alerts.map((a:any, i:number) => {
+              const isRed   = a.color === 'red'
+              const isAmber = a.color === 'amber'
+              const iconColor = isRed ? '#EF4444' : isAmber ? '#F59E0B' : '#3B82F6'
+              const iconBg    = isRed ? 'rgba(239,68,68,0.1)' : isAmber ? 'rgba(245,158,11,0.1)' : 'rgba(59,130,246,0.1)'
+              const icon      = isRed ? 'R' : isAmber ? '!' : 'i'
+              return (
+                <Link key={i} href={a.href}
+                  className="flex items-start gap-3 px-5 py-4 hover:bg-slate-50 transition-colors"
+                >
+                  <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5" style={{ background:iconBg, color:iconColor }}>
+                    {icon}
                   </div>
-                  <div>
-                    <p className="text-sm font-medium" style={{ color:'#0F172A' }}>{inv.subcontractor_name||'Unknown'}</p>
-                    <p className="text-xs mt-0.5" style={{ color:'#94A3B8' }}>{new Date(inv.created_at||inv.submitted_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}</p>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold truncate" style={{ color:'#0F172A' }}>{a.title}</p>
+                    <p className="text-xs mt-0.5 truncate" style={{ color:'#94A3B8' }}>{a.sub}</p>
                   </div>
-                </div>
-                <div className="flex items-center gap-4">
-                  <span className="text-sm font-semibold" style={{ color:'#0F172A' }}>{formatCurrency(inv.amount_ttc)}</span>
-                  <span className="text-xs px-2.5 py-1 rounded-full font-semibold" style={{ background:st.bg, color:st.color }}>{st.label}</span>
-                  <svg width="14" height="14" fill="none" stroke="#CBD5E1" strokeWidth="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-                </div>
-              </Link>
-            )
-          })
-        )}
+                  <svg width="14" height="14" fill="none" stroke="#CBD5E1" strokeWidth="2" viewBox="0 0 24 24" className="shrink-0 mt-1"><polyline points="9 18 15 12 9 6"/></svg>
+                </Link>
+              )
+            })}
+          </div>
+        </div>
       </div>
 
     </div>
