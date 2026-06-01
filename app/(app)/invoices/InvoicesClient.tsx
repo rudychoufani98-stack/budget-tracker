@@ -6,7 +6,7 @@ import { formatCurrency, formatDate } from '@/lib/format'
 const STATUS_MAP: Record<string,{label:string;color:string;bg:string}> = {
   pending_review:  { label:'Awaiting Rudy',    color:'#F97316', bg:'rgba(249,115,22,0.1)'  },
   pending_placide: { label:'Awaiting Placide', color:'#D97706', bg:'rgba(217,119,6,0.1)'   },
-  pending_hitech:  { label:'Awaiting Dani',    color:'#7C3AED', bg:'rgba(124,58,237,0.1)'  },
+  pending_dani:  { label:'Awaiting Dani',    color:'#7C3AED', bg:'rgba(124,58,237,0.1)'  },
   approved:        { label:'Approved',         color:'#10B981', bg:'rgba(16,185,129,0.1)'  },
   rejected:        { label:'Rejected',         color:'#EF4444', bg:'rgba(239,68,68,0.1)'   },
 }
@@ -41,7 +41,7 @@ export function InvoicesClient({ invoices }: { invoices: any[] }) {
     return invoices.filter(i => {
       const currOk = selectedCurrency === 'ALL' || (i.currency || 'NGN') === selectedCurrency
       const statOk = selectedStatus  === 'ALL'
-        || (selectedStatus === 'pending' && ['pending_review','pending_placide','pending_hitech'].includes(i.status))
+        || (selectedStatus === 'pending' && ['pending_review','pending_placide','pending_dani'].includes(i.status))
         || i.status === selectedStatus
       const projOk = selectedProject === 'ALL' || (i.contracts?.projects?.name || '') === selectedProject
       return currOk && statOk && projOk
@@ -50,7 +50,7 @@ export function InvoicesClient({ invoices }: { invoices: any[] }) {
 
   const counts = {
     all:      filtered.length,
-    pending:  filtered.filter(i=>['pending_review','pending_placide','pending_hitech'].includes(i.status)).length,
+    pending:  filtered.filter(i=>['pending_review','pending_placide','pending_dani'].includes(i.status)).length,
     approved: filtered.filter(i=>i.status==='approved').length,
     rejected: filtered.filter(i=>i.status==='rejected').length,
   }
@@ -77,7 +77,7 @@ export function InvoicesClient({ invoices }: { invoices: any[] }) {
 
   const pendingTotal = useMemo(() => {
     const map: Record<string,number> = {}
-    filtered.filter(i=>['pending_review','pending_placide','pending_hitech'].includes(i.status)).forEach(i => {
+    filtered.filter(i=>['pending_review','pending_placide','pending_dani'].includes(i.status)).forEach(i => {
       const c = i.currency || 'NGN'
       map[c] = (map[c] || 0) + (i.amount_ttc || 0)
     })

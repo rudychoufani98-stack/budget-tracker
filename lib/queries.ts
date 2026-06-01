@@ -108,7 +108,7 @@ export async function getPendingValidations() {
   const { data } = await supabaseAdmin
     .from('invoices')
     .select('id, subcontractor_name, invoice_number, amount_ttc, status, submitted_at')
-    .in('status', ['pending_review', 'pending_placide', 'pending_hitech'])
+    .in('status', ['pending_review', 'pending_placide', 'pending_dani'])
     .order('created_at', { ascending: false })
   return data || []
 }
@@ -141,7 +141,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
   const { count: pendingHitech } = await supabaseAdmin
     .from('invoices')
     .select('*', { count: 'exact', head: true })
-    .eq('status', 'pending_hitech')
+    .eq('status', 'pending_dani')
 
   // Top 5 subcontractors by spend this year
   const yearStart = `${new Date().getFullYear()}-01-01`

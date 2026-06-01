@@ -11,7 +11,7 @@ const TRANCHE_ORDER = ['T1','T2','T3','T4','One-Shot']
 const INV_STATUS: Record<string,{label:string;color:string;bg:string}> = {
   pending_review:  { label:'Awaiting Rudy',    color:'#F97316', bg:'rgba(249,115,22,0.1)'  },
   pending_placide: { label:'Awaiting Placide', color:'#D97706', bg:'rgba(217,119,6,0.1)'   },
-  pending_hitech:  { label:'Awaiting Dani',    color:'#7C3AED', bg:'rgba(124,58,237,0.1)'  },
+  pending_dani:  { label:'Awaiting Dani',    color:'#7C3AED', bg:'rgba(124,58,237,0.1)'  },
   approved:        { label:'Approved',         color:'#10B981', bg:'rgba(16,185,129,0.1)'  },
   rejected:        { label:'Rejected',         color:'#EF4444', bg:'rgba(239,68,68,0.1)'   },
 }
@@ -237,7 +237,7 @@ async function getData(projectId?: string, sectionId?: string, baseCcy: string =
     })
   }
 
-  for (const inv of allInv.filter((i:any) => ['pending_review','pending_placide','pending_hitech'].includes(i.status))) {
+  for (const inv of allInv.filter((i:any) => ['pending_review','pending_placide','pending_dani'].includes(i.status))) {
     if (!(inv as any).submitted_at) continue
     const daysStuck = Math.floor((now.getTime() - new Date((inv as any).submitted_at).getTime()) / 86400000)
     if (daysStuck > 3) {

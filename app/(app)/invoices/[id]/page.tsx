@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
@@ -30,14 +30,15 @@ const ALL_CATEGORIES = [
 
 const STATUS: Record<string, { label: string; color: string; bg: string; dot: string }> = {
   pending_review:  { label: 'Awaiting Rudy',    color: '#F97316', bg: 'rgba(249,115,22,0.12)',  dot: '#F97316' },
-  pending_placide: { label: 'Awaiting Placide',  color: '#D97706', bg: 'rgba(217,119,6,0.12)',   dot: '#D97706' },
-  pending_hitech:  { label: 'Awaiting Dani',     color: '#FACC15', bg: 'rgba(250,204,21,0.12)',  dot: '#FACC15' },
+  pending_placide: { label: 'Awaiting Placide',  color: '#8B5CF6', bg: 'rgba(139,92,246,0.12)', dot: '#8B5CF6' },
+  pending_dani:    { label: 'Awaiting Dani',     color: '#3B82F6', bg: 'rgba(59,130,246,0.12)', dot: '#3B82F6' },
+  pending_fares:   { label: 'Awaiting Fares',    color: '#0EA5E9', bg: 'rgba(14,165,233,0.12)', dot: '#0EA5E9' },
   approved:        { label: 'Approved',           color: '#10B981', bg: 'rgba(16,185,129,0.12)', dot: '#10B981' },
   rejected:        { label: 'Rejected',           color: '#EF4444', bg: 'rgba(239,68,68,0.12)',  dot: '#EF4444' },
 }
 
-const STEPS = ['pending_review', 'pending_placide', 'pending_hitech', 'approved']
-const STEP_LABELS = ['Rudy', 'Placide', 'Dani', 'Done']
+const STEPS = ['pending_review', 'pending_placide', 'pending_dani', 'pending_fares', 'approved']
+const STEP_LABELS = ['Rudy', 'Placide', 'Dani', 'Fares', 'Done']
 
 export default function InvoiceDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -143,12 +144,13 @@ export default function InvoiceDetailPage() {
   const roleForStep: Record<string, string[]> = {
     pending_review:  ['rudy', 'admin'],
     pending_placide: ['placide'],
-    pending_hitech:  ['hitech'],
+    pending_dani:    ['dani'],
+    pending_fares:   ['fares'],
   }
   const stepAllowed = roleForStep[invoice.status] ?? []
   const canValidate = stepAllowed.includes(userRole)
-  const validatorLabel = invoice.status === 'pending_review' ? 'Rudy' : invoice.status === 'pending_placide' ? 'Placide' : 'Dani'
-  const isWaitingForOther = ['pending_review', 'pending_placide', 'pending_hitech'].includes(invoice.status) && !canValidate
+  const validatorLabel = { pending_review:'Rudy', pending_placide:'Placide', pending_dani:'Dani', pending_fares:'Fares' }[invoice.status] || 'Validator'
+  const isWaitingForOther = ['pending_review','pending_placide','pending_dani','pending_fares'].includes(invoice.status) && !canValidate
   const s = STATUS[invoice.status] ?? STATUS.pending_review
   const currentStep = STEPS.indexOf(invoice.status)
 
