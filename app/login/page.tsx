@@ -29,41 +29,41 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden" style={{ background: '#0A0F1E' }}>
 
-      {/* Background grid pattern */}
-      <div className="absolute inset-0 opacity-[0.03]" style={{
-        backgroundImage: 'linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)',
+      {/* Background grid */}
+      <div className="absolute inset-0 opacity-[0.04]" style={{
+        backgroundImage: 'linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)',
         backgroundSize: '60px 60px',
       }}/>
 
       {/* Glow blobs */}
-      <div className="absolute top-0 left-1/4 w-96 h-96 rounded-full opacity-10 blur-3xl pointer-events-none" style={{ background: '#3B82F6' }}/>
-      <div className="absolute bottom-0 right-1/4 w-80 h-80 rounded-full opacity-10 blur-3xl pointer-events-none" style={{ background: '#8B5CF6' }}/>
+      <div className="absolute rounded-full blur-3xl pointer-events-none" style={{ top: '-100px', left: '20%', width: '400px', height: '400px', background: 'rgba(59,130,246,0.15)' }}/>
+      <div className="absolute rounded-full blur-3xl pointer-events-none" style={{ bottom: '-100px', right: '20%', width: '350px', height: '350px', background: 'rgba(139,92,246,0.12)' }}/>
 
       {/* Card */}
       <div className="relative w-full max-w-md mx-4">
 
-        {/* Logo */}
+        {/* Logo on white pill */}
         <div className="flex justify-center mb-8">
-          <div className="rounded-2xl px-7 py-4" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(12px)' }}>
-            <Image src="/logo.png" alt="Skykapital" width={150} height={42} style={{ objectFit: 'contain', filter: 'brightness(0) invert(1)' }} priority />
+          <div className="rounded-2xl px-6 py-3.5 shadow-xl" style={{ background: '#FFFFFF' }}>
+            <Image src="/logo.png" alt="Skykapital" width={140} height={38} style={{ objectFit: 'contain', display: 'block' }} priority />
           </div>
         </div>
 
-        {/* Login box */}
-        <div className="rounded-3xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(20px)' }}>
-          {/* Top accent line */}
-          <div style={{ height: 2, background: 'linear-gradient(90deg, transparent, #3B82F6, #8B5CF6, transparent)' }}/>
+        {/* Glass box */}
+        <div className="rounded-3xl" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)', backdropFilter: 'blur(20px)' }}>
+          <div style={{ height: 2, background: 'linear-gradient(90deg, transparent, #3B82F6 40%, #8B5CF6 60%, transparent)', borderRadius: '99px 99px 0 0' }}/>
 
           <div className="px-8 py-9">
+
             <div className="text-center mb-8">
-              <h1 className="text-2xl font-bold mb-2" style={{ color: '#F8FAFC' }}>Welcome back</h1>
-              <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>Sign in to access your workspace</p>
+              <h1 className="text-2xl font-bold mb-2" style={{ color: '#F1F5F9' }}>Welcome back</h1>
+              <p className="text-sm" style={{ color: 'rgba(255,255,255,0.35)' }}>Sign in to access your workspace</p>
             </div>
 
             <form onSubmit={handleLogin} className="space-y-4">
-              {/* Email */}
+
               <div>
-                <label className="text-xs font-semibold uppercase tracking-widest mb-2 block" style={{ color: 'rgba(255,255,255,0.4)' }}>Email</label>
+                <label className="text-xs font-semibold uppercase tracking-widest mb-2 block" style={{ color: 'rgba(255,255,255,0.35)' }}>Email</label>
                 <input
                   type="email"
                   value={email}
@@ -72,15 +72,14 @@ export default function LoginPage() {
                   required
                   autoComplete="email"
                   className="w-full px-4 py-3.5 text-sm rounded-xl outline-none transition-all"
-                  style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: '#F8FAFC' }}
-                  onFocus={e => { (e.target as HTMLElement).style.borderColor = '#3B82F6'; (e.target as HTMLElement).style.background = 'rgba(59,130,246,0.08)' }}
+                  style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: '#F1F5F9' }}
+                  onFocus={e => { (e.target as HTMLElement).style.borderColor = '#3B82F6'; (e.target as HTMLElement).style.background = 'rgba(59,130,246,0.1)' }}
                   onBlur={e  => { (e.target as HTMLElement).style.borderColor = 'rgba(255,255,255,0.1)'; (e.target as HTMLElement).style.background = 'rgba(255,255,255,0.06)' }}
                 />
               </div>
 
-              {/* Password */}
               <div>
-                <label className="text-xs font-semibold uppercase tracking-widest mb-2 block" style={{ color: 'rgba(255,255,255,0.4)' }}>Password</label>
+                <label className="text-xs font-semibold uppercase tracking-widest mb-2 block" style={{ color: 'rgba(255,255,255,0.35)' }}>Password</label>
                 <div className="relative">
                   <input
                     type={showPwd ? 'text' : 'password'}
@@ -90,16 +89,13 @@ export default function LoginPage() {
                     required
                     autoComplete="current-password"
                     className="w-full px-4 py-3.5 pr-12 text-sm rounded-xl outline-none transition-all"
-                    style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: '#F8FAFC' }}
-                    onFocus={e => { (e.target as HTMLElement).style.borderColor = '#3B82F6'; (e.target as HTMLElement).style.background = 'rgba(59,130,246,0.08)' }}
+                    style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: '#F1F5F9' }}
+                    onFocus={e => { (e.target as HTMLElement).style.borderColor = '#3B82F6'; (e.target as HTMLElement).style.background = 'rgba(59,130,246,0.1)' }}
                     onBlur={e  => { (e.target as HTMLElement).style.borderColor = 'rgba(255,255,255,0.1)'; (e.target as HTMLElement).style.background = 'rgba(255,255,255,0.06)' }}
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowPwd(v => !v)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg transition-colors"
-                    style={{ color: 'rgba(255,255,255,0.3)' }}
-                  >
+                  <button type="button" onClick={() => setShowPwd(v => !v)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg"
+                    style={{ color: 'rgba(255,255,255,0.3)' }}>
                     {showPwd ? (
                       <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                         <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
@@ -116,9 +112,8 @@ export default function LoginPage() {
                 </div>
               </div>
 
-              {/* Error */}
               {error && (
-                <div className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm" style={{ background: 'rgba(239,68,68,0.1)', color: '#FCA5A5', border: '1px solid rgba(239,68,68,0.2)' }}>
+                <div className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm" style={{ background: 'rgba(239,68,68,0.1)', color: '#FCA5A5', border: '1px solid rgba(239,68,68,0.25)' }}>
                   <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
                     <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
                   </svg>
@@ -126,32 +121,33 @@ export default function LoginPage() {
                 </div>
               )}
 
-              {/* Submit */}
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3.5 rounded-xl text-sm font-bold disabled:opacity-50 transition-all flex items-center justify-center gap-2 mt-2"
-                style={{ background: 'linear-gradient(135deg,#1D4ED8,#3B82F6)', color: '#fff', boxShadow: '0 0 30px rgba(59,130,246,0.3)' }}
+                className="w-full py-3.5 rounded-xl text-sm font-bold disabled:opacity-50 transition-all flex items-center justify-center gap-2"
+                style={{ background: 'linear-gradient(135deg,#1D4ED8,#3B82F6)', color: '#fff', boxShadow: '0 0 40px rgba(59,130,246,0.25)', marginTop: '8px' }}
               >
-                {loading ? (
-                  <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"/>Signing in...</>
-                ) : 'Sign in'}
+                {loading
+                  ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"/>Signing in...</>
+                  : 'Sign in'
+                }
               </button>
             </form>
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="flex items-center justify-center gap-6 mt-6">
-          <div className="flex items-center gap-2">
+        {/* Bottom bar */}
+        <div className="flex items-center justify-center gap-4 mt-6 flex-wrap">
+          <div className="flex items-center gap-1.5">
             <div className="w-1.5 h-1.5 rounded-full" style={{ background: '#10B981' }}/>
-            <span className="text-xs" style={{ color: 'rgba(255,255,255,0.25)' }}>Secured</span>
+            <span className="text-xs" style={{ color: 'rgba(255,255,255,0.2)' }}>Secured</span>
           </div>
-          <span className="text-xs" style={{ color: 'rgba(255,255,255,0.15)' }}>|</span>
-          <span className="text-xs" style={{ color: 'rgba(255,255,255,0.25)' }}>Authorized access only</span>
-          <span className="text-xs" style={{ color: 'rgba(255,255,255,0.15)' }}>|</span>
-          <span className="text-xs" style={{ color: 'rgba(255,255,255,0.25)' }}>SkyKapital Europe</span>
+          <span className="text-xs" style={{ color: 'rgba(255,255,255,0.1)' }}>|</span>
+          <span className="text-xs" style={{ color: 'rgba(255,255,255,0.2)' }}>Authorized access only</span>
+          <span className="text-xs" style={{ color: 'rgba(255,255,255,0.1)' }}>|</span>
+          <span className="text-xs" style={{ color: 'rgba(255,255,255,0.2)' }}>SkyKapital Europe</span>
         </div>
+
       </div>
     </div>
   )
