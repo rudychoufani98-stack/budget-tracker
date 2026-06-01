@@ -12,12 +12,12 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   const body = await req.json()
-  const { contract_name, client_name, service_provider_id, project, project_id, category,
+  const { contract_name, client_name, service_provider_id, project, project_id, section_id, category,
           description, contract_amount, currency, start_date, end_date, status, notes } = body
   if (!contract_name) return NextResponse.json({ error: 'Contract name required' }, { status: 400 })
   const { data, error } = await supabaseAdmin.from('contracts').insert({
     contract_name, client_name, service_provider_id,
-    project, project_id: project_id || null, category,
+    project, project_id: project_id || null, section_id: section_id || null, category,
     description, contract_amount: contract_amount || 0,
     total_budget: contract_amount || 0,
     currency: currency || 'USD',

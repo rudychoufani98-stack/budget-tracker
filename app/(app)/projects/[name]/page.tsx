@@ -42,6 +42,7 @@ export default function ProjectDetailPage({ params }: { params: { name: string }
   const [showAddSection, setShowAddSection]   = useState(false)
   const [sectionForm,    setSectionForm]      = useState({ name:'', description:'', budget:'', currency:'USD', start_date:'', end_date:'', status:'active' })
   const [addingSection,  setAddingSection]    = useState(false)
+  const [sectionError,   setSectionError]     = useState('')
 
   // Contract modal
   const [showAddContract, setShowAddContract] = useState(false)
@@ -79,22 +80,31 @@ export default function ProjectDetailPage({ params }: { params: { name: string }
   }
 
   async function handleAddSection(e: React.FormEvent) {
-    e.preventDefault(); setAddingSection(true)
-    await fetch('/api/sections', { method:'POST', headers:{'Content-Type':'application/json'},
+    e.preventDefault()
+    setSectionError('')
+    setAddingSection(true)
+    const res = await fetch('/api/sections', { method:'POST', headers:{'Content-Type':'application/json'},
       body:JSON.stringify({ ...sectionForm, project_id:projectId, budget:sectionForm.budget?parseFloat(sectionForm.budget):null, start_date:sectionForm.start_date||null, end_date:sectionForm.end_date||null }) })
-    setAddingSection(false); setShowAddSection(false)
+    const data = await res.json()
+    setAddingSection(false)
+    if (!res.ok || data.error) { setSectionError(data.error || 'Failed to create section'); return }
+    setShowAddSection(false)
     setSectionForm({ name:'', description:'', budget:'', currency:'USD', start_date:'', end_date:'', status:'active' })
-    reload()
+    setSectionError('')
+    await reload()
   }
 
   async function handleAddContract(e: React.FormEvent) {
     e.preventDefault(); setAddingContract(true)
-    await fetch('/api/contracts', { method:'POST', headers:{'Content-Type':'application/json'},
+    const res = await fetch('/api/contracts', { method:'POST', headers:{'Content-Type':'application/json'},
       body:JSON.stringify({ ...contractForm, project_id:projectId, project:project?.name||'', section_id:contractSectionId||null, status:'active', contract_amount:0 }) })
-    setAddingContract(false); setShowAddContract(false)
+    const data = await res.json()
+    setAddingContract(false)
+    if (!res.ok || data.error) { alert(data.error || 'Failed to create contract'); return }
+    setShowAddContract(false)
     setContractForm({ contract_name:'', service_provider_id:'', category:'E', currency:'USD', description:'' })
     setContractSectionId('')
-    reload()
+    await reload()
   }
 
   async function deleteSection(sectionId: string) {
@@ -427,6 +437,7 @@ export default function ProjectDetailPage({ params }: { params: { name: string }
                   </div>
                 </div>
                 <div className="flex gap-3 pt-1">
+                  {sectionError && <p className="text-xs px-3 py-2 rounded-xl col-span-2" style={{ background:'rgba(239,68,68,0.08)', color:'#EF4444', border:'1px solid rgba(239,68,68,0.2)' }}>{sectionError}</p>}
                   <button type="submit" disabled={addingSection} className="flex-1 py-3 rounded-xl text-sm font-semibold disabled:opacity-50" style={{ background:'#8B5CF6', color:'#fff' }}>{addingSection?'Creating...':'Create Section'}</button>
                   <button type="button" onClick={()=>setShowAddSection(false)} className="px-5 py-3 rounded-xl text-sm" style={{ background:'#F1F5F9', color:'#64748B' }}>Cancel</button>
                 </div>
