@@ -3,9 +3,9 @@ import { NextResponse, type NextRequest } from 'next/server'
 
 // Pages each role can access
 const ROLE_ACCESS: Record<string, string[]> = {
-  admin:    ['*'],  // everything
-  placide:  ['*'],  // everything (no users page enforced at component level)
-  uploader: ['/dashboard', '/upload'],
+  admin:    ['*'],
+  placide:  ['/dashboard', '/projects', '/contracts', '/payment-register', '/invoices', '/upload', '/validations', '/providers', '/vault', '/reports', '/settings'],
+  uploader: ['/dashboard', '/invoices', '/upload'],
   dani:     ['/dashboard', '/invoices', '/validations'],
   fares:    ['/dashboard', '/invoices', '/validations'],
   viewer:   ['/dashboard'],
