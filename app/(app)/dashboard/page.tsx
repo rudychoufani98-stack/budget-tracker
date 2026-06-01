@@ -243,6 +243,7 @@ async function getData() {
     contractAdvancement,
     timeline,
     providerRows,
+    invoiceByTranche,
     alerts: alerts.slice(0, 12),
   }
 }
@@ -472,7 +473,7 @@ export default async function DashboardPage() {
                             <div className="w-5 h-5 rounded mx-auto" style={{ background:'#F1F5F9' }}/>
                           </td>
                         )
-                        const href = t.id && invoiceByTranche[t.id] ? `/invoices/${invoiceByTranche[t.id].id}` : `/contracts/${c.contractId}`
+                        const href = t.id && d.invoiceByTranche[t.id] ? `/invoices/${d.invoiceByTranche[t.id].id}` : `/contracts/${c.contractId}`
                         return (
                           <td key={tn} className="px-2 py-2.5 text-center">
                             <Link href={href} title={`${tn}: ${t.status} - ${formatCurrency(t.amount, c.ccy)}`}>
