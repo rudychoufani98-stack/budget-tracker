@@ -1,3 +1,4 @@
+import { getApiUser, unauthorized, forbidden } from '@/lib/auth-guard'
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { writeAudit } from '@/lib/audit'
@@ -12,6 +13,10 @@ const nextStatusOnApproval: Record<string, InvoiceStatus> = {
 }
 
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+  // Verify authentication
+  const apiUser = await getApiUser(req)
+  if (!apiUser) return unauthorized()
+
   try {
     const { decision, comment, validator_name } = await req.json()
     if (!decision || !validator_name) return NextResponse.json({ error: 'decision and validator_name are required' }, { status: 400 })

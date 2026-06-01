@@ -1,13 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
+import { requireRole } from '@/lib/auth-guard'
 
-// GET — list all users
-export async function GET() {
+// All user management requires admin role
+async function assertAdmin(req: NextRequest) {
+  return requireRole(req, ['admin'])
+}
+
+export async function GET(req: NextRequest) {
+  const deny = await assertAdmin(req)
+  if (deny) return deny
   const { data, error } = await supabaseAdmin.auth.admin.listUsers()
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   const users = data.users.map(u => ({
-    id: u.id,
-    email: u.email,
+    id: u.id, email: u.email,
     name: u.user_metadata?.name || '',
     role: u.user_metadata?.role || 'viewer',
     created_at: u.created_at,
@@ -15,25 +21,40 @@ export async function GET() {
   return NextResponse.json(users)
 }
 
-// POST — create a new user
-export async function POST(request: NextRequest) {
-  const { email, password, name, role } = await request.json()
+export async function POST(req: NextRequest) {
+  const deny = await assertAdmin(req)
+  if (deny) return deny
+  const { email, password, name, role } = await req.json()
   if (!email || !password || !name) {
     return NextResponse.json({ error: 'Email, password and name are required' }, { status: 400 })
   }
+  // Prevent privilege escalation: only admin can create admin
+  const safRole = role || 'viewer'
   const { data, error } = await supabaseAdmin.auth.admin.createUser({
-    email,
-    password,
-    email_confirm: true,
-    user_metadata: { name, role: role || 'viewer' },
+    email, password, email_confirm: true,
+    user_metadata: { name, role: safRole },
   })
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ id: data.user.id, email: data.user.email })
 }
 
-// DELETE — delete a user
-export async function DELETE(request: NextRequest) {
-  const { id } = await request.json()
+export async function PATCH(req: NextRequest) {
+  const deny = await assertAdmin(req)
+  if (deny) return deny
+  const { id, name, role } = await req.json()
+  if (!id) return NextResponse.json({ error: 'User ID required' }, { status: 400 })
+  const { error } = await supabaseAdmin.auth.admin.updateUserById(id, {
+    user_metadata: { name, role },
+  })
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  return NextResponse.json({ success: true })
+}
+
+export async function DELETE(req: NextRequest) {
+  const deny = await assertAdmin(req)
+  if (deny) return deny
+  const { id } = await req.json()
+  if (!id) return NextResponse.json({ error: 'User ID required' }, { status: 400 })
   const { error } = await supabaseAdmin.auth.admin.deleteUser(id)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ success: true })

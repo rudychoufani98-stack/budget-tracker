@@ -1,10 +1,13 @@
+import { requireRole } from '@/lib/auth-guard'
 import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 
 // Currencies used in the app
 const CURRENCIES = ['EUR','GBP','CHF','MAD','XOF','NGN','CAD','AED','JPY']
 
-export async function GET() {
+export async function GET(req: import('next/server').NextRequest) {
+  const deny = await requireRole(req, ['admin', 'placide'])
+  if (deny) return deny
   const key = process.env.OPEN_EXCHANGE_RATES_KEY
   if (!key) return NextResponse.json({ error: 'Missing OPEN_EXCHANGE_RATES_KEY' }, { status: 500 })
 
