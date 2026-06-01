@@ -405,7 +405,7 @@ export default function UploadPage() {
                   ))}
                   <div>
                     <label className="text-xs font-semibold uppercase tracking-widest mb-1.5 block" style={{ color:'#64748B' }}>Currency</label>
-                    <select className={inp} style={inpSt} value={scanned.currency||'USD'} onChange={e=>setScanned(p=>p?{...p,currency:e.target.value}:p)}>
+                    <select className={inp} style={inpSt} value={scanned.currency||'NGN'} onChange={e=>setScanned(p=>p?{...p,currency:e.target.value}:p)}>
                       {CURRENCIES.map(c=><option key={c} value={c}>{c}</option>)}
                     </select>
                   </div>
@@ -432,9 +432,9 @@ export default function UploadPage() {
                   </div>
                   <div className="grid grid-cols-3 gap-3">
                     {[
-                      {label:`HT (${scanned.currency||'USD'})`,key:'amount_ht'},
+                      {label:`HT (${scanned.currency||'NGN'})`,key:'amount_ht'},
                       {label:'VAT %',key:'vat_rate'},
-                      {label:`TTC (${scanned.currency||'USD'})`,key:'amount_ttc'},
+                      {label:`TTC (${scanned.currency||'NGN'})`,key:'amount_ttc'},
                     ].map(f=>(
                       <div key={f.key}>
                         <label className="text-xs font-semibold uppercase tracking-widest mb-1.5 block" style={{ color:'#64748B' }}>{f.label}</label>
@@ -479,8 +479,8 @@ export default function UploadPage() {
                 <p className="text-sm font-semibold mb-4" style={{ color:'#0F172A' }}>Summary</p>
                 <div className="space-y-2.5">
                   {[
-                    {label:'Amount HT',          value:cs(scanned.amount_ht, scanned.currency||'USD')},
-                    {label:`VAT (${scanned.vat_rate||0}%)`, value:cs(scanned.amount_tva, scanned.currency||'USD')},
+                    {label:'Amount HT',          value:cs(scanned.amount_ht, scanned.currency||'NGN')},
+                    {label:`VAT (${scanned.vat_rate||0}%)`, value:cs(scanned.amount_tva, scanned.currency||'NGN')},
                   ].map(r=>(
                     <div key={r.label} className="flex justify-between text-sm">
                       <span style={{ color:'#64748B' }}>{r.label}</span>
@@ -489,7 +489,7 @@ export default function UploadPage() {
                   ))}
                   <div className="flex justify-between pt-3 mt-1" style={{ borderTop:'1px solid #F1F5F9' }}>
                     <span className="text-sm font-semibold" style={{ color:'#0F172A' }}>Total TTC</span>
-                    <span className="text-xl font-bold" style={{ color:'#10B981' }}>{cs(scanned.amount_ttc, scanned.currency||'USD')}</span>
+                    <span className="text-xl font-bold" style={{ color:'#10B981' }}>{cs(scanned.amount_ttc, scanned.currency||'NGN')}</span>
                   </div>
                 </div>
                 {scanned.line_items?.length>0 && (
@@ -498,7 +498,7 @@ export default function UploadPage() {
                     {scanned.line_items.slice(0,5).map((li,i)=>(
                       <div key={i} className="flex justify-between text-xs py-1.5" style={{ borderBottom:'1px solid #F8FAFC' }}>
                         <span className="truncate mr-4" style={{ color:'#374151' }}>{li.description||'-'}</span>
-                        <span style={{ color:'#64748B' }}>{cs(li.total_ht, scanned.currency||'USD')}</span>
+                        <span style={{ color:'#64748B' }}>{cs(li.total_ht, scanned.currency||'NGN')}</span>
                       </div>
                     ))}
                   </div>

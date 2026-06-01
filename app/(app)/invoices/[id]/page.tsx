@@ -46,7 +46,7 @@ export default function InvoiceDetailPage() {
   const [invoice, setInvoice] = useState<Invoice | null>(null)
   const [lineItems, setLineItems] = useState<InvoiceLineItem[]>([])
   const [validations, setValidations] = useState<Validation[]>([])
-  const [currency, setCurrency] = useState('EUR')
+  const [currency, setCurrency] = useState('NGN')
   const [savingCurrency, setSavingCurrency] = useState(false)
   const [loading, setLoading] = useState(true)
   const [validatorName, setValidatorName] = useState('')
