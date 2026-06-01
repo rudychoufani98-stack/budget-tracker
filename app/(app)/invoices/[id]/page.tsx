@@ -149,7 +149,8 @@ export default function InvoiceDetailPage() {
   }
   const stepAllowed = roleForStep[invoice.status] ?? []
   const canValidate = stepAllowed.includes(userRole)
-  const validatorLabel = { pending_review:'Rudy', pending_placide:'Placide', pending_dani:'Dani', pending_fares:'Fares' }[invoice.status] || 'Validator'
+  const validatorLabelMap: Record<string,string> = { pending_review:'Rudy', pending_placide:'Placide', pending_dani:'Dani', pending_fares:'Fares', approved:'', rejected:'' }
+  const validatorLabel = validatorLabelMap[invoice.status] || 'Validator'
   const isWaitingForOther = ['pending_review','pending_placide','pending_dani','pending_fares'].includes(invoice.status) && !canValidate
   const s = STATUS[invoice.status] ?? STATUS.pending_review
   const currentStep = STEPS.indexOf(invoice.status)
