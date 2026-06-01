@@ -1,4 +1,4 @@
-﻿import { supabaseAdmin } from '@/lib/supabase'
+import { supabaseAdmin } from '@/lib/supabase'
 import { formatCurrency } from '@/lib/format'
 import Link from 'next/link'
 
