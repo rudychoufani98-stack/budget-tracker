@@ -6,8 +6,13 @@ export async function GET(req: NextRequest) {
   const deny = await requireAuth(req)
   if (deny) return deny
   const contractId = req.nextUrl.searchParams.get('contract_id')
-  let query = supabaseAdmin.from('contract_tranches').select('*').order('tranche_name')
+  const status     = req.nextUrl.searchParams.get('status')
+  const needsJoin  = !!status && !contractId
+  let query = supabaseAdmin.from('contract_tranches')
+    .select(needsJoin ? '*, contracts(id, contract_name, currency, service_providers(name))' : '*')
+    .order('paid_date', { ascending: false })
   if (contractId) query = query.eq('contract_id', contractId)
+  if (status)     query = query.eq('status', status)
   const { data, error } = await query
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json(data || [])
