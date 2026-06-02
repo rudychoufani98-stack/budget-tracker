@@ -25,6 +25,17 @@ export function InvoicesClient({ invoices }: { invoices: any[] }) {
   const [search,          setSearch]          = useState('')
   const [paidTranches,    setPaidTranches]    = useState<any[]>([])
   const [view, setView] = useState<'native'|'ngn'|'usd'>('native')
+  const [fixingCcy, setFixingCcy] = useState<string|null>(null)
+
+  async function fixCurrency(invId: string, newCcy: string) {
+    setFixingCcy(invId)
+    await fetch(`/api/invoices/${invId}/fix-currency`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ currency: newCcy }),
+    })
+    window.location.reload()
+  }
 
   function toView(amount: number, ccy: string, inv: any): string {
     const rate = getFX(inv)
@@ -416,18 +427,17 @@ export function InvoicesClient({ invoices }: { invoices: any[] }) {
           const projectName = inv.contracts?.projects?.name || inv.contracts?.project || '--'
 
           return (
-            <Link key={inv.id} href={`/invoices/${inv.id}`}
-              className="grid px-0 py-0 items-center transition-colors hover:bg-blue-50/40 group"
+            <div key={inv.id}
+              className="grid px-0 py-0 items-center hover:bg-blue-50/40 group"
               style={{ borderBottom:'1px solid #F8FAFC', gridTemplateColumns:'0.8fr 1.8fr 1fr 1.2fr 0.6fr 1fr 1fr 1.4fr' }}
             >
-              {/* Colored left border based on status */}
-              <div className="flex items-center px-6 py-4">
+              <Link href={`/invoices/${inv.id}`} className="flex items-center px-6 py-4">
                 <div className="font-mono text-xs px-2 py-1 rounded-lg" style={{ background:'#F1F5F9', color:'#64748B' }}>
                   {inv.invoice_number || '--'}
                 </div>
-              </div>
+              </Link>
 
-              <div className="flex items-center gap-2.5 min-w-0 py-4">
+              <Link href={`/invoices/${inv.id}`} className="flex items-center gap-2.5 min-w-0 py-4">
                 <div className="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold shrink-0 text-white" style={{ background: avatarColor }}>
                   {initial}
                 </div>
@@ -435,27 +445,43 @@ export function InvoicesClient({ invoices }: { invoices: any[] }) {
                   <p className="text-sm font-semibold truncate group-hover:text-blue-600 transition-colors" style={{ color:'#0F172A' }}>{name}</p>
                   <p className="text-xs truncate" style={{ color:'#94A3B8' }}>{formatDate(inv.invoice_date || inv.submitted_at)}</p>
                 </div>
-              </div>
+              </Link>
 
-              <div className="text-sm truncate py-4 pr-3" style={{ color:'#64748B' }}>{projectName}</div>
-              <div className="text-sm truncate py-4 pr-3" style={{ color:'#64748B' }}>{inv.contracts?.contract_name || '--'}</div>
+              <Link href={`/invoices/${inv.id}`} className="text-sm truncate py-4 pr-3" style={{ color:'#64748B' }}>{projectName}</Link>
+              <Link href={`/invoices/${inv.id}`} className="text-sm truncate py-4 pr-3" style={{ color:'#64748B' }}>{inv.contracts?.contract_name || '--'}</Link>
 
-              <div className="py-4 pr-3">
+              <Link href={`/invoices/${inv.id}`} className="py-4 pr-3">
                 <span className="text-xs font-bold px-2 py-0.5 rounded" style={{ background:'#F1F5F9', color:'#64748B' }}>
                   {(inv.category || 'OT').slice(0,3).toUpperCase()}
                 </span>
+              </Link>
+
+              <div className="py-4 pr-3">
+                <p className="text-sm" style={{ color:'#64748B' }}>{toView(inv.amount_ht, ccy, inv)}</p>
               </div>
 
-              <div className="text-sm py-4 pr-3" style={{ color:'#64748B' }}>{toView(inv.amount_ht, ccy, inv)}</div>
+              <div className="py-3 pr-3">
+                <p className="text-sm font-bold" style={{ color:'#0F172A' }}>{toView(inv.amount_ttc, ccy, inv)}</p>
+                <div className="flex gap-1 mt-1">
+                  {(['NGN','USD'] as const).map(c => (
+                    <button key={c} onClick={() => fixCurrency(inv.id, c)}
+                      disabled={fixingCcy === inv.id}
+                      className="text-xs px-1.5 py-0.5 rounded font-semibold transition-all"
+                      style={ccy === c
+                        ? { background: c === 'USD' ? '#DCFCE7' : '#FEF9C3', color: c === 'USD' ? '#15803D' : '#854D0E', border: `1px solid ${c === 'USD' ? '#86EFAC' : '#FDE047'}` }
+                        : { background:'#F1F5F9', color:'#94A3B8', border:'1px solid #E2E8F0' }}>
+                      {c}
+                    </button>
+                  ))}
+                </div>
+              </div>
 
-              <div className="text-sm font-bold py-4 pr-3" style={{ color:'#0F172A' }}>{toView(inv.amount_ttc, ccy, inv)}</div>
-
-              <div className="py-4 pr-6">
+              <Link href={`/invoices/${inv.id}`} className="py-4 pr-6">
                 <span className="text-xs px-2.5 py-1 rounded-full font-semibold inline-block" style={{ background:st.bg, color:st.color }}>
                   {st.label}
                 </span>
-              </div>
-            </Link>
+              </Link>
+            </div>
           )
         })}
 
