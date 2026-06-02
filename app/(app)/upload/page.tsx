@@ -65,6 +65,7 @@ export default function UploadPage() {
   const [selectedContract, setSelectedContract] = useState(searchParams?.get('contract') || '')
   const [selectedProvider, setSelectedProvider] = useState('')
   const [selectedTranche,  setSelectedTranche]  = useState(searchParams?.get('tranche') || '')
+  const [selectedCurrency, setSelectedCurrency] = useState<'NGN'|'USD'>('USD')
 
   useEffect(() => {
     Promise.all([
@@ -128,15 +129,15 @@ export default function UploadPage() {
     return contracts
   })()
 
-  // When contract changes: update tranches + auto-fill provider + reset tranche
+  // When contract changes: update tranches + auto-fill provider + set currency from contract
   useEffect(()=>{
     if (!selectedContract) { setTranches([]); setSelectedProvider(''); return }
     const c = contracts.find((x:any)=>x.id===selectedContract)
     setTranches(c?.contract_tranches||[])
     setSelectedTranche('')
-    // Always override provider from contract
     if (c?.service_provider_id) setSelectedProvider(c.service_provider_id)
     else setSelectedProvider('')
+    if (c?.currency) setSelectedCurrency(c.currency === 'NGN' ? 'NGN' : 'USD')
   },[selectedContract, contracts])
 
   // Get selected tranche details for milestone display
@@ -157,6 +158,8 @@ export default function UploadPage() {
       const prov = providers.find((p:any) => p.id === selectedProvider)
       if (prov) data.subcontractor_name = prov.name
     }
+    // Always override AI currency with what user selected in step 1
+    data.currency = selectedCurrency
     setScanned(data); setScanning(false); setStep(2)
   }
 
@@ -323,13 +326,37 @@ export default function UploadPage() {
                   <select className={inp} style={inpSt} value={selectedContract} onChange={e=>setSelectedContract(e.target.value)} disabled={!selectedProject}>
                     <option value="">Select contract...</option>
                     {filteredContracts.map((c:any)=>(
-                      <option key={c.id} value={c.id}>{c.contract_name}</option>
+                      <option key={c.id} value={c.id}>{c.contract_name} ({c.currency || 'USD'})</option>
                     ))}
                   </select>
                   {selectedProject && filteredContracts.length===0 && (
                     <p className="text-xs mt-1" style={{ color:'#94A3B8' }}>No contracts found - add one in the Projects tab</p>
                   )}
                 </div>
+
+                {/* Invoice Currency — set before scan, AI cannot override */}
+                {selectedContract && (
+                  <div>
+                    <label className="text-xs font-semibold uppercase tracking-widest mb-2 flex items-center gap-1.5" style={{ color:'#64748B' }}>
+                      <span style={{ width:6,height:6,borderRadius:'50%',background:'#8B5CF6',display:'inline-block' }}/>
+                      Invoice Currency *
+                    </label>
+                    <div className="flex gap-3">
+                      {(['NGN','USD'] as const).map(c => (
+                        <button key={c} type="button" onClick={() => setSelectedCurrency(c)}
+                          className="flex-1 py-2.5 rounded-xl text-sm font-bold transition-all"
+                          style={selectedCurrency === c
+                            ? { background:'#0F172A', color:'#fff', border:'2px solid #0F172A' }
+                            : { background:'#F8FAFC', color:'#64748B', border:'1.5px solid #E2E8F0' }}>
+                          {c === 'NGN' ? '₦ NGN' : '$ USD'}
+                        </button>
+                      ))}
+                    </div>
+                    <p className="text-xs mt-1.5" style={{ color:'#94A3B8' }}>
+                      Auto-set from contract. Change if invoice currency differs.
+                    </p>
+                  </div>
+                )}
 
                 {/* Consultant — locked when contract is selected */}
                 <div>
@@ -460,17 +487,9 @@ export default function UploadPage() {
                   ))}
                   <div>
                     <label className="text-xs font-semibold uppercase tracking-widest mb-1.5 block" style={{ color:'#64748B' }}>Currency</label>
-                    <div className="flex gap-2">
-                      {['NGN','USD'].map(c => (
-                        <button key={c} type="button"
-                          onClick={() => setScanned((prev:any) => ({ ...prev, currency: c }))}
-                          className="flex-1 py-2.5 rounded-xl text-sm font-bold transition-all"
-                          style={scanned.currency === c
-                            ? { background:'#0F172A', color:'#fff', border:'2px solid #0F172A' }
-                            : { background:'#F8FAFC', color:'#64748B', border:'1.5px solid #E2E8F0' }}>
-                          {c}
-                        </button>
-                      ))}
+                    <div className="px-3.5 py-2.5 rounded-xl flex items-center justify-between" style={{ background:'#F0FDF4', border:'1.5px solid rgba(16,185,129,0.3)' }}>
+                      <span className="text-sm font-bold" style={{ color:'#065F46' }}>{selectedCurrency}</span>
+                      <span className="text-xs px-2 py-0.5 rounded-full" style={{ background:'rgba(16,185,129,0.1)', color:'#10B981' }}>locked from step 1</span>
                     </div>
                   </div>
                   <div>
