@@ -3,6 +3,8 @@ import { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
 import { formatCurrency, formatDate } from '@/lib/format'
 
+const FX = 1441
+
 const STATUS_MAP: Record<string,{label:string;color:string;bg:string}> = {
   pending_review:  { label:'Awaiting Rudy',    color:'#F97316', bg:'rgba(249,115,22,0.1)'  },
   pending_placide: { label:'Awaiting Placide', color:'#8B5CF6', bg:'rgba(139,92,246,0.1)'  },
@@ -20,6 +22,17 @@ export function InvoicesClient({ invoices }: { invoices: any[] }) {
   const [selectedProject, setSelectedProject] = useState('ALL')
   const [search,          setSearch]          = useState('')
   const [paidTranches,    setPaidTranches]    = useState<any[]>([])
+  const [view,            setView]            = useState<'native'|'ngn'|'usd'>('native')
+
+  function toView(amount: number, ccy: string): string {
+    if (view === 'native') return formatCurrency(amount, ccy)
+    if (view === 'ngn') {
+      const ngn = ccy === 'USD' ? amount * FX : amount
+      return formatCurrency(ngn, 'NGN')
+    }
+    const usd = ccy === 'NGN' ? amount / FX : amount
+    return formatCurrency(usd, 'USD')
+  }
 
   useEffect(() => {
     fetch('/api/tranches?status=paid')
@@ -49,6 +62,20 @@ export function InvoicesClient({ invoices }: { invoices: any[] }) {
   }, [invoices, selectedStatus, selectedProject, search])
 
   function sumByCcy(list: any[]) {
+    if (view === 'ngn') {
+      const total = list.reduce((s, i) => {
+        const amt = i.amount_ttc || 0
+        return s + (i.currency === 'USD' ? amt * FX : amt)
+      }, 0)
+      return formatCurrency(total, 'NGN')
+    }
+    if (view === 'usd') {
+      const total = list.reduce((s, i) => {
+        const amt = i.amount_ttc || 0
+        return s + (i.currency === 'NGN' ? amt / FX : amt)
+      }, 0)
+      return formatCurrency(total, 'USD')
+    }
     const map: Record<string,number> = {}
     list.forEach(i => { const c = i.currency||'NGN'; map[c]=(map[c]||0)+(i.amount_ttc||0) })
     return Object.entries(map).map(([c,v])=>formatCurrency(v,c)).join(' + ') || '--'
@@ -298,6 +325,19 @@ export function InvoicesClient({ invoices }: { invoices: any[] }) {
         })}
       </div>
 
+      {/* Currency toggle */}
+      <div className="flex items-center gap-1 mb-4 p-1 rounded-xl w-fit" style={{ background:'#F1F5F9' }}>
+        {(['native','ngn','usd'] as const).map(v => (
+          <button key={v} onClick={() => setView(v)}
+            className="text-xs font-bold px-3 py-1.5 rounded-lg transition-all"
+            style={view === v
+              ? { background:'#0F172A', color:'#fff' }
+              : { color:'#64748B' }}>
+            {v === 'native' ? 'Native' : v === 'ngn' ? '₦ NGN' : '$ USD'}
+          </button>
+        ))}
+      </div>
+
       {/* Search + filters */}
       <div className="flex items-center gap-3 mb-4 flex-wrap">
         <div className="relative flex-1 min-w-48">
@@ -399,9 +439,9 @@ export function InvoicesClient({ invoices }: { invoices: any[] }) {
                 </span>
               </div>
 
-              <div className="text-sm py-4 pr-3" style={{ color:'#64748B' }}>{formatCurrency(inv.amount_ht, ccy)}</div>
+              <div className="text-sm py-4 pr-3" style={{ color:'#64748B' }}>{toView(inv.amount_ht, ccy)}</div>
 
-              <div className="text-sm font-bold py-4 pr-3" style={{ color:'#0F172A' }}>{formatCurrency(inv.amount_ttc, ccy)}</div>
+              <div className="text-sm font-bold py-4 pr-3" style={{ color:'#0F172A' }}>{toView(inv.amount_ttc, ccy)}</div>
 
               <div className="py-4 pr-6">
                 <span className="text-xs px-2.5 py-1 rounded-full font-semibold inline-block" style={{ background:st.bg, color:st.color }}>
