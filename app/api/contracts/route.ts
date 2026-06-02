@@ -39,16 +39,19 @@ export async function POST(req: NextRequest) {
   const primarySectionId = sectionIds[0] || null
 
   const { data, error } = await supabaseAdmin.from('contracts').insert({
-    contract_name, client_name: client_name || contract_name, service_provider_id,
+    contract_name,
+    client_name:     client_name     || contract_name,
+    contract_type:   'service',
+    service_provider_id,
     project, project_id: project_id || null,
     section_id: primarySectionId,
     category, description,
     contract_amount: contract_amount || 0,
-    total_budget: contract_amount || 0,
-    currency: currency || 'NGN',
-    start_date:  start_date  || null,
-    end_date:    end_date    || null,
-    status: status || 'active',
+    total_budget:    contract_amount || 0,
+    currency:        currency        || 'NGN',
+    start_date:      start_date      || null,
+    end_date:        end_date        || null,
+    status:          status          || 'active',
     fx_rate_at_signing: signingRate,
   }).select().single()
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
