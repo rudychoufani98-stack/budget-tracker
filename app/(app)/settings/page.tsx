@@ -3,8 +3,17 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/utils/supabase/client'
 
 const C = { card:'#FFFFFF', card2:'#F1F5F9', border:'#E2E8F0', border2:'#CBD5E1', green:'#10B981', amber:'#F59E0B', red:'#EF4444', blue:'#3B82F6', muted:'#6B7280' }
-const ROLES = ['admin','rudy','placide','hitech','viewer']
-const ROLE_COLORS: Record<string,string> = { admin:'#3B82F6', rudy:'#F97316', placide:'#D97706', hitech:'#FACC15', viewer:'#6B7280' }
+const ROLES = ['admin','rudy','placide','hitech','fares','uploader','viewer']
+const ROLE_COLORS: Record<string,string> = { admin:'#3B82F6', rudy:'#F97316', placide:'#D97706', hitech:'#FACC15', fares:'#10B981', uploader:'#8B5CF6', viewer:'#6B7280' }
+const ROLE_LABELS: Record<string,string> = {
+  admin:    'Admin',
+  rudy:     'Director',
+  placide:  'ESG Manager',
+  hitech:   'MD',
+  fares:    'Accountant',
+  uploader: 'Intern',
+  viewer:   'Viewer',
+}
 
 export default function SettingsPage() {
   const [currentRole, setCurrentRole] = useState<string>('viewer')
@@ -99,7 +108,7 @@ export default function SettingsPage() {
                 <div><label className="text-xs font-medium mb-1.5 block" style={{ color:C.muted }}>Password</label><input type="text" className={inp} style={inpStyle} value={form.password} onChange={e=>setForm(p=>({...p,password:e.target.value}))} required minLength={6} placeholder="Min 6 characters" /></div>
                 <div><label className="text-xs font-medium mb-1.5 block" style={{ color:C.muted }}>Role</label>
                   <select className={inp} style={inpStyle} value={form.role} onChange={e=>setForm(p=>({...p,role:e.target.value}))}>
-                    {ROLES.map(r=><option key={r} value={r}>{r.charAt(0).toUpperCase()+r.slice(1)}</option>)}
+                    {ROLES.map(r=><option key={r} value={r}>{ROLE_LABELS[r] || r}</option>)}
                   </select>
                 </div>
                 {error && <div className="col-span-2 text-sm px-4 py-3 rounded-xl" style={{ background:'rgba(239,68,68,0.1)', color:C.red }}>{error}</div>}
@@ -125,7 +134,7 @@ export default function SettingsPage() {
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
-                      <span className="text-xs px-2.5 py-1 rounded-full font-medium" style={{ background:`${rc}20`, color:rc }}>{u.role}</span>
+                      <span className="text-xs px-2.5 py-1 rounded-full font-medium" style={{ background:`${rc}20`, color:rc }}>{ROLE_LABELS[u.role] || u.role}</span>
                       <button onClick={()=>deleteUser(u.id,u.name)} disabled={deleting===u.id} className="text-xs px-3 py-1.5 rounded-lg disabled:opacity-50" style={{ color:C.red, border:'1px solid rgba(239,68,68,0.2)' }}>Delete</button>
                     </div>
                   </div>

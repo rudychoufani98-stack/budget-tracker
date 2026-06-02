@@ -40,7 +40,9 @@ export async function POST(req: NextRequest) {
     description, contract_amount: contract_amount || 0,
     total_budget: contract_amount || 0,
     currency: currency || 'NGN',
-    start_date, end_date, status: status || 'active', notes,
+    start_date:  start_date  || null,
+    end_date:    end_date    || null,
+    status: status || 'active', notes,
     fx_rate_at_signing: signingRate,
   }).select().single()
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
