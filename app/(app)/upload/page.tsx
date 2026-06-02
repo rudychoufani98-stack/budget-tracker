@@ -460,9 +460,17 @@ export default function UploadPage() {
                   ))}
                   <div>
                     <label className="text-xs font-semibold uppercase tracking-widest mb-1.5 block" style={{ color:'#64748B' }}>Currency</label>
-                    <div className="px-3.5 py-2.5 rounded-xl flex items-center justify-between" style={{ background:'#F8FAFC', border:'1.5px solid #E2E8F0' }}>
-                      <span className="text-sm font-bold" style={{ color:'#0F172A' }}>{scanned.currency || 'NGN'}</span>
-                      <span className="text-xs px-2 py-0.5 rounded-full" style={{ background:'rgba(59,130,246,0.1)', color:'#3B82F6' }}>detected by AI</span>
+                    <div className="flex gap-2">
+                      {['NGN','USD'].map(c => (
+                        <button key={c} type="button"
+                          onClick={() => setScanned((prev:any) => ({ ...prev, currency: c }))}
+                          className="flex-1 py-2.5 rounded-xl text-sm font-bold transition-all"
+                          style={scanned.currency === c
+                            ? { background:'#0F172A', color:'#fff', border:'2px solid #0F172A' }
+                            : { background:'#F8FAFC', color:'#64748B', border:'1.5px solid #E2E8F0' }}>
+                          {c}
+                        </button>
+                      ))}
                     </div>
                   </div>
                   <div>
