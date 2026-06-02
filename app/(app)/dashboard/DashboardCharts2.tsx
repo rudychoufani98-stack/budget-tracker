@@ -29,7 +29,7 @@ export function ConsultantChart({ data, ccy }: { data: { name:string; committed:
         <YAxis type="category" dataKey="name" tick={{ fill:'#0F172A', fontSize:12, fontWeight:600 }} axisLine={false} tickLine={false} width={80} />
         <Tooltip
           contentStyle={{ background:'#0F172A', border:'none', borderRadius:10, color:'#fff', fontSize:12 }}
-          formatter={(v:any, name:string) => [fmt(Number(v), ccy), name === 'committed' ? 'Contract value' : 'Paid']}
+          formatter={(v:any, name:any) => [fmt(Number(v), ccy), name === 'committed' ? 'Contract value' : 'Paid']}
           cursor={{ fill:'rgba(0,0,0,0.04)' }}
         />
         {/* Committed bar (background) */}
