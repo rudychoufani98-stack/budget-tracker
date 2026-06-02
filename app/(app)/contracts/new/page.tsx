@@ -92,24 +92,20 @@ export default function NewContractPage() {
     const data = await res.json()
     if (!res.ok) { setError(data.error || 'Failed to create contract'); setSaving(false); return }
 
-    // Valid tranche names allowed by DB constraint
-    const TRANCHE_NAMES = ['T1','T2','T3','T4','One-Shot']
-    let trancheIndex = 0
-
-    // Create payment at signature (T1)
+    // Create payment at signature
     if (sigValue) {
       await fetch('/api/tranches', {
         method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({
           contract_id:    data.id,
-          tranche_name:   TRANCHE_NAMES[trancheIndex++] || 'T1',
+          tranche_name:   'Advance',
           amount:         sigAmount,
           scheduled_date: sigDate || null,
         })
       })
     }
 
-    // Create future payments (T2, T3, T4...)
+    // Create future payments
     for (const p of payments) {
       const amt = resolveAmount(p.mode === 'percent' ? p.pct : p.amount, p.mode)
       if (amt || p.date) {
@@ -117,7 +113,7 @@ export default function NewContractPage() {
           method:'POST', headers:{'Content-Type':'application/json'},
           body: JSON.stringify({
             contract_id:    data.id,
-            tranche_name:   TRANCHE_NAMES[trancheIndex++] || 'One-Shot',
+            tranche_name:   p.label || `Payment ${payments.indexOf(p) + 2}`,
             amount:         amt,
             scheduled_date: p.date || null,
           })
