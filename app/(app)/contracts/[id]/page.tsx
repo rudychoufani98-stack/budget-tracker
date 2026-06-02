@@ -144,9 +144,23 @@ export default function ContractDetailPage() {
   const approvedInvs    = invoices.filter((i:any) => i.status === 'approved')
   const pendingInvs     = invoices.filter((i:any) => !['approved','rejected'].includes(i.status))
 
-  const totalInvoiced   = nonRejected.reduce((s:number,i:any) => s+(i.amount_ttc||0), 0)
-  const totalApproved   = approvedInvs.reduce((s:number,i:any)=> s+(i.amount_ttc||0), 0)
-  const totalPending    = pendingInvs.reduce((s:number,i:any) => s+(i.amount_ttc||0), 0)
+  // Convert invoice amount to contract's native currency using signing rate
+  function invToContractCcy(inv: any): number {
+    const amt = inv.amount_ttc || 0
+    const invCcy = inv.currency || nativeCcy
+    if (!amt) return 0
+    if (invCcy === nativeCcy) return amt
+    const rate = contract.fx_rate_at_signing || 1580
+    // invoice is USD, contract is NGN
+    if (invCcy === 'USD' && nativeCcy === 'NGN') return amt * rate
+    // invoice is NGN, contract is USD
+    if (invCcy === 'NGN' && nativeCcy === 'USD') return amt / rate
+    return amt
+  }
+
+  const totalInvoiced   = nonRejected.reduce((s:number,i:any) => s + invToContractCcy(i), 0)
+  const totalApproved   = approvedInvs.reduce((s:number,i:any) => s + invToContractCcy(i), 0)
+  const totalPending    = pendingInvs.reduce((s:number,i:any)  => s + invToContractCcy(i), 0)
   const remaining       = contractBudget - totalApproved
   const approvedPct     = contractBudget > 0 ? Math.min(100, Math.round((totalApproved/contractBudget)*100)) : 0
   const pendingPct      = contractBudget > 0 ? Math.min(100-approvedPct, Math.round((totalPending/contractBudget)*100)) : 0
@@ -158,11 +172,29 @@ export default function ContractDetailPage() {
 
   const catColor = ESG_COLORS[contract.category] || ESG_COLORS.Other
 
-  // Currency conversion
+  // Currency conversion — defined early so invoice calculations can use it
   const signingRate = contract.fx_rate_at_signing || 1580
   const hasRate     = !!contract.fx_rate_at_signing
   const nativeCcy   = contract.currency || 'NGN'
   const displayCcy  = view === 'native' ? nativeCcy : view === 'ngn' ? 'NGN' : 'USD'
+
+  // Also display each invoice in the correct currency in the table
+  function invDisplayAmount(inv: any): number {
+    const amt = inv.amount_ttc || 0
+    const invCcy = inv.currency || nativeCcy
+    if (invCcy === displayCcy) return amt
+    if (invCcy === 'USD' && displayCcy === 'NGN') return amt * signingRate
+    if (invCcy === 'NGN' && displayCcy === 'USD') return amt / signingRate
+    return amt
+  }
+  function invDisplayHT(inv: any): number {
+    const amt = inv.amount_ht || 0
+    const invCcy = inv.currency || nativeCcy
+    if (invCcy === displayCcy) return amt
+    if (invCcy === 'USD' && displayCcy === 'NGN') return amt * signingRate
+    if (invCcy === 'NGN' && displayCcy === 'USD') return amt / signingRate
+    return amt
+  }
 
   function cvt(amount: number): number {
     if (view === 'native' || nativeCcy === displayCcy) return amount
@@ -450,8 +482,8 @@ export default function ContractDetailPage() {
                     <p className="text-sm font-medium truncate" style={{ color:C.text }}>{inv.subcontractor_name || '—'}</p>
                   </div>
                   <p className="text-sm" style={{ color:C.muted }}>{formatDate(inv.invoice_date)}</p>
-                  <p className="text-sm" style={{ color:C.text }}>{fc(inv.amount_ht)}</p>
-                  <p className="text-sm font-bold" style={{ color:C.text }}>{fc(inv.amount_ttc)}</p>
+                  <p className="text-sm" style={{ color:C.text }}>{formatCurrency(invDisplayHT(inv), displayCcy)}</p>
+                  <p className="text-sm font-bold" style={{ color:C.text }}>{formatCurrency(invDisplayAmount(inv), displayCcy)}</p>
                   <span className="text-xs px-2.5 py-1 rounded-full font-semibold inline-block" style={{ background:st.bg, color:st.color }}>{st.label}</span>
                 </Link>
               )

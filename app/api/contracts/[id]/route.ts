@@ -10,7 +10,9 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
   if (!contract) return NextResponse.json({ error: 'Not found' }, { status: 404 })
   const [{ data: invoices }, { data: currencies }] = await Promise.all([
     supabaseAdmin.from('invoices').select('id, invoice_number, subcontractor_name, invoice_date, amount_ht, amount_tva, amount_ttc, vat_rate, status, category, tranche_id, pdf_url, submitted_at, created_at').eq('contract_id', params.id).order('created_at', { ascending: false }),
-    supabaseAdmin.from('invoice_currency').select('invoice_id, currency'),
+    supabaseAdmin.from('invoice_currency').select('invoice_id, currency').in('invoice_id',
+      (await supabaseAdmin.from('invoices').select('id').eq('contract_id', params.id)).data?.map((i:any) => i.id) || []
+    ),
   ])
   const currencyMap: Record<string,string> = {}
   for (const c of currencies || []) currencyMap[c.invoice_id] = c.currency
