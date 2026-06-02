@@ -22,16 +22,12 @@ export function InvoicesClient({ invoices }: { invoices: any[] }) {
   const [selectedProject, setSelectedProject] = useState('ALL')
   const [search,          setSearch]          = useState('')
   const [paidTranches,    setPaidTranches]    = useState<any[]>([])
-  const [view,            setView]            = useState<'native'|'ngn'|'usd'>('native')
+  const [view, setView] = useState<'native'|'ngn'|'usd'>('native')
 
   function toView(amount: number, ccy: string): string {
-    if (view === 'native') return formatCurrency(amount, ccy)
-    if (view === 'ngn') {
-      const ngn = ccy === 'USD' ? amount * FX : amount
-      return formatCurrency(ngn, 'NGN')
-    }
-    const usd = ccy === 'NGN' ? amount / FX : amount
-    return formatCurrency(usd, 'USD')
+    if (view === 'ngn') return formatCurrency(ccy === 'USD' ? amount * FX : amount, 'NGN')
+    if (view === 'usd') return formatCurrency(ccy === 'NGN' ? amount / FX : amount, 'USD')
+    return formatCurrency(amount, ccy)
   }
 
   useEffect(() => {
@@ -327,15 +323,21 @@ export function InvoicesClient({ invoices }: { invoices: any[] }) {
 
       {/* Currency toggle */}
       <div className="flex items-center gap-1 mb-4 p-1 rounded-xl w-fit" style={{ background:'#F1F5F9' }}>
-        {(['native','ngn','usd'] as const).map(v => (
-          <button key={v} onClick={() => setView(v)}
-            className="text-xs font-bold px-3 py-1.5 rounded-lg transition-all"
-            style={view === v
-              ? { background:'#0F172A', color:'#fff' }
-              : { color:'#64748B' }}>
-            {v === 'native' ? 'Native' : v === 'ngn' ? '₦ NGN' : '$ USD'}
-          </button>
-        ))}
+        <button onClick={() => setView('native')}
+          className="text-xs font-bold px-3 py-1.5 rounded-lg transition-all"
+          style={view === 'native' ? { background:'#0F172A', color:'#fff' } : { color:'#64748B' }}>
+          As uploaded
+        </button>
+        <button onClick={() => setView('ngn')}
+          className="text-xs font-bold px-3 py-1.5 rounded-lg transition-all"
+          style={view === 'ngn' ? { background:'#0F172A', color:'#fff' } : { color:'#64748B' }}>
+          ₦ NGN
+        </button>
+        <button onClick={() => setView('usd')}
+          className="text-xs font-bold px-3 py-1.5 rounded-lg transition-all"
+          style={view === 'usd' ? { background:'#0F172A', color:'#fff' } : { color:'#64748B' }}>
+          $ USD
+        </button>
       </div>
 
       {/* Search + filters */}
