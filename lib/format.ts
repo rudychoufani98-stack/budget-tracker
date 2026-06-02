@@ -1,5 +1,21 @@
 export function formatCurrency(amount: number | null, currency = 'NGN'): string {
   if (amount === null || amount === undefined) return '—'
+  // NGN amounts: show in millions (e.g. "₦39,9M") for readability
+  if (currency === 'NGN') {
+    const abs = Math.abs(amount)
+    const sign = amount < 0 ? '-' : ''
+    if (abs >= 1_000_000) {
+      const m = abs / 1_000_000
+      const formatted = new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(m)
+      return `${sign}₦${formatted}M`
+    }
+    if (abs >= 1_000) {
+      const k = abs / 1_000
+      const formatted = new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(k)
+      return `${sign}₦${formatted}K`
+    }
+    return `${sign}₦${new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(abs)}`
+  }
   return new Intl.NumberFormat('fr-FR', {
     style: 'currency',
     currency,
