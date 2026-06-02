@@ -90,11 +90,27 @@ async function getData(projectId?: string, sectionId?: string, baseCcy: string =
     sectionCountByProject[s.project_id] = (sectionCountByProject[s.project_id] || 0) + 1
   }
 
+  // trancheBaseForProject: convert tranche amount to baseCcy using contract's signing rate
+  function trancheBaseForProject(t: any): number {
+    const amount = t.amount || 0
+    const ccy    = (t.contracts as any)?.currency || 'NGN'
+    const signingRate = (t.contracts as any)?.fx_rate_at_signing || fxRates['NGN'] || 1580
+    if (baseCcy === 'NGN') {
+      if (ccy === 'NGN') return amount
+      if (ccy === 'USD') return amount * signingRate
+      return (amount / (fxRates[ccy] || 1)) * signingRate
+    } else {
+      if (ccy === 'USD') return amount
+      if (ccy === 'NGN') return amount / signingRate
+      return amount / (fxRates[ccy] || 1)
+    }
+  }
+
   const projectsWithStats = rawProjects.map((p: any) => {
     const pContracts = allContracts.filter((c: any) => c.project_id === p.id)
     const pTranches = allTranches.filter((t: any) => (t.contracts as any)?.project_id === p.id)
-    const committed = pTranches.reduce((s: number, t: any) => s + (t.amount || 0), 0)
-    const paid = pTranches.filter((t: any) => t.status === 'paid').reduce((s: number, t: any) => s + (t.amount || 0), 0)
+    const committed = pTranches.reduce((s: number, t: any) => s + trancheBaseForProject(t), 0)
+    const paid = pTranches.filter((t: any) => t.status === 'paid').reduce((s: number, t: any) => s + trancheBaseForProject(t), 0)
     const pct = committed > 0 ? Math.round((paid / committed) * 100) : 0
     return {
       id: p.id,
@@ -105,7 +121,7 @@ async function getData(projectId?: string, sectionId?: string, baseCcy: string =
       pct,
       contractCount: pContracts.length,
       sectionCount: sectionCountByProject[p.id] || 0,
-      currency: p.currency || 'NGN',
+      currency: baseCcy,
     }
   })
 

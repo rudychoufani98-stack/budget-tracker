@@ -38,6 +38,7 @@ export default function ContractDetailPage() {
   const [editingRate, setEditingRate] = useState(false)
   const [rateInput,   setRateInput]   = useState('')
   const [savingRate,  setSavingRate]  = useState(false)
+  const [view,     setView]     = useState<'native'|'ngn'|'usd'>('native')
 
   async function saveRate() {
     setSavingRate(true)
@@ -124,6 +125,24 @@ export default function ContractDetailPage() {
 
   const catColor = ESG_COLORS[contract.category] || ESG_COLORS.Other
 
+  // Currency conversion
+  const signingRate = contract.fx_rate_at_signing || 1580
+  const hasRate     = !!contract.fx_rate_at_signing
+  const nativeCcy   = contract.currency || 'NGN'
+  const displayCcy  = view === 'native' ? nativeCcy : view === 'ngn' ? 'NGN' : 'USD'
+
+  function cvt(amount: number): number {
+    if (view === 'native' || nativeCcy === displayCcy) return amount
+    if (view === 'ngn') {
+      if (nativeCcy === 'USD') return amount * signingRate
+      return amount
+    }
+    // view === 'usd'
+    if (nativeCcy === 'NGN') return amount / signingRate
+    return amount
+  }
+  function fc(amount: number) { return formatCurrency(cvt(amount), displayCcy) }
+
   return (
     <div className="px-6 py-8 max-w-6xl mx-auto">
 
@@ -181,9 +200,38 @@ export default function ContractDetailPage() {
               )}
             </div>
           </div>
-          <button onClick={handleDelete} disabled={deleting} className="text-xs font-medium px-3 py-2 rounded-xl disabled:opacity-50" style={{ background:'rgba(239,68,68,0.08)', color:'#EF4444' }}>
-            {deleting ? 'Deleting...' : 'Delete'}
-          </button>
+          <div className="flex items-center gap-2">
+            {/* Currency toggle — only show when contract is not NGN */}
+            {nativeCcy !== 'NGN' && (
+              <div className="flex items-center rounded-xl overflow-hidden" style={{ border:'1px solid #E2E8F0' }}>
+                <button onClick={()=>setView('native')} className="px-3 py-1.5 text-xs font-bold transition-colors"
+                  style={view==='native'?{background:'#0F172A',color:'#fff'}:{background:'#FFFFFF',color:'#64748B'}}>
+                  {nativeCcy}
+                </button>
+                <button onClick={()=>setView('ngn')} disabled={!hasRate} title={!hasRate?'Set signing rate first':''}
+                  className="px-3 py-1.5 text-xs font-bold transition-colors disabled:opacity-40"
+                  style={view==='ngn'?{background:'#0F172A',color:'#fff'}:{background:'#FFFFFF',color:'#64748B'}}>
+                  NGN
+                </button>
+              </div>
+            )}
+            {nativeCcy !== 'USD' && (
+              <div className="flex items-center rounded-xl overflow-hidden" style={{ border:'1px solid #E2E8F0' }}>
+                <button onClick={()=>setView('native')} className="px-3 py-1.5 text-xs font-bold transition-colors"
+                  style={view==='native'?{background:'#0F172A',color:'#fff'}:{background:'#FFFFFF',color:'#64748B'}}>
+                  {nativeCcy}
+                </button>
+                <button onClick={()=>setView('usd')} disabled={!hasRate} title={!hasRate?'Set signing rate first':''}
+                  className="px-3 py-1.5 text-xs font-bold transition-colors disabled:opacity-40"
+                  style={view==='usd'?{background:'#0F172A',color:'#fff'}:{background:'#FFFFFF',color:'#64748B'}}>
+                  USD
+                </button>
+              </div>
+            )}
+            <button onClick={handleDelete} disabled={deleting} className="text-xs font-medium px-3 py-2 rounded-xl disabled:opacity-50" style={{ background:'rgba(239,68,68,0.08)', color:'#EF4444' }}>
+              {deleting ? 'Deleting...' : 'Delete'}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -204,10 +252,10 @@ export default function ContractDetailPage() {
           {/* KPI row */}
           <div className="grid grid-cols-4 gap-3 mb-6">
             {[
-              { label:'Contract Budget', value:formatCurrency(contractBudget, ccy),  color:'#3B82F6', bg:'#EFF6FF',  icon:'💰' },
-              { label:'Total Invoiced',  value:formatCurrency(totalInvoiced,  ccy),  color:'#8B5CF6', bg:'#F5F3FF',  icon:'🧾' },
-              { label:'Approved',        value:formatCurrency(totalApproved,  ccy),  color:'#10B981', bg:'#F0FDF4',  icon:'✅' },
-              { label:'Remaining',       value:formatCurrency(remaining,      ccy),  color:remaining<0?'#EF4444':remaining<contractBudget*0.2?'#F59E0B':'#0F172A', bg:remaining<0?'#FEF2F2':'#F8FAFC', icon:'📊' },
+              { label:'Contract Budget', value:fc(contractBudget),  color:'#3B82F6', bg:'#EFF6FF',  icon:'💰' },
+              { label:'Total Invoiced',  value:fc(totalInvoiced),  color:'#8B5CF6', bg:'#F5F3FF',  icon:'🧾' },
+              { label:'Approved',        value:fc(totalApproved),  color:'#10B981', bg:'#F0FDF4',  icon:'✅' },
+              { label:'Remaining',       value:fc(remaining),      color:remaining<0?'#EF4444':remaining<contractBudget*0.2?'#F59E0B':'#0F172A', bg:remaining<0?'#FEF2F2':'#F8FAFC', icon:'📊' },
             ].map(k=>(
               <div key={k.label} className="rounded-xl px-4 py-3.5" style={{ background:k.bg }}>
                 <div className="flex items-center gap-1.5 mb-1">
@@ -230,12 +278,12 @@ export default function ContractDetailPage() {
                 {/* Approved — green */}
                 {approvedPct > 0 && (
                   <div style={{ width:`${approvedPct}%`, background:'#10B981', transition:'width 0.5s' }}
-                    title={`Approved: ${formatCurrency(totalApproved, ccy)}`}/>
+                    title={`Approved: ${fc(totalApproved)}`}/>
                 )}
                 {/* Pending — amber */}
                 {pendingPct > 0 && (
                   <div style={{ width:`${pendingPct}%`, background:'#F59E0B', transition:'width 0.5s' }}
-                    title={`Pending: ${formatCurrency(totalPending, ccy)}`}/>
+                    title={`Pending: ${fc(totalPending)}`}/>
                 )}
               </div>
               <div className="flex items-center gap-4 mt-2">
@@ -267,7 +315,7 @@ export default function ContractDetailPage() {
         <div className="px-6 py-4 flex items-center justify-between" style={{ borderBottom:`1px solid #F1F5F9` }}>
           <div>
             <h2 className="text-sm font-bold" style={{ color:C.text }}>Linked Invoices</h2>
-            <p className="text-xs mt-0.5" style={{ color:C.muted }}>{invoices.length} invoice{invoices.length!==1?'s':''} · {formatCurrency(totalInvoiced, ccy)} total</p>
+            <p className="text-xs mt-0.5" style={{ color:C.muted }}>{invoices.length} invoice{invoices.length!==1?'s':''} · {fc(totalInvoiced)} total</p>
           </div>
         </div>
 
@@ -301,8 +349,8 @@ export default function ContractDetailPage() {
                     <p className="text-sm font-medium truncate" style={{ color:C.text }}>{inv.subcontractor_name || '—'}</p>
                   </div>
                   <p className="text-sm" style={{ color:C.muted }}>{formatDate(inv.invoice_date)}</p>
-                  <p className="text-sm" style={{ color:C.text }}>{formatCurrency(inv.amount_ht, iccy)}</p>
-                  <p className="text-sm font-bold" style={{ color:C.text }}>{formatCurrency(inv.amount_ttc, iccy)}</p>
+                  <p className="text-sm" style={{ color:C.text }}>{fc(inv.amount_ht)}</p>
+                  <p className="text-sm font-bold" style={{ color:C.text }}>{fc(inv.amount_ttc)}</p>
                   <span className="text-xs px-2.5 py-1 rounded-full font-semibold inline-block" style={{ background:st.bg, color:st.color }}>{st.label}</span>
                 </Link>
               )
@@ -311,8 +359,8 @@ export default function ContractDetailPage() {
             <div className="grid px-6 py-3 items-center" style={{ background:'#F8FAFC', borderTop:`1px solid #F1F5F9`, gridTemplateColumns:'0.6fr 1.5fr 0.8fr 1fr 1fr 1.3fr' }}>
               <div className="col-span-3 text-xs font-semibold uppercase tracking-widest" style={{ color:'#94A3B8' }}>Total</div>
               <div/>
-              <p className="text-sm font-bold" style={{ color:C.text }}>{formatCurrency(totalInvoiced, ccy)}</p>
-              <p className="text-xs font-semibold" style={{ color:'#10B981' }}>{formatCurrency(totalApproved, ccy)} approved</p>
+              <p className="text-sm font-bold" style={{ color:C.text }}>{fc(totalInvoiced)}</p>
+              <p className="text-xs font-semibold" style={{ color:'#10B981' }}>{fc(totalApproved)} approved</p>
             </div>
           </>
         )}
@@ -323,7 +371,7 @@ export default function ContractDetailPage() {
         <div className="px-6 py-4 flex items-center justify-between" style={{ borderBottom:`1px solid #F1F5F9` }}>
           <div>
             <h2 className="text-sm font-bold" style={{ color:C.text }}>Payment Milestones</h2>
-            <p className="text-xs mt-0.5" style={{ color:C.muted }}>{tranchePct}% of tranches paid · {formatCurrency(tranchePaid, ccy)} of {formatCurrency(trancheTotal, ccy)}</p>
+            <p className="text-xs mt-0.5" style={{ color:C.muted }}>{tranchePct}% of tranches paid · {fc(tranchePaid)} of {fc(trancheTotal)}</p>
           </div>
         </div>
 
@@ -339,7 +387,7 @@ export default function ContractDetailPage() {
                     <span className="text-sm font-bold" style={{ color:C.text }}>{t.tranche_name}</span>
                   </div>
                   <div className="w-36 shrink-0">
-                    <p className="text-sm font-semibold" style={{ color:C.text }}>{formatCurrency(t.amount, ccy)}</p>
+                    <p className="text-sm font-semibold" style={{ color:C.text }}>{fc(t.amount)}</p>
                     {t.scheduled_date && <p className="text-xs mt-0.5" style={{ color:C.muted }}>{formatDate(t.scheduled_date)}</p>}
                   </div>
                   <div className="flex-1">

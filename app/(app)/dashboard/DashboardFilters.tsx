@@ -110,7 +110,7 @@ export function DashboardFilters({ projects, currentProject, currentSection }: P
                   <span className="text-xs font-bold shrink-0" style={{ color: pctColor }}>{p.pct}%</span>
                 </div>
                 <p className="text-xs" style={{ color: '#94A3B8' }}>
-                  {formatCurrency(p.paid)} / {formatCurrency(p.committed)} &middot; {p.contractCount} contract{p.contractCount !== 1 ? 's' : ''}
+                  {formatCurrency(p.paid, p.currency)} / {formatCurrency(p.committed, p.currency)} &middot; {p.contractCount} contract{p.contractCount !== 1 ? 's' : ''}
                 </p>
               </button>
             )
