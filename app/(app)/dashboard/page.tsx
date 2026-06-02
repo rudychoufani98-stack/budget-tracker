@@ -2,6 +2,7 @@ import { supabaseAdmin } from '@/lib/supabase'
 import { formatCurrency } from '@/lib/format'
 import Link from 'next/link'
 import { DashboardFilters } from './DashboardFilters'
+import { ConsultantChart, MonthlyPaymentsChart, ProjectCompletionChart } from './DashboardCharts2'
 
 export const revalidate = 0
 
@@ -22,7 +23,7 @@ async function getData(projectId?: string, sectionId?: string, baseCcy: string =
   const in14 = new Date(now.getTime() + 14*86400000)
 
   const [tranchesRes, contractsRes, invoicesRes, allInvRes, currencyRes, providersRes, projectsRes, sectionsCountRes, fxRes] = await Promise.all([
-    supabaseAdmin.from('contract_tranches').select('*, contracts(id, contract_name, category, currency, fx_rate_at_signing, project_id, section_id, service_providers(id, name))').order('scheduled_date', { ascending: true }),
+    supabaseAdmin.from('contract_tranches').select('*, contracts(id, contract_name, category, currency, fx_rate_at_signing, project_id, section_id, service_providers(id, name))').order('scheduled_date', { ascending: true }).select('id, tranche_name, amount, status, scheduled_date, paid_date, contract_id, contracts(id, contract_name, category, currency, fx_rate_at_signing, project_id, section_id, service_providers(id, name))'),
     supabaseAdmin.from('contracts').select('id, contract_name, category, currency, fx_rate_at_signing, contract_amount, start_date, end_date, project_id, section_id, service_providers(id, name), contract_tranches(id, tranche_name, amount, status, scheduled_date, paid_date), invoices(id, status, submitted_at, amount_ttc)').order('created_at', { ascending: false }),
     supabaseAdmin.from('invoices').select('id, status, subcontractor_name, submitted_at, amount_ttc, contract_id, tranche_id').order('submitted_at', { ascending: false }),
     supabaseAdmin.from('invoices').select('id, status, subcontractor_name, submitted_at, amount_ttc, contract_id'),
@@ -413,6 +414,34 @@ async function getData(projectId?: string, sectionId?: string, baseCcy: string =
     })
     .sort((a:any,b:any) => (a.startDate||'').localeCompare(b.startDate||''))
 
+  // Chart 2: Consultant committed vs paid
+  const consultantChart = Object.values(providerMap).map((p:any) => {
+    const committed = p.contracts.reduce((s:number,c:any) => s + c.totalPaid + c.balance, 0)
+    const paid      = p.contracts.reduce((s:number,c:any) => s + c.totalPaid, 0)
+    return { name: p.name.split(' ')[0], committed, paid }
+  }).filter((p:any) => p.committed > 0).sort((a:any,b:any) => b.committed - a.committed).slice(0,8)
+
+  // Chart 3: Payments made by month (based on paid tranches with paid_date)
+  const monthlyPayments: Record<string,number> = {}
+  for (const t of allTranches.filter((t:any) => t.status === 'paid' && t.paid_date)) {
+    const month = t.paid_date.slice(0,7) // YYYY-MM
+    const ccy   = (t.contracts as any)?.currency || 'NGN'
+    const rate  = (t.contracts as any)?.fx_rate_at_signing || null
+    monthlyPayments[month] = (monthlyPayments[month] || 0) + contractToBase(t.amount || 0, ccy, rate)
+  }
+  const monthlyChart = Object.entries(monthlyPayments)
+    .sort(([a],[b]) => a.localeCompare(b))
+    .map(([month, amount]) => ({
+      month: new Date(month + '-01').toLocaleDateString('en-GB', { month:'short', year:'2-digit' }),
+      amount: Math.round(amount),
+    }))
+
+  // Chart 4: Project completion rate
+  const projectChart = projectsWithStats
+    .filter((p:any) => p.committed > 0)
+    .map((p:any) => ({ name: p.name, committed: p.committed, paid: p.paid, pct: p.pct }))
+    .sort((a:any,b:any) => b.committed - a.committed)
+
   return {
     totalCommitted, totalPaid, pipeline30, overdueAmount,
     overdueCount: overdueTranches.length,
@@ -428,6 +457,7 @@ async function getData(projectId?: string, sectionId?: string, baseCcy: string =
     contractTimeline,
     baseCcy,
     fxRates,
+    consultantChart, monthlyChart, projectChart,
     fxFetchedAt,
   }
 }
@@ -842,7 +872,44 @@ export default async function DashboardPage({
         </div>
       </div>
 
-      {/* ROW 3 - Tranche tracker + Alerts */}
+      {/* ROW 3 - New charts */}
+      <div className="grid grid-cols-2 gap-5">
+
+        {/* Chart 2: Consultant committed vs paid */}
+        <div className="rounded-2xl overflow-hidden" style={{ background:'#FFFFFF', border:'1px solid #E2E8F0' }}>
+          <div className="px-5 py-4" style={{ borderBottom:'1px solid #F1F5F9' }}>
+            <p className="text-sm font-bold" style={{ color:'#0F172A' }}>Consultant Budget vs Paid</p>
+            <p className="text-xs mt-0.5" style={{ color:'#94A3B8' }}>Grey = contract value &nbsp;·&nbsp; Colour = amount paid</p>
+          </div>
+          <div className="px-5 py-4" style={{ height:240 }}>
+            <ConsultantChart data={d.consultantChart} ccy={baseCcy} />
+          </div>
+        </div>
+
+        {/* Chart 3: Payments by month */}
+        <div className="rounded-2xl overflow-hidden" style={{ background:'#FFFFFF', border:'1px solid #E2E8F0' }}>
+          <div className="px-5 py-4" style={{ borderBottom:'1px solid #F1F5F9' }}>
+            <p className="text-sm font-bold" style={{ color:'#0F172A' }}>Payments Made by Month</p>
+            <p className="text-xs mt-0.5" style={{ color:'#94A3B8' }}>Based on confirmed payment dates</p>
+          </div>
+          <div className="px-5 py-4" style={{ height:240 }}>
+            <MonthlyPaymentsChart data={d.monthlyChart} ccy={baseCcy} />
+          </div>
+        </div>
+      </div>
+
+      {/* Chart 4: Project completion rate */}
+      <div className="rounded-2xl overflow-hidden" style={{ background:'#FFFFFF', border:'1px solid #E2E8F0' }}>
+        <div className="px-5 py-4" style={{ borderBottom:'1px solid #F1F5F9' }}>
+          <p className="text-sm font-bold" style={{ color:'#0F172A' }}>Project Completion Rate</p>
+          <p className="text-xs mt-0.5" style={{ color:'#94A3B8' }}>Paid vs total contract value per project</p>
+        </div>
+        <div className="px-5 py-5">
+          <ProjectCompletionChart data={d.projectChart} ccy={baseCcy} />
+        </div>
+      </div>
+
+      {/* ROW 4 - Tranche tracker + Alerts */}
       <div className="grid grid-cols-2 gap-5">
 
         {/* Left: Tranche tracker per provider */}
