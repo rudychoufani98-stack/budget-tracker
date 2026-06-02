@@ -228,7 +228,7 @@ export default function ProjectDetailPage({ params }: { params: { name: string }
         </div>
       </div>
 
-      {/* ── 2. SUB-SECTIONS ── */}
+      {/* ── 2. SECTIONS ── */}
       <div className="flex items-center justify-between mb-3">
         <div>
           <h2 className="text-base font-bold" style={{ color:'#0F172A' }}>Sections</h2>
@@ -415,7 +415,7 @@ export default function ProjectDetailPage({ params }: { params: { name: string }
         </div>
       )}
 
-      {/* ── ADD SUB-SECTION MODAL ── */}
+      {/* ── ADD SECTION MODAL ── */}
       {showAddSection && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background:'rgba(0,0,0,0.5)' }} onClick={()=>setShowAddSection(false)}>
           <div className="rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl" style={{ background:'#FFFFFF' }} onClick={e=>e.stopPropagation()}>
