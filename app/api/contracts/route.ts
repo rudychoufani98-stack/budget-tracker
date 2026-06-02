@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
   const primarySectionId = sectionIds[0] || null
 
   const { data, error } = await supabaseAdmin.from('contracts').insert({
-    contract_name, client_name, service_provider_id,
+    contract_name, client_name: client_name || contract_name, service_provider_id,
     project, project_id: project_id || null,
     section_id: primarySectionId,
     category, description,
