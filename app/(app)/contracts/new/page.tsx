@@ -179,7 +179,14 @@ export default function NewContractPage() {
                   {sections.length > 0 ? (
                     <select className={inp} style={inpStyle} value={selectedSection} onChange={e => setSelectedSection(e.target.value)}>
                       <option value="">No section (direct to project)</option>
-                      {sections.map((s:any) => <option key={s.id} value={s.id}>{s.name}</option>)}
+                      {sections.map((s:any) => (
+                        <optgroup key={s.id} label={s.name}>
+                          <option value={s.id}>{s.name} (all sub-sections)</option>
+                          {(s.children||[]).map((ch:any) => (
+                            <option key={ch.id} value={ch.id}>&nbsp;&nbsp;↳ {ch.name}</option>
+                          ))}
+                        </optgroup>
+                      ))}
                     </select>
                   ) : (
                     <div className="px-3 py-2.5 rounded-xl text-sm" style={{ background:'#F8FAFC', border:'1.5px solid #E2E8F0', color:'#94A3B8' }}>
