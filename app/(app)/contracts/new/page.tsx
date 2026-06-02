@@ -4,8 +4,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
 const C = { card: '#FFFFFF', border: '#E2E8F0', blue: '#3B82F6', muted: '#64748B' }
-const TRANCHE_NAMES = ['T1','T2','T3','T4','One-Shot']
-const CURRENCIES = ['NGN','USD','EUR','GBP','CHF','MAD','XOF','NGN','CAD','AED']
+const CURRENCIES = ['NGN','USD','EUR','GBP','CHF','MAD','XOF','CAD','AED']
 
 export default function NewContractPage() {
   const router = useRouter()
@@ -15,12 +14,11 @@ export default function NewContractPage() {
   const [error,  setError]  = useState('')
   const [form, setForm] = useState({
     contract_name:'', service_provider_id:'', project_id:'', project:'',
-    category:'E', description:'', currency:'NGN',
+    category:'E', description:'', currency:'NGN', contract_amount:'',
     start_date:'', end_date:'', status:'active', notes:'',
     fx_rate_at_signing: ''
   })
-  const [fxLoading, setFxLoading] = useState(false)
-  const [tranches, setTranches] = useState<{ name:string; amount:string; date:string }[]>([])
+  const [payments, setPayments] = useState<{ label:string; amount:string; date:string }[]>([])
 
   useEffect(() => {
     Promise.all([
@@ -39,26 +37,44 @@ export default function NewContractPage() {
     setForm(f => ({ ...f, project_id: projectId, project: proj?.name || '' }))
   }
 
-  function addTranche() {
-    const used = tranches.map(t => t.name)
-    const next = TRANCHE_NAMES.find(n => !used.includes(n))
-    if (next) setTranches(p => [...p, { name:next, amount:'', date:'' }])
+  function addPayment() {
+    const n = payments.length + 1
+    setPayments(p => [...p, { label: `Payment ${n}`, amount: '', date: '' }])
   }
+
+  const totalPayments = payments.reduce((s,p) => s + (parseFloat(p.amount)||0), 0)
+  const contractAmount = parseFloat(form.contract_amount) || 0
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault(); setSaving(true); setError('')
-    const totalAmount = tranches.reduce((s,t) => s+(parseFloat(t.amount)||0), 0)
+
+    // Use direct contract amount if provided, otherwise sum of payments
+    const finalAmount = contractAmount || totalPayments
+
     const res = await fetch('/api/contracts', {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ ...form, contract_amount: totalAmount, fx_rate_at_signing: form.fx_rate_at_signing ? parseFloat(form.fx_rate_at_signing) : null })
+      body: JSON.stringify({
+        ...form,
+        contract_amount: finalAmount,
+        fx_rate_at_signing: form.fx_rate_at_signing ? parseFloat(form.fx_rate_at_signing) : null,
+      })
     })
     const data = await res.json()
-    if (!res.ok) { setError(data.error || 'Failed'); setSaving(false); return }
-    for (const t of tranches) {
-      if (t.amount) await fetch('/api/tranches', {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ contract_id:data.id, tranche_name:t.name, amount:parseFloat(t.amount)||0, scheduled_date:t.date||null })
-      })
+    if (!res.ok) { setError(data.error || 'Failed to create contract'); setSaving(false); return }
+
+    // Create payment schedule entries as tranches
+    for (const p of payments) {
+      if (p.amount || p.date) {
+        await fetch('/api/tranches', {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({
+            contract_id:    data.id,
+            tranche_name:   p.label || 'Payment',
+            amount:         parseFloat(p.amount) || 0,
+            scheduled_date: p.date || null,
+          })
+        })
+      }
     }
     router.push(`/contracts/${data.id}`)
   }
@@ -90,7 +106,7 @@ export default function NewContractPage() {
                   required placeholder="e.g. Environmental Assessment 2025" />
               </div>
 
-              {/* Project — dropdown from Projects tab */}
+              {/* Project */}
               <div className="col-span-2">
                 <label className="text-xs font-semibold uppercase tracking-widest mb-2 block" style={{ color: C.muted }}>
                   Project
@@ -102,7 +118,7 @@ export default function NewContractPage() {
                 </label>
                 {projects.length > 0 ? (
                   <select className={inp} style={inpStyle} value={form.project_id} onChange={e => handleProjectChange(e.target.value)}>
-                    <option value="">Select project…</option>
+                    <option value="">Select project...</option>
                     {projects.map((p:any) => <option key={p.id} value={p.id}>{p.name}</option>)}
                   </select>
                 ) : (
@@ -140,12 +156,31 @@ export default function NewContractPage() {
                 </select>
               </div>
 
-              {/* FX Rate at Signing */}
+              {/* Total Contract Amount */}
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-widest mb-2 block" style={{ color: C.muted }}>
+                  Total Contract Amount
+                </label>
+                <input
+                  type="number" className={inp} style={inpStyle}
+                  value={form.contract_amount}
+                  onChange={e=>setForm(p=>({...p,contract_amount:e.target.value}))}
+                  placeholder={totalPayments > 0 ? `Auto: ${totalPayments.toLocaleString()}` : 'e.g. 5000000'}
+                  step="0.01"
+                />
+                <p className="text-xs mt-1" style={{ color:'#94A3B8' }}>
+                  {totalPayments > 0 && !form.contract_amount
+                    ? `Will use sum of payments below: ${totalPayments.toLocaleString()} ${form.currency}`
+                    : 'Enter the total value of this contract'}
+                </p>
+              </div>
+
+              {/* FX Rate */}
               <div>
                 <label className="text-xs font-semibold uppercase tracking-widest mb-1 block" style={{ color: C.muted }}>
                   Rate at Signing (1 USD = &#8358; X)
                 </label>
-                <p className="text-xs mb-2" style={{ color:'#94A3B8' }}>Auto-fetched today. Edit if contract was signed earlier.</p>
+                <p className="text-xs mb-2" style={{ color:'#94A3B8' }}>Auto-fetched today. Edit if different.</p>
                 <input type="number" className={inp} style={inpStyle} value={form.fx_rate_at_signing}
                   onChange={e=>setForm(p=>({...p,fx_rate_at_signing:e.target.value}))}
                   placeholder="e.g. 1580" step="0.01" />
@@ -172,42 +207,72 @@ export default function NewContractPage() {
               </div>
             </div>
 
-            {/* Payment Tranches */}
+            {/* Payment Schedule */}
             <div>
               <div className="flex items-center justify-between mb-3">
-                <p className="text-sm font-semibold" style={{ color: '#0F172A' }}>Payment Tranches</p>
-                <button type="button" onClick={addTranche} className="text-xs font-semibold px-3 py-1.5 rounded-lg" style={{ background:'rgba(59,130,246,0.12)', color: C.blue }}>
-                  + Add Tranche
+                <div>
+                  <p className="text-sm font-semibold" style={{ color: '#0F172A' }}>Payment Schedule</p>
+                  <p className="text-xs mt-0.5" style={{ color:'#94A3B8' }}>Add expected payment dates and amounts</p>
+                </div>
+                <button type="button" onClick={addPayment} className="text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1.5" style={{ background:'rgba(59,130,246,0.1)', color: C.blue }}>
+                  <svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  Add Payment
                 </button>
               </div>
-              {tranches.length === 0 && (
-                <p className="text-sm" style={{ color: '#94A3B8' }}>No tranches added yet. Click above to add a payment schedule.</p>
+
+              {payments.length === 0 && (
+                <div className="text-center py-6 rounded-xl" style={{ border:'1px dashed #E2E8F0', background:'#F8FAFC' }}>
+                  <p className="text-sm" style={{ color:'#94A3B8' }}>No payments scheduled yet.</p>
+                  <p className="text-xs mt-1" style={{ color:'#CBD5E1' }}>Click "Add Payment" to schedule payment dates.</p>
+                </div>
               )}
+
               <div className="space-y-2">
-                {tranches.map((t,i) => (
-                  <div key={i} className="grid grid-cols-3 gap-3 p-3 rounded-xl" style={{ background:'#F8FAFC', border:'1px solid #E2E8F0' }}>
-                    <select className={inp} style={inpStyle} value={t.name} onChange={e=>setTranches(p=>p.map((x,j)=>j===i?{...x,name:e.target.value}:x))}>
-                      {TRANCHE_NAMES.map(n => <option key={n} value={n}>{n}</option>)}
-                    </select>
+                {payments.map((p, i) => (
+                  <div key={i} className="grid gap-3 p-3 rounded-xl items-center" style={{ background:'#F8FAFC', border:'1px solid #E2E8F0', gridTemplateColumns:'1.2fr 1fr 1.2fr auto' }}>
+                    {/* Label */}
+                    <input className={inp} style={inpStyle} placeholder="e.g. Advance, Final..."
+                      value={p.label}
+                      onChange={e=>setPayments(prev=>prev.map((x,j)=>j===i?{...x,label:e.target.value}:x))} />
+                    {/* Amount */}
                     <input type="number" className={inp} style={inpStyle} placeholder="Amount"
-                      value={t.amount} onChange={e=>setTranches(p=>p.map((x,j)=>j===i?{...x,amount:e.target.value}:x))} />
-                    <div className="flex gap-2">
-                      <input type="date" className="flex-1 px-3 py-2.5 text-sm rounded-xl outline-none" style={inpStyle}
-                        value={t.date} onChange={e=>setTranches(p=>p.map((x,j)=>j===i?{...x,date:e.target.value}:x))} />
-                      <button type="button" onClick={()=>setTranches(p=>p.filter((_,j)=>j!==i))}
-                        className="px-2.5 text-sm rounded-lg font-medium" style={{ color:'#EF4444', background:'rgba(239,68,68,0.08)' }}>
-                        x
-                      </button>
-                    </div>
+                      value={p.amount}
+                      onChange={e=>setPayments(prev=>prev.map((x,j)=>j===i?{...x,amount:e.target.value}:x))} />
+                    {/* Date */}
+                    <input type="date" className={inp} style={inpStyle}
+                      value={p.date}
+                      onChange={e=>setPayments(prev=>prev.map((x,j)=>j===i?{...x,date:e.target.value}:x))} />
+                    {/* Remove */}
+                    <button type="button" onClick={()=>setPayments(prev=>prev.filter((_,j)=>j!==i))}
+                      className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ color:'#EF4444', background:'rgba(239,68,68,0.08)' }}>
+                      <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </button>
                   </div>
                 ))}
               </div>
-              {tranches.length > 0 && (
-                <p className="text-sm mt-2 font-medium" style={{ color: C.muted }}>
-                  Total: <span style={{ color:'#0F172A' }}>
-                    {tranches.reduce((s,t)=>s+(parseFloat(t.amount)||0),0).toLocaleString()} {form.currency}
-                  </span>
-                </p>
+
+              {/* Totals summary */}
+              {(payments.length > 0 || contractAmount > 0) && (
+                <div className="mt-3 px-4 py-3 rounded-xl flex items-center justify-between" style={{ background:'rgba(59,130,246,0.05)', border:'1px solid rgba(59,130,246,0.15)' }}>
+                  <div className="flex items-center gap-4">
+                    <div>
+                      <p className="text-xs" style={{ color:'#64748B' }}>Contract total</p>
+                      <p className="text-sm font-bold" style={{ color:'#0F172A' }}>
+                        {(contractAmount || totalPayments).toLocaleString()} {form.currency}
+                      </p>
+                    </div>
+                    {payments.length > 0 && contractAmount > 0 && (
+                      <div>
+                        <p className="text-xs" style={{ color:'#64748B' }}>Scheduled</p>
+                        <p className="text-sm font-semibold" style={{ color: totalPayments > contractAmount ? '#EF4444' : '#10B981' }}>
+                          {totalPayments.toLocaleString()} {form.currency}
+                          {totalPayments > contractAmount && ' (exceeds total!)'}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                  <p className="text-xs" style={{ color:'#94A3B8' }}>{payments.length} payment{payments.length!==1?'s':''} scheduled</p>
+                </div>
               )}
             </div>
 
@@ -221,7 +286,7 @@ export default function NewContractPage() {
               <button type="submit" disabled={saving} className="flex-1 py-3 rounded-xl text-sm font-semibold disabled:opacity-50" style={{ background: C.blue, color: '#fff' }}>
                 {saving ? 'Creating...' : 'Create Contract'}
               </button>
-              <Link href="/contracts" className="px-5 py-3 rounded-xl text-sm font-medium" style={{ background:'#F1F5F9', color: C.muted }}>
+              <Link href="/contracts" className="px-5 py-3 rounded-xl text-sm font-medium flex items-center" style={{ background:'#F1F5F9', color: C.muted }}>
                 Cancel
               </Link>
             </div>
