@@ -274,12 +274,15 @@ export default function NewContractPage() {
               </div>
 
               <div>
-                <label className="text-xs font-semibold uppercase tracking-widest mb-2 block" style={{ color: C.muted }}>Start Date</label>
-                <input type="date" className={inp} style={inpStyle} value={form.start_date} onChange={e=>setForm(p=>({...p,start_date:e.target.value}))} />
+                <label className="text-xs font-semibold uppercase tracking-widest mb-2 block" style={{ color: C.muted }}>Start Date *</label>
+                <input type="date" className={inp} style={inpStyle} value={form.start_date} onChange={e=>setForm(p=>({...p,start_date:e.target.value}))} required />
               </div>
 
               <div>
-                <label className="text-xs font-semibold uppercase tracking-widest mb-2 block" style={{ color: C.muted }}>End Date</label>
+                <label className="text-xs font-semibold uppercase tracking-widest mb-2 block" style={{ color: C.muted }}>
+                  End Date
+                  <span className="ml-1.5 text-xs font-normal" style={{ color:'#94A3B8' }}>(optional)</span>
+                </label>
                 <input type="date" className={inp} style={inpStyle} value={form.end_date} onChange={e=>setForm(p=>({...p,end_date:e.target.value}))} />
               </div>
 
