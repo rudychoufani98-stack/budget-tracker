@@ -157,13 +157,29 @@ async function getData(projectId?: string, sectionId?: string, baseCcy: string =
     }
   }
 
+  // Helper: convert a contract amount to baseCcy using its signing rate
+  function contractToBase(amount: number, ccy: string, signingRate: number | null): number {
+    if (!amount) return 0
+    const rate = signingRate || fxRates['NGN'] || 1580
+    if (baseCcy === 'NGN') {
+      if (ccy === 'NGN') return amount
+      if (ccy === 'USD') return amount * rate
+      return toBase(amount, ccy) * rate
+    } else {
+      if (ccy === 'USD') return amount
+      if (ccy === 'NGN') return amount / rate
+      return toBase(amount, ccy)
+    }
+  }
+
   // Contract advancement (filtered)
   const contractAdvancement = contracts.map((c:any) => {
     const ts: any[] = c.contract_tranches || []
-    const total = ts.reduce((s:number,t:any) => s + (t.amount||0), 0)
-    const paid  = ts.filter((t:any) => t.status === 'paid').reduce((s:number,t:any) => s + (t.amount||0), 0)
+    const signingRate = c.fx_rate_at_signing || null
+    const ccy = c.currency || 'NGN'
+    const total = ts.reduce((s:number,t:any) => s + contractToBase(t.amount||0, ccy, signingRate), 0)
+    const paid  = ts.filter((t:any) => t.status === 'paid').reduce((s:number,t:any) => s + contractToBase(t.amount||0, ccy, signingRate), 0)
     const pct   = total > 0 ? Math.round((paid/total)*100) : 0
-    const ccy   = c.currency || 'NGN'
 
     const upcoming = ts
       .filter((t:any) => t.status !== 'paid' && t.scheduled_date)
@@ -174,7 +190,7 @@ async function getData(projectId?: string, sectionId?: string, baseCcy: string =
     const currentTranche = upcoming[0] || ts[ts.length - 1] || null
 
     return { id:c.id, name:c.contract_name, provider:c.service_providers?.name||'',
-             category:c.category||'Other', total, paid, pct, ccy,
+             category:c.category||'Other', total, paid, pct, ccy: baseCcy,
              nextDeadline:nextDeadline?.scheduled_date||null, daysToNext,
              trancheStatus:currentTranche?.status||'unpaid' }
   }).filter((c:any) => c.total > 0)
@@ -190,6 +206,9 @@ async function getData(projectId?: string, sectionId?: string, baseCcy: string =
       const inv = invoiceByTranche[t.id] || null
       let invStatus = 'no_invoice'
       if (inv) invStatus = inv.status
+      const tCcy        = (t.contracts as any)?.currency || 'NGN'
+      const tSignRate   = (t.contracts as any)?.fx_rate_at_signing || null
+      const amountBase  = contractToBase(t.amount || 0, tCcy, tSignRate)
       return {
         trancheId: t.id,
         contractId: (t.contracts as any)?.id,
@@ -197,8 +216,8 @@ async function getData(projectId?: string, sectionId?: string, baseCcy: string =
         provider: (t.contracts as any)?.service_providers?.name || '',
         trancheName: t.tranche_name,
         scheduledDate: t.scheduled_date,
-        amount: t.amount || 0,
-        currency: (t.contracts as any)?.currency || 'NGN',
+        amount: amountBase,
+        currency: baseCcy,
         status: t.status,
         isOverdue,
         isDueSoon,
@@ -222,14 +241,16 @@ async function getData(projectId?: string, sectionId?: string, baseCcy: string =
     if (!pid) continue
     if (!providerMap[pid]) providerMap[pid] = { id:pid, name:pname, contracts:[] }
     const ts: any[] = (c as any).contract_tranches || []
+    const cCcy       = (c as any).currency || 'NGN'
+    const cRate      = (c as any).fx_rate_at_signing || null
     const tranchesByName: Record<string,any> = {}
     for (const t of ts) tranchesByName[t.tranche_name] = t
-    const totalPaidP = ts.filter((t:any) => t.status==='paid').reduce((s:number,t:any)=>s+(t.amount||0),0)
-    const totalAllP  = ts.reduce((s:number,t:any)=>s+(t.amount||0),0)
+    const totalPaidP = ts.filter((t:any) => t.status==='paid').reduce((s:number,t:any)=>s+contractToBase(t.amount||0,cCcy,cRate),0)
+    const totalAllP  = ts.reduce((s:number,t:any)=>s+contractToBase(t.amount||0,cCcy,cRate),0)
     providerMap[pid].contracts.push({
       contractId: (c as any).id,
       contractName: (c as any).contract_name,
-      ccy: (c as any).currency || 'NGN',
+      ccy: baseCcy,
       tranches: tranchesByName,
       totalPaid: totalPaidP,
       balance: totalAllP - totalPaidP,
