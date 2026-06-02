@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
-const CURRENCIES = ['NGN','USD','EUR','GBP','CHF','MAD','XOF','NGN','CAD','AED']
+const CURRENCIES = ['NGN','USD']
 
 export default function NewProjectPage() {
   const router = useRouter()

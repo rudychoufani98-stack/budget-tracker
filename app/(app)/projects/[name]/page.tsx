@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { formatCurrency } from '@/lib/format'
 
-const CURRENCIES = ['NGN','USD','EUR','GBP','CHF','MAD','XOF','CAD']
+const CURRENCIES = ['NGN','USD']
 const PALETTE     = ['#3B82F6','#8B5CF6','#F59E0B','#EF4444','#10B981','#06B6D4','#F97316','#EC4899']
 
 const PROJ_STATUS: Record<string,{label:string;color:string;bg:string}> = {

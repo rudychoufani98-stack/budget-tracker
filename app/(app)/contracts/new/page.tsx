@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
 const C = { card: '#FFFFFF', border: '#E2E8F0', blue: '#3B82F6', muted: '#64748B' }
-const CURRENCIES = ['NGN','USD','EUR','GBP','CHF','MAD','XOF','CAD','AED']
+const CURRENCIES = ['NGN','USD']
 
 export default function NewContractPage() {
   const router = useRouter()

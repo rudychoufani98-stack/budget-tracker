@@ -302,7 +302,7 @@ export default function InvoiceDetailPage() {
               <div className="flex items-center gap-2">
                 {savingCurrency && <span className="text-xs" style={{ color: C.muted }}>Saving…</span>}
                 <select value={currency} onChange={e=>saveCurrency(e.target.value)} className="text-xs font-semibold rounded-lg px-2 py-1.5" style={{ background:'#E2E8F0', color:C.text, border:`1px solid ${C.border2}` }}>
-                  {['EUR','USD','GBP','CHF','MAD','XOF','NGN','CAD','AED','JPY'].map(c=>(
+                  {['NGN','USD'].map(c=>(
                     <option key={c} value={c}>{c}</option>
                   ))}
                 </select>

@@ -34,7 +34,7 @@ const CATEGORIES: { label:string; icon:string; color:string }[] = [
   { label:'Other',             icon:'📋', color:'#94A3B8' },
 ]
 
-const CURRENCIES = ['USD','EUR','GBP','CHF','MAD','XOF','NGN','CAD','AED','JPY']
+const CURRENCIES = ['NGN','USD']
 
 function cs(v:number|null, currency:string) {
   if (v===null||v===undefined) return '-'
