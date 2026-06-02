@@ -125,12 +125,15 @@ export default function UploadPage() {
     return contracts
   })()
 
-  // When contract changes: update tranches + auto-fill provider
+  // When contract changes: update tranches + auto-fill provider + reset tranche
   useEffect(()=>{
-    if (!selectedContract) { setTranches([]); return }
+    if (!selectedContract) { setTranches([]); setSelectedProvider(''); return }
     const c = contracts.find((x:any)=>x.id===selectedContract)
     setTranches(c?.contract_tranches||[])
+    setSelectedTranche('')
+    // Always override provider from contract
     if (c?.service_provider_id) setSelectedProvider(c.service_provider_id)
+    else setSelectedProvider('')
   },[selectedContract, contracts])
 
   // Get selected tranche details for milestone display

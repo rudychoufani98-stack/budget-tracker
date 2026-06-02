@@ -3,14 +3,15 @@
 import { useState, useEffect } from 'react'
 
 const NAVY = '#0C1F52'
-const ROLES = ['admin', 'placide', 'uploader', 'dani', 'fares', 'viewer']
+const ROLES = ['admin', 'rudy', 'placide', 'hitech', 'fares', 'uploader', 'viewer']
 
 const ROLE_LABELS: Record<string,string> = {
   admin:    'Administrator',
+  rudy:     'Director',
   placide:  'ESG Manager',
-  uploader: 'Intern',
-  dani:     'MD',
+  hitech:   'MD / Dani',
   fares:    'Accountant',
+  uploader: 'Intern (Data Entry)',
   viewer:   'Viewer',
 }
 
@@ -75,10 +76,12 @@ export default function UsersPage() {
 
   const roleColors: Record<string, { bg: string; color: string }> = {
     admin:    { bg: '#DBEAFE', color: '#1D4ED8' },
+    rudy:     { bg: '#FEE2E2', color: '#991B1B' },
     placide:  { bg: '#D1FAE5', color: '#065F46' },
-    uploader: { bg: '#FEF9C3', color: '#854D0E' },
+    hitech:   { bg: '#EDE9FE', color: '#5B21B6' },
     dani:     { bg: '#EDE9FE', color: '#5B21B6' },
-    fares:    { bg: '#D1FAE5', color: '#065F46' },
+    fares:    { bg: '#ECFDF5', color: '#047857' },
+    uploader: { bg: '#FEF9C3', color: '#854D0E' },
     viewer:   { bg: '#F3F4F6', color: '#6B7280' },
   }
 

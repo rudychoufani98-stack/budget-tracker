@@ -199,9 +199,10 @@ export default function SettingsPage() {
           <p className="text-sm font-medium mb-4" style={{ color:'#0F172A' }}>Validation Chain Configuration</p>
           <div className="space-y-3">
             {[
-              { step:1, role:'rudy/admin',  label:'Step 1 — Rudy',    desc:'Checks invoice accuracy and matching with contract', color:'#F97316' },
-              { step:2, role:'placide',     label:'Step 2 — Placide', desc:'Manager approval and budget verification',            color:'#D97706' },
-              { step:3, role:'hitech',      label:'Step 3 — Dani',    desc:'Final financial approval before payment release',    color:'#FACC15' },
+              { step:1, role:'rudy / admin', label:'Step 1 — Rudy',        desc:'Reviews invoice accuracy and match with contract',       color:'#F97316' },
+              { step:2, role:'placide',      label:'Step 2 — Placide',      desc:'ESG Manager approval and budget verification',           color:'#D97706' },
+              { step:3, role:'hitech',       label:'Step 3 — Dani',         desc:'Final validation before sending to accounting',          color:'#FACC15' },
+              { step:4, role:'fares',        label:'Step 4 — Accountant',   desc:'Confirms payment done + uploads proof of payment',       color:'#10B981' },
             ].map(s=>(
               <div key={s.step} className="flex items-center gap-4 p-4 rounded-xl" style={{ background:C.card2, border:`1px solid ${C.border}` }}>
                 <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium shrink-0" style={{ background:`${s.color}20`, color:s.color }}>{s.step}</div>
