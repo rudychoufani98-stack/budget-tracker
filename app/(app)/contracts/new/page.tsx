@@ -10,12 +10,13 @@ export default function NewContractPage() {
   const router = useRouter()
   const [providers, setProviders] = useState<any[]>([])
   const [projects,  setProjects]  = useState<any[]>([])
+  const [sections,  setSections]  = useState<any[]>([])
   const [saving, setSaving] = useState(false)
   const [error,  setError]  = useState('')
   const [form, setForm] = useState({
-    contract_name:'', service_provider_id:'', project_id:'', project:'',
+    contract_name:'', service_provider_id:'', project_id:'', project:'', section_id:'',
     category:'E', description:'', currency:'NGN', contract_amount:'',
-    start_date:'', end_date:'', status:'active', notes:'',
+    start_date:'', end_date:'', status:'active',
     fx_rate_at_signing: ''
   })
 
@@ -41,7 +42,11 @@ export default function NewContractPage() {
 
   function handleProjectChange(projectId: string) {
     const proj = projects.find((p:any) => p.id === projectId)
-    setForm(f => ({ ...f, project_id: projectId, project: proj?.name || '' }))
+    setForm(f => ({ ...f, project_id: projectId, project: proj?.name || '', section_id: '' }))
+    setSections([])
+    if (projectId) {
+      fetch(`/api/sections?project_id=${projectId}`).then(r=>r.json()).then(d=>setSections(Array.isArray(d)?d:[]))
+    }
   }
 
   function addPayment() {
@@ -161,6 +166,29 @@ export default function NewContractPage() {
                     placeholder="Type project name or create one in Projects tab" />
                 )}
               </div>
+
+              {/* Section — only shown when a project with sections is selected */}
+              {form.project_id && (
+                <div className="col-span-2">
+                  <label className="text-xs font-semibold uppercase tracking-widest mb-2 block" style={{ color: C.muted }}>
+                    Section
+                    <span className="ml-1.5 text-xs font-normal" style={{ color:'#94A3B8' }}>(optional)</span>
+                  </label>
+                  {sections.length > 0 ? (
+                    <select className={inp} style={inpStyle} value={form.section_id} onChange={e=>setForm(p=>({...p,section_id:e.target.value}))}>
+                      <option value="">No section — direct to project</option>
+                      {sections.map((s:any) => <option key={s.id} value={s.id}>{s.name}</option>)}
+                    </select>
+                  ) : (
+                    <div className="px-3 py-2.5 rounded-xl text-sm" style={{ background:'#F8FAFC', border:'1.5px solid #E2E8F0', color:'#94A3B8' }}>
+                      No sections in this project —{' '}
+                      <Link href={`/projects/${form.project_id}`} className="underline" style={{ color:'#3B82F6' }}>
+                        add one in the project page
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              )}
 
               <div>
                 <label className="text-xs font-semibold uppercase tracking-widest mb-2 block" style={{ color: C.muted }}>Consultant</label>
