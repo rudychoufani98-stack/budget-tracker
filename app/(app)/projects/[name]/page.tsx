@@ -31,7 +31,7 @@ function stats(contracts: any[]) {
   const pct       = totalCommitted>0 ? Math.round((paid/totalCommitted)*100) : 0
   // Detect dominant currency (use contract currency, not section currency)
   const ccySet = new Set(contracts.map(c=>c.currency).filter(Boolean))
-  const dominantCcy = ccySet.size === 1 ? [...ccySet][0] : null
+  const dominantCcy = ccySet.size === 1 ? Array.from(ccySet)[0] : null
   return { committed:totalCommitted, paid, scheduled, invoices, pending, pct, dominantCcy }
 }
 
