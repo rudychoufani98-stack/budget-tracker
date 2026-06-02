@@ -154,7 +154,8 @@ async function getData(projectId?: string, sectionId?: string, baseCcy: string =
     return d >= now && d <= in30
   }).reduce((s:number,t:any) => s + trancheBase(t), 0)
 
-  const pendingPaymentTranches = tranches.filter((t:any) => t.status === 'pending_payment')
+  const VALIDATION_STATUSES = ['pending_review','pending_placide','pending_dani','pending_fares']
+  const pendingPaymentTranches = tranches.filter((t:any) => VALIDATION_STATUSES.includes(t.status))
   const pendingPaymentAmount   = pendingPaymentTranches.reduce((s:number,t:any) => s + trancheBase(t), 0)
 
   const overdueTranches = tranches.filter((t:any) => {

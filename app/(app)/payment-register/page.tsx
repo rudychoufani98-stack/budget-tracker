@@ -6,10 +6,13 @@ import Link from 'next/link'
 const TRANCHES = ['T1','T2','T3','T4','One-Shot']
 const ESG: Record<string,string> = { E:'#10B981', S:'#3B82F6', G:'#8B5CF6', Other:'#6B7280' }
 const TRANCHE_STATUS: Record<string,{label:string;color:string}> = {
-  unpaid:          { label:'Unpaid',             color:'#94A3B8' },
-  scheduled:       { label:'Scheduled',          color:'#F59E0B' },
-  pending_payment: { label:'Sent to Accounting', color:'#3B82F6' },
-  paid:            { label:'Paid',               color:'#10B981' },
+  unpaid:          { label:'Unpaid',          color:'#94A3B8' },
+  scheduled:       { label:'Scheduled',       color:'#F59E0B' },
+  pending_review:  { label:'In Validation',   color:'#3B82F6' },
+  pending_placide: { label:'In Validation',   color:'#3B82F6' },
+  pending_dani:    { label:'In Validation',   color:'#3B82F6' },
+  pending_fares:   { label:'Pending Payment', color:'#8B5CF6' },
+  paid:            { label:'Paid',            color:'#10B981' },
 }
 
 function tranche(tranches: any[], name: string) {

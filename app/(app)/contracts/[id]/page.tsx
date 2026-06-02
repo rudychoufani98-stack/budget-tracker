@@ -10,7 +10,10 @@ const ESG_COLORS: Record<string,string> = { E:'#10B981', S:'#3B82F6', G:'#8B5CF6
 const STATUS_COLORS: Record<string,{bg:string;color:string;label:string}> = {
   unpaid:          { bg:'rgba(107,114,128,0.15)', color:'#6B7280',  label:'Unpaid'              },
   scheduled:       { bg:'rgba(245,158,11,0.15)',  color:'#F59E0B',  label:'Scheduled'           },
-  pending_payment: { bg:'rgba(59,130,246,0.15)',  color:'#3B82F6',  label:'Sent to Accounting'  },
+  pending_review:  { bg:'rgba(59,130,246,0.15)',  color:'#3B82F6',  label:'In Validation'       },
+  pending_placide: { bg:'rgba(59,130,246,0.15)',  color:'#3B82F6',  label:'In Validation'       },
+  pending_dani:    { bg:'rgba(59,130,246,0.15)',  color:'#3B82F6',  label:'In Validation'       },
+  pending_fares:   { bg:'rgba(139,92,246,0.15)',  color:'#8B5CF6',  label:'Pending Payment'     },
   paid:            { bg:'rgba(16,185,129,0.15)',  color:'#10B981',  label:'Paid'                },
 }
 const INV_STATUS: Record<string,{label:string;color:string;bg:string}> = {
@@ -65,7 +68,7 @@ export default function ContractDetailPage() {
     setMarking(trancheId)
     await fetch(`/api/tranches/${trancheId}`, {
       method:'PATCH', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ status: 'pending_payment' }),
+      body: JSON.stringify({ status: 'pending_review' }),
     })
     await load()
     setMarking(null)
@@ -345,27 +348,11 @@ export default function ContractDetailPage() {
                         <p className="text-xs font-medium" style={{ color:C.muted }}>POP: {t.pop_reference || '—'}</p>
                         <p className="text-xs mt-0.5" style={{ color:C.muted }}>Paid {formatDate(t.paid_date)}</p>
                       </div>
-                    ) : t.status === 'pending_payment' ? (
+                    ) : ['pending_review','pending_placide','pending_dani','pending_fares'].includes(t.status) ? (
                       <div className="flex items-center gap-2">
-                        <span className="text-xs px-3 py-1.5 rounded-lg font-medium" style={{ background:'rgba(59,130,246,0.08)', color:'#3B82F6' }}>
-                          Awaiting accounting confirmation
-                        </span>
-                        <input
-                          type="text"
-                          value={popRefs[t.id] || ''}
-                          onChange={e => setPopRefs(p=>({...p,[t.id]:e.target.value}))}
-                          placeholder="POP reference..."
-                          className="text-xs px-3 py-1.5 rounded-lg w-44 outline-none"
-                          style={{ background:'#F1F5F9', color:C.text, border:`1px solid ${C.border2}` }}
-                        />
-                        <button
-                          onClick={() => markPaid(t.id)}
-                          disabled={marking===t.id}
-                          className="text-xs font-semibold px-3 py-1.5 rounded-lg disabled:opacity-50"
-                          style={{ background:'rgba(16,185,129,0.12)', color:'#10B981', border:'1px solid rgba(16,185,129,0.25)' }}
-                        >
-                          {marking===t.id ? '...' : '✓ Mark Paid'}
-                        </button>
+                        <Link href="/validations" className="text-xs px-3 py-1.5 rounded-lg font-medium hover:underline" style={{ background:'rgba(59,130,246,0.08)', color:'#3B82F6' }}>
+                          In validation pipeline — view in Validations
+                        </Link>
                       </div>
                     ) : (
                       <div className="flex items-center gap-2">

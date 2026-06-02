@@ -66,7 +66,7 @@ function StepBar({ counts, userRole }: { counts: Record<string,number>; userRole
 }
 
 export default function ValidationsPage() {
-  const [invoices,   setInvoices]   = useState<any[]>([])
+  const [items,      setItems]      = useState<any[]>([])  // mixed invoices + tranches
   const [userRole,   setUserRole]   = useState('')
   const [history,    setHistory]    = useState<any[]>([])
   const [loading,    setLoading]    = useState(true)
@@ -77,14 +77,33 @@ export default function ValidationsPage() {
 
   async function load() {
     const all = ['pending_review','pending_placide','pending_dani','pending_fares']
-    const [invRes, curRes, valRes] = await Promise.all([
+    const [invRes, curRes, valRes, trancheRes] = await Promise.all([
       supabase.from('invoices').select('*, contracts(contract_name), service_providers(name)').in('status', all).order('submitted_at'),
       supabase.from('invoice_currency').select('invoice_id, currency'),
       supabase.from('validations').select('*, invoices(subcontractor_name)').order('validated_at', { ascending:false }).limit(60),
+      supabase.from('contract_tranches').select('*, contracts(id, contract_name, currency, service_providers(name))').in('status', all),
     ])
     const cmap: Record<string,string> = {}
     for (const c of curRes.data || []) cmap[c.invoice_id] = c.currency
-    setInvoices((invRes.data || []).map((i:any) => ({ ...i, currency: cmap[i.id] || i.currency || 'NGN' })))
+    const invoices = (invRes.data || []).map((i:any) => ({
+      ...i,
+      _type: 'invoice',
+      currency: cmap[i.id] || i.currency || 'NGN',
+      _displayName: i.subcontractor_name || i.service_providers?.name || 'Invoice',
+      _subtitle: i.contracts?.contract_name || '',
+      _amount: i.amount_ttc,
+      _date: i.submitted_at || i.created_at,
+    }))
+    const tranches = (trancheRes.data || []).map((t:any) => ({
+      ...t,
+      _type: 'tranche',
+      currency: t.contracts?.currency || 'NGN',
+      _displayName: t.contracts?.service_providers?.name || t.contracts?.contract_name || 'Payment',
+      _subtitle: `${t.contracts?.contract_name || ''} — ${t.tranche_name}`,
+      _amount: t.amount,
+      _date: t.scheduled_date || t.created_at,
+    }))
+    setItems([...invoices, ...tranches].sort((a,b) => new Date(a._date||0).getTime() - new Date(b._date||0).getTime()))
     setHistory(valRes.data || [])
     setLoading(false)
   }
@@ -94,14 +113,19 @@ export default function ValidationsPage() {
     load()
   }, [])
 
-  async function act(invoiceId: string, decision: 'approved'|'rejected') {
-    setSubmitting(invoiceId)
-    await fetch(`/api/invoices/${invoiceId}/validate`, {
+  async function act(itemId: string, decision: 'approved'|'rejected') {
+    const item = items.find(i => i.id === itemId)
+    if (!item) return
+    setSubmitting(itemId)
+    const endpoint = item._type === 'tranche'
+      ? `/api/tranches/${itemId}/validate`
+      : `/api/invoices/${itemId}/validate`
+    await fetch(endpoint, {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ decision, validator_name: VALIDATOR_NAME[userRole] || userRole, comment: comments[invoiceId] || null }),
+      body: JSON.stringify({ decision, validator_name: VALIDATOR_NAME[userRole] || userRole, comment: comments[itemId] || null }),
     })
     setSubmitting(null); setReject(null)
-    setComments(p => { const n = {...p}; delete n[invoiceId]; return n })
+    setComments(p => { const n = {...p}; delete n[itemId]; return n })
     await load()
   }
 
@@ -112,10 +136,10 @@ export default function ValidationsPage() {
   )
 
   const myStep    = STEPS.find(s => s.role === userRole || (userRole === 'admin' && s.role === 'rudy'))
-  const myInvs    = invoices.filter(i => i.status === myStep?.status)
-  const otherInvs = invoices.filter(i => i.status !== myStep?.status)
-  const counts    = Object.fromEntries(STEPS.map(s => [s.status, invoices.filter(i=>i.status===s.status).length]))
-  const total     = invoices.length
+  const myInvs    = items.filter(i => i.status === myStep?.status)
+  const otherInvs = items.filter(i => i.status !== myStep?.status)
+  const counts    = Object.fromEntries(STEPS.map(s => [s.status, items.filter(i=>i.status===s.status).length]))
+  const total     = items.length
 
   return (
     <div className="px-6 py-8 max-w-5xl mx-auto">
@@ -126,7 +150,7 @@ export default function ValidationsPage() {
           <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color:'#64748B' }}>Workflow</p>
           <h1 className="text-2xl font-bold" style={{ color:'#0F172A' }}>Validations</h1>
           <p className="text-sm mt-0.5" style={{ color:'#64748B' }}>
-            {total > 0 ? `${total} invoice${total!==1?'s':''} in pipeline` : 'Pipeline is clear'}
+            {total > 0 ? `${total} item${total!==1?'s':''} in pipeline` : 'Pipeline is clear'}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -167,21 +191,28 @@ export default function ValidationsPage() {
               ) : (
                 <div className="space-y-3">
                   {myInvs.map((inv: any) => {
-                    const days  = Math.floor((Date.now() - new Date(inv.submitted_at || inv.created_at).getTime()) / 86400000)
+                    const days  = Math.floor((Date.now() - new Date(inv._date || inv.created_at).getTime()) / 86400000)
                     const urgent = days >= 3
+                    const isPayment = inv._type === 'tranche'
+                    const href = isPayment ? `/contracts/${inv.contracts?.id}` : `/invoices/${inv.id}`
                     return (
                       <div key={inv.id} className="rounded-2xl overflow-hidden transition-shadow hover:shadow-md"
                         style={{ background:'#FFFFFF', border:`1.5px solid ${urgent ? '#FCA5A5' : myStep.color + '40'}` }}>
                         <div style={{ height:3, background: myStep.color }}/>
                         <div className="p-5">
                           <div className="flex items-start gap-4">
-                            {/* Invoice info */}
+                            {/* Item info */}
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                <Link href={`/invoices/${inv.id}`} className="text-base font-bold hover:text-blue-600 transition-colors" style={{ color:'#0F172A' }}>
-                                  {inv.subcontractor_name || inv.service_providers?.name || 'Unknown'}
+                                {isPayment && (
+                                  <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background:'rgba(139,92,246,0.12)', color:'#8B5CF6' }}>
+                                    Contract Payment
+                                  </span>
+                                )}
+                                <Link href={href} className="text-base font-bold hover:text-blue-600 transition-colors" style={{ color:'#0F172A' }}>
+                                  {inv._displayName}
                                 </Link>
-                                {inv.invoice_number && (
+                                {!isPayment && inv.invoice_number && (
                                   <span className="text-xs px-2 py-0.5 rounded-lg font-mono" style={{ background:'#F1F5F9', color:'#64748B' }}>
                                     #{inv.invoice_number}
                                   </span>
@@ -193,14 +224,14 @@ export default function ValidationsPage() {
                                 )}
                               </div>
                               <div className="flex items-center gap-3 text-xs mb-3" style={{ color:'#94A3B8' }}>
-                                {inv.contracts?.contract_name && <span>{inv.contracts.contract_name}</span>}
-                                {inv.invoice_date && <span>{inv.invoice_date}</span>}
-                                {inv.category && <span>{inv.category}</span>}
+                                <span>{inv._subtitle}</span>
+                                {!isPayment && inv.invoice_date && <span>{inv.invoice_date}</span>}
+                                {!isPayment && inv.category && <span>{inv.category}</span>}
                               </div>
                               <p className="text-2xl font-bold" style={{ color:'#0F172A' }}>
-                                {formatCurrency(inv.amount_ttc, inv.currency || 'NGN')}
+                                {formatCurrency(inv._amount, inv.currency || 'NGN')}
                               </p>
-                              {inv.amount_ht && inv.vat_rate && (
+                              {!isPayment && inv.amount_ht && inv.vat_rate && (
                                 <p className="text-xs mt-0.5" style={{ color:'#94A3B8' }}>
                                   HT {formatCurrency(inv.amount_ht, inv.currency||'NGN')} + VAT {inv.vat_rate}%
                                 </p>
@@ -257,37 +288,35 @@ export default function ValidationsPage() {
           {otherInvs.length > 0 && (
             <div>
               <h2 className="text-sm font-bold mb-3" style={{ color:'#64748B' }}>
-                Other invoices in pipeline ({otherInvs.length})
+                Other items in pipeline ({otherInvs.length})
               </h2>
               <div className="rounded-2xl overflow-hidden" style={{ background:'#FFFFFF', border:'1px solid #E2E8F0' }}>
                 {otherInvs.map((inv: any, i: number) => {
                   const step = STEPS.find(s => s.status === inv.status)
                   if (!step) return null
-                  const days = Math.floor((Date.now() - new Date(inv.submitted_at || inv.created_at).getTime()) / 86400000)
+                  const days = Math.floor((Date.now() - new Date(inv._date || inv.created_at).getTime()) / 86400000)
+                  const href = inv._type === 'tranche' ? `/contracts/${inv.contracts?.id}` : `/invoices/${inv.id}`
                   return (
-                    <Link key={inv.id} href={`/invoices/${inv.id}`}
+                    <Link key={inv.id} href={href}
                       className="flex items-center gap-4 px-5 py-4 hover:bg-slate-50 transition-colors"
                       style={{ borderBottom: i < otherInvs.length - 1 ? '1px solid #F8FAFC' : 'none' }}
                     >
-                      {/* Step badge */}
                       <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
                         style={{ background: step.color + '20', color: step.color }}>
                         {step.step}
                       </div>
-                      {/* Info */}
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold truncate" style={{ color:'#0F172A' }}>
-                          {inv.subcontractor_name || 'Unknown'}
-                        </p>
-                        <p className="text-xs truncate" style={{ color:'#94A3B8' }}>
-                          {inv.contracts?.contract_name || ''} {inv.invoice_date ? '- ' + inv.invoice_date : ''}
-                        </p>
+                        <div className="flex items-center gap-2">
+                          {inv._type === 'tranche' && (
+                            <span className="text-xs px-1.5 py-0.5 rounded-full font-semibold shrink-0" style={{ background:'rgba(139,92,246,0.1)', color:'#8B5CF6' }}>Payment</span>
+                          )}
+                          <p className="text-sm font-semibold truncate" style={{ color:'#0F172A' }}>{inv._displayName}</p>
+                        </div>
+                        <p className="text-xs truncate" style={{ color:'#94A3B8' }}>{inv._subtitle}</p>
                       </div>
-                      {/* Amount */}
                       <p className="text-sm font-bold shrink-0" style={{ color:'#0F172A' }}>
-                        {formatCurrency(inv.amount_ttc, inv.currency || 'NGN')}
+                        {formatCurrency(inv._amount, inv.currency || 'NGN')}
                       </p>
-                      {/* Status badge */}
                       <div className="shrink-0 flex items-center gap-2">
                         {days > 3 && <span className="text-xs px-1.5 py-0.5 rounded-full" style={{ background:'rgba(239,68,68,0.1)', color:'#EF4444' }}>{days}d</span>}
                         <span className="text-xs px-2.5 py-1 rounded-full font-semibold" style={{ background: step.color + '18', color: step.color }}>
