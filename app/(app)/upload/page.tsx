@@ -325,19 +325,30 @@ export default function UploadPage() {
                   )}
                 </div>
 
-                {/* Consultant */}
+                {/* Consultant — locked when contract is selected */}
                 <div>
                   <label className="text-xs font-semibold uppercase tracking-widest mb-2 flex items-center gap-1.5" style={{ color:'#64748B' }}>
                     <span style={{ width:6,height:6,borderRadius:'50%',background:'#10B981',display:'inline-block' }}/>
                     Consultant *
-                    {selectedContract && providers.find((p:any)=>p.id===selectedProvider) && (
-                      <span className="text-xs px-2 py-0.5 rounded-full font-normal" style={{ background:'rgba(16,185,129,0.1)',color:'#10B981' }}>auto-filled</span>
+                    {selectedContract && selectedProvider && (
+                      <span className="text-xs px-2 py-0.5 rounded-full font-normal" style={{ background:'rgba(16,185,129,0.1)',color:'#10B981' }}>
+                        from contract
+                      </span>
                     )}
                   </label>
-                  <select className={inp} style={inpSt} value={selectedProvider} onChange={e=>setSelectedProvider(e.target.value)}>
-                    <option value="">Select consultant...</option>
-                    {providers.map((p:any)=><option key={p.id} value={p.id}>{p.name}</option>)}
-                  </select>
+                  {selectedContract && selectedProvider ? (
+                    <div className="px-3.5 py-2.5 rounded-xl flex items-center justify-between" style={{ background:'#F0FDF4', border:'1.5px solid rgba(16,185,129,0.3)' }}>
+                      <span className="text-sm font-semibold" style={{ color:'#065F46' }}>
+                        {providers.find((p:any)=>p.id===selectedProvider)?.name || 'Consultant'}
+                      </span>
+                      <button type="button" onClick={()=>setSelectedProvider('')} className="text-xs" style={{ color:'#94A3B8' }}>change</button>
+                    </div>
+                  ) : (
+                    <select className={inp} style={inpSt} value={selectedProvider} onChange={e=>setSelectedProvider(e.target.value)}>
+                      <option value="">Select consultant...</option>
+                      {providers.map((p:any)=><option key={p.id} value={p.id}>{p.name}</option>)}
+                    </select>
+                  )}
                 </div>
 
                 {/* Payment Tranche — MANDATORY */}

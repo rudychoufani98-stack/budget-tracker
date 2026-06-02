@@ -38,7 +38,29 @@ export default function ContractDetailPage() {
   const [editingRate, setEditingRate] = useState(false)
   const [rateInput,   setRateInput]   = useState('')
   const [savingRate,  setSavingRate]  = useState(false)
-  const [view,     setView]     = useState<'native'|'ngn'|'usd'>('native')
+  const [view,        setView]       = useState<'native'|'ngn'|'usd'>('native')
+  const [editing,     setEditing]    = useState(false)
+  const [editData,    setEditData]   = useState<any>({})
+  const [savingEdit,  setSavingEdit] = useState(false)
+
+  async function saveEdit() {
+    setSavingEdit(true)
+    await fetch(`/api/contracts/${id}`, {
+      method:'PATCH', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        contract_name:    editData.contract_name,
+        contract_amount:  parseFloat(editData.contract_amount) || 0,
+        currency:         editData.currency,
+        category:         editData.category,
+        status:           editData.status,
+        start_date:       editData.start_date || null,
+        end_date:         editData.end_date || null,
+        description:      editData.description || null,
+      })
+    })
+    await load()
+    setSavingEdit(false); setEditing(false)
+  }
 
   async function saveRate() {
     setSavingRate(true)
@@ -168,19 +190,81 @@ export default function ContractDetailPage() {
       <div className="rounded-2xl overflow-hidden mb-6" style={{ background:C.card, border:`1px solid ${C.border}` }}>
         <div style={{ height:4, background: catColor ? `linear-gradient(90deg,${catColor},${catColor}88)` : 'linear-gradient(90deg,#3B82F6,#8B5CF6)' }}/>
         <div className="px-6 py-5 flex items-start justify-between">
-          <div>
-            <div className="flex items-center gap-2.5 mb-1 flex-wrap">
-              <h1 className="text-2xl font-bold" style={{ color:C.text }}>{contract.contract_name}</h1>
-              {contract.category && (
-                <span className="text-xs px-2.5 py-1 rounded-full font-semibold" style={{ background:`${catColor}18`, color:catColor }}>{contract.category}</span>
-              )}
-              <span className="text-xs px-2.5 py-1 rounded-full font-semibold capitalize" style={{ background:'rgba(59,130,246,0.1)', color:'#3B82F6' }}>{contract.status}</span>
-            </div>
-            <div className="flex items-center gap-3 text-sm flex-wrap" style={{ color:C.muted }}>
-              {contract.service_providers?.name && <span>{contract.service_providers.name}</span>}
-              {contract.project && <span>{contract.project}</span>}
-              {contract.start_date && <span>{formatDate(contract.start_date)}</span>}
-            </div>
+          <div className="flex-1 min-w-0 mr-4">
+            {!editing ? (
+              <>
+                <div className="flex items-center gap-2.5 mb-1 flex-wrap">
+                  <h1 className="text-2xl font-bold" style={{ color:C.text }}>{contract.contract_name}</h1>
+                  {contract.category && <span className="text-xs px-2.5 py-1 rounded-full font-semibold" style={{ background:`${catColor}18`, color:catColor }}>{contract.category}</span>}
+                  <span className="text-xs px-2.5 py-1 rounded-full font-semibold capitalize" style={{ background:'rgba(59,130,246,0.1)', color:'#3B82F6' }}>{contract.status}</span>
+                  {contract.payment_type === 'milestone_based' && <span className="text-xs px-2.5 py-1 rounded-full font-semibold" style={{ background:'rgba(139,92,246,0.1)', color:'#8B5CF6' }}>🎯 Milestone-based</span>}
+                </div>
+                <div className="flex items-center gap-3 text-sm flex-wrap" style={{ color:C.muted }}>
+                  {contract.service_providers?.name && <span>{contract.service_providers.name}</span>}
+                  {contract.project && <span>{contract.project}</span>}
+                  {contract.start_date && <span>{formatDate(contract.start_date)}</span>}
+                  {contract.end_date && <span>→ {formatDate(contract.end_date)}</span>}
+                </div>
+              </>
+            ) : (
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="col-span-2">
+                    <label className="text-xs font-semibold uppercase tracking-widest mb-1 block" style={{ color:C.muted }}>Contract Name</label>
+                    <input className="w-full px-3 py-2 text-sm rounded-xl outline-none" style={{ background:'#F8FAFC', border:'1.5px solid #3B82F6', color:C.text }}
+                      value={editData.contract_name||''} onChange={e=>setEditData((p:any)=>({...p,contract_name:e.target.value}))} />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold uppercase tracking-widest mb-1 block" style={{ color:C.muted }}>Total Amount</label>
+                    <input type="number" className="w-full px-3 py-2 text-sm rounded-xl outline-none" style={{ background:'#F8FAFC', border:'1.5px solid #E2E8F0', color:C.text }}
+                      value={editData.contract_amount||''} onChange={e=>setEditData((p:any)=>({...p,contract_amount:e.target.value}))} />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold uppercase tracking-widest mb-1 block" style={{ color:C.muted }}>Currency</label>
+                    <select className="w-full px-3 py-2 text-sm rounded-xl outline-none" style={{ background:'#F8FAFC', border:'1.5px solid #E2E8F0', color:C.text }}
+                      value={editData.currency||'NGN'} onChange={e=>setEditData((p:any)=>({...p,currency:e.target.value}))}>
+                      <option value="NGN">NGN</option><option value="USD">USD</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold uppercase tracking-widest mb-1 block" style={{ color:C.muted }}>Category</label>
+                    <select className="w-full px-3 py-2 text-sm rounded-xl outline-none" style={{ background:'#F8FAFC', border:'1.5px solid #E2E8F0', color:C.text }}
+                      value={editData.category||'E'} onChange={e=>setEditData((p:any)=>({...p,category:e.target.value}))}>
+                      <option value="E">E - Environmental</option><option value="S">S - Social</option>
+                      <option value="G">G - Governance</option><option value="Other">Other</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold uppercase tracking-widest mb-1 block" style={{ color:C.muted }}>Status</label>
+                    <select className="w-full px-3 py-2 text-sm rounded-xl outline-none" style={{ background:'#F8FAFC', border:'1.5px solid #E2E8F0', color:C.text }}
+                      value={editData.status||'active'} onChange={e=>setEditData((p:any)=>({...p,status:e.target.value}))}>
+                      <option value="active">Active</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold uppercase tracking-widest mb-1 block" style={{ color:C.muted }}>Start Date</label>
+                    <input type="date" className="w-full px-3 py-2 text-sm rounded-xl outline-none" style={{ background:'#F8FAFC', border:'1.5px solid #E2E8F0', color:C.text }}
+                      value={editData.start_date||''} onChange={e=>setEditData((p:any)=>({...p,start_date:e.target.value}))} />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold uppercase tracking-widest mb-1 block" style={{ color:C.muted }}>End Date</label>
+                    <input type="date" className="w-full px-3 py-2 text-sm rounded-xl outline-none" style={{ background:'#F8FAFC', border:'1.5px solid #E2E8F0', color:C.text }}
+                      value={editData.end_date||''} onChange={e=>setEditData((p:any)=>({...p,end_date:e.target.value}))} />
+                  </div>
+                  <div className="col-span-2">
+                    <label className="text-xs font-semibold uppercase tracking-widest mb-1 block" style={{ color:C.muted }}>Description</label>
+                    <textarea rows={2} className="w-full px-3 py-2 text-sm rounded-xl outline-none resize-none" style={{ background:'#F8FAFC', border:'1.5px solid #E2E8F0', color:C.text }}
+                      value={editData.description||''} onChange={e=>setEditData((p:any)=>({...p,description:e.target.value}))} />
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={saveEdit} disabled={savingEdit} className="text-xs font-semibold px-4 py-2 rounded-xl disabled:opacity-50" style={{ background:'#3B82F6', color:'#fff' }}>
+                    {savingEdit ? 'Saving...' : 'Save Changes'}
+                  </button>
+                  <button onClick={()=>setEditing(false)} className="text-xs px-4 py-2 rounded-xl" style={{ background:'#F1F5F9', color:C.muted }}>Cancel</button>
+                </div>
+              </div>
+            )}
             {/* FX Rate at Signing */}
             <div className="flex items-center gap-2 mt-2">
               {!editingRate ? (
@@ -212,6 +296,12 @@ export default function ContractDetailPage() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            {!editing && (
+              <button onClick={()=>{ setEditData({ contract_name:contract.contract_name, contract_amount:contract.contract_amount||'', currency:contract.currency||'NGN', category:contract.category||'E', status:contract.status||'active', start_date:contract.start_date||'', end_date:contract.end_date||'', description:contract.description||'' }); setEditing(true) }}
+                className="text-xs font-medium px-3 py-2 rounded-xl" style={{ background:'#F1F5F9', color:'#475569' }}>
+                Edit
+              </button>
+            )}
             {/* Currency toggle — only show when contract is not NGN */}
             {nativeCcy !== 'NGN' && (
               <div className="flex items-center rounded-xl overflow-hidden" style={{ border:'1px solid #E2E8F0' }}>
