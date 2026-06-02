@@ -55,6 +55,19 @@ export default function ProjectDetailPage({ params }: { params: { name: string }
   const [addingSection,  setAddingSection]    = useState(false)
   const [sectionError,   setSectionError]     = useState('')
 
+  // Section inline rename
+  const [editingSectionId,   setEditingSectionId]   = useState<string|null>(null)
+  const [editingSectionName, setEditingSectionName] = useState('')
+  const [savingSection,      setSavingSection]      = useState(false)
+
+  async function renameSection(id: string) {
+    if (!editingSectionName.trim()) return
+    setSavingSection(true)
+    await fetch(`/api/sections/${id}`, { method:'PATCH', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ name: editingSectionName.trim() }) })
+    setSavingSection(false); setEditingSectionId(null)
+    await reload()
+  }
+
   // Contract modal
   const [showAddContract, setShowAddContract] = useState(false)
   const [contractSectionId, setContractSectionId] = useState('')
@@ -260,14 +273,36 @@ export default function ProjectDetailPage({ params }: { params: { name: string }
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1 min-w-0 mr-4">
                     <div className="flex items-center gap-2 mb-1 flex-wrap">
-                      <h3 className="text-base font-bold" style={{ color:'#0F172A' }}>{sec.name}</h3>
-                      <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background:secStatus.bg, color:secStatus.color }}>{secStatus.label}</span>
+                      {editingSectionId === sec.id ? (
+                        <>
+                          <input
+                            autoFocus
+                            className="text-base font-bold px-2 py-0.5 rounded-lg outline-none"
+                            style={{ border:'2px solid #8B5CF6', color:'#0F172A', background:'#F8FAFC', minWidth:160 }}
+                            value={editingSectionName}
+                            onChange={e=>setEditingSectionName(e.target.value)}
+                            onKeyDown={e=>{ if(e.key==='Enter') renameSection(sec.id); if(e.key==='Escape') setEditingSectionId(null) }}
+                          />
+                          <button onClick={()=>renameSection(sec.id)} disabled={savingSection}
+                            className="text-xs px-2.5 py-1 rounded-lg font-semibold disabled:opacity-50"
+                            style={{ background:'#8B5CF6', color:'#fff' }}>
+                            {savingSection ? '...' : 'Save'}
+                          </button>
+                          <button onClick={()=>setEditingSectionId(null)} className="text-xs px-2.5 py-1 rounded-lg" style={{ background:'#F1F5F9', color:'#64748B' }}>Cancel</button>
+                        </>
+                      ) : (
+                        <>
+                          <h3 className="text-base font-bold" style={{ color:'#0F172A' }}>{sec.name}</h3>
+                          <button onClick={()=>{ setEditingSectionId(sec.id); setEditingSectionName(sec.name) }}
+                            className="text-xs px-2 py-0.5 rounded-lg" style={{ background:'#F1F5F9', color:'#64748B' }}>
+                            Rename
+                          </button>
+                          <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background:secStatus.bg, color:secStatus.color }}>{secStatus.label}</span>
+                        </>
+                      )}
                     </div>
-                    {sec.description && <p className="text-xs mb-1" style={{ color:'#64748B' }}>{sec.description}</p>}
                     <p className="text-xs" style={{ color:'#94A3B8' }}>
                       {(sec.contracts||[]).length} contract{(sec.contracts||[]).length!==1?'s':''}
-                      {sec.budget && ` · Budget: ${formatCurrency(sec.budget, sec.currency||'NGN')}`}
-                      {sec.start_date && ` · ${new Date(sec.start_date).toLocaleDateString('en-GB',{month:'short',year:'numeric'})} → ${new Date(sec.end_date||sec.start_date).toLocaleDateString('en-GB',{month:'short',year:'numeric'})}`}
                     </p>
                   </div>
                   <div className="flex items-center gap-3 shrink-0">
