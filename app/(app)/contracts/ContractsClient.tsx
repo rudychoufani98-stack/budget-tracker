@@ -188,7 +188,14 @@ export function ContractsClient({ contracts, projects, initialProject, initialSe
           const cs          = CONTRACT_STATUS[c.status] || CONTRACT_STATUS.active
           const barColor    = PALETTE[i % PALETTE.length]
           const projectName = c.projects?.name || c.project || ''
-          const sectionName = c.project_sections?.name || ''
+          // Show all linked sections (primary + junction table)
+          const sectionNames: string[] = []
+          if (c.project_sections?.name) sectionNames.push(c.project_sections.name)
+          for (const cs of (c.contract_sections || [])) {
+            const n = cs.project_sections?.name
+            if (n && !sectionNames.includes(n)) sectionNames.push(n)
+          }
+          const sectionName = sectionNames.join(', ')
 
           return (
             <Link key={c.id} href={`/contracts/${c.id}`}

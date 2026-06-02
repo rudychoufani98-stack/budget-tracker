@@ -118,9 +118,12 @@ export default function UploadPage() {
     setTranches([])
   }
 
-  // Filter contracts by section (if selected) or project
+  // Filter contracts by section (primary OR junction table) or by project
   const filteredContracts = (() => {
-    if (selectedSection) return contracts.filter((c:any) => c.section_id === selectedSection)
+    if (selectedSection) return contracts.filter((c:any) =>
+      c.section_id === selectedSection ||
+      (c.contract_sections || []).some((cs:any) => cs.section_id === selectedSection)
+    )
     if (selectedProject) return contracts.filter((c:any) => c.project_id === selectedProject)
     return contracts
   })()

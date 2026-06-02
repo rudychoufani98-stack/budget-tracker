@@ -10,8 +10,8 @@ export default function NewContractPage() {
   const router = useRouter()
   const [providers, setProviders] = useState<any[]>([])
   const [projects,  setProjects]  = useState<any[]>([])
-  const [sections,     setSections]     = useState<any[]>([])
-  const [selectedSection, setSelectedSection] = useState<string>('')
+  const [sections,      setSections]      = useState<any[]>([])
+  const [selectedSections, setSelectedSections] = useState<string[]>([])
   const [saving, setSaving] = useState(false)
   const [error,  setError]  = useState('')
   const [form, setForm] = useState({
@@ -48,7 +48,7 @@ export default function NewContractPage() {
     const proj = projects.find((p:any) => p.id === projectId)
     setForm(f => ({ ...f, project_id: projectId, project: proj?.name || '' }))
     setSections([])
-    setSelectedSection('')
+    setSelectedSections([])
     if (projectId) {
       fetch(`/api/sections?project_id=${projectId}`).then(r=>r.json()).then(d=>setSections(Array.isArray(d)?d:[]))
     }
@@ -82,7 +82,7 @@ export default function NewContractPage() {
       body: JSON.stringify({
         ...form,
         contract_amount: finalAmount,
-        section_ids: selectedSection ? [selectedSection] : [],
+        section_ids: selectedSections,
         payment_type: paymentType,
         fx_rate_at_signing: form.fx_rate_at_signing ? parseFloat(form.fx_rate_at_signing) : null,
       })
@@ -199,17 +199,40 @@ export default function NewContractPage() {
                 )}
               </div>
 
-              {/* Section — single dropdown */}
+              {/* Sections — multi-select tags */}
               {form.project_id && (
                 <div className="col-span-2">
                   <label className="text-xs font-semibold uppercase tracking-widest mb-2 block" style={{ color: C.muted }}>
-                    Section <span className="ml-1 font-normal" style={{ color:'#94A3B8' }}>(optional)</span>
+                    Sections <span className="ml-1 font-normal" style={{ color:'#94A3B8' }}>(optional — select one or more)</span>
                   </label>
                   {sections.length > 0 ? (
-                    <select className={inp} style={inpStyle} value={selectedSection} onChange={e => setSelectedSection(e.target.value)}>
-                      <option value="">No section (direct to project)</option>
-                      {sections.map((s:any) => <option key={s.id} value={s.id}>{s.name}</option>)}
-                    </select>
+                    <div>
+                      <div className="flex flex-wrap gap-2">
+                        {sections.map((s:any) => {
+                          const selected = selectedSections.includes(s.id)
+                          return (
+                            <button key={s.id} type="button"
+                              onClick={() => setSelectedSections(prev =>
+                                prev.includes(s.id) ? prev.filter(x => x !== s.id) : [...prev, s.id]
+                              )}
+                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all"
+                              style={{
+                                background: selected ? '#3B82F6' : '#F1F5F9',
+                                color: selected ? '#fff' : '#64748B',
+                                border: selected ? '1.5px solid #3B82F6' : '1.5px solid #E2E8F0',
+                              }}>
+                              {selected && <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>}
+                              {s.name}
+                            </button>
+                          )
+                        })}
+                      </div>
+                      {selectedSections.length > 0 && (
+                        <p className="text-xs mt-2" style={{ color:'#3B82F6' }}>
+                          {selectedSections.length} section{selectedSections.length > 1 ? 's' : ''} selected — contract will appear under all of them
+                        </p>
+                      )}
+                    </div>
                   ) : (
                     <div className="px-3 py-2.5 rounded-xl text-sm" style={{ background:'#F8FAFC', border:'1.5px solid #E2E8F0', color:'#94A3B8' }}>
                       No sections in this project —{' '}
