@@ -39,9 +39,24 @@ export async function GET(_: NextRequest, { params }: { params: { id: string } }
   }
   const allContracts = Array.from(contractMap.values())
 
+  // Also fetch junction table so contracts linked to multiple sections show in each
+  const contractIds = allContracts.map((c:any) => c.id)
+  const { data: junctionRows } = contractIds.length
+    ? await supabaseAdmin.from('contract_sections').select('contract_id, section_id').in('contract_id', contractIds)
+    : { data: [] }
+
+  // Build a set of section_id → contract_ids from the junction table
+  const junctionMap: Record<string, Set<string>> = {}
+  for (const row of (junctionRows || [])) {
+    if (!junctionMap[row.section_id]) junctionMap[row.section_id] = new Set()
+    junctionMap[row.section_id].add(row.contract_id)
+  }
+
   const sections = (sectionsRes.data || []).map(s => ({
     ...s,
-    contracts: allContracts.filter((c:any) => c.section_id === s.id),
+    contracts: allContracts.filter((c:any) =>
+      c.section_id === s.id || junctionMap[s.id]?.has(c.id)
+    ),
   }))
   const directContracts = allContracts.filter((c:any) => !c.section_id)
 

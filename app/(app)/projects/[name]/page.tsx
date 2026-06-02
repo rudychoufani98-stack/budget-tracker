@@ -15,13 +15,24 @@ const PROJ_STATUS: Record<string,{label:string;color:string;bg:string}> = {
 const ESG_COLOR: Record<string,string> = { E:'#10B981', S:'#3B82F6', G:'#8B5CF6', Other:'#6B7280' }
 
 function stats(contracts: any[]) {
-  const committed = contracts.reduce((s,c)=>s+(c.contract_tranches||[]).reduce((ts:number,t:any)=>ts+(t.amount||0),0),0)
+  const committed = contracts.reduce((s,c)=>s+(c.contract_amount||c.contract_tranches||[]).reduce
+    ? s+(c.contract_amount||0)
+    : s,0)
+  // Use contract_amount as the committed value; fall back to summing tranches
+  const totalCommitted = contracts.reduce((s,c)=>{
+    const byAmount = c.contract_amount || 0
+    const byTranches = (c.contract_tranches||[]).reduce((ts:number,t:any)=>ts+(t.amount||0),0)
+    return s + (byAmount || byTranches)
+  },0)
   const paid      = contracts.reduce((s,c)=>s+(c.contract_tranches||[]).filter((t:any)=>t.status==='paid').reduce((ts:number,t:any)=>ts+(t.amount||0),0),0)
   const scheduled = contracts.reduce((s,c)=>s+(c.contract_tranches||[]).filter((t:any)=>t.status==='scheduled').reduce((ts:number,t:any)=>ts+(t.amount||0),0),0)
   const invoices  = contracts.reduce((s,c)=>s+(c.invoices||[]).length,0)
   const pending   = contracts.reduce((s,c)=>s+(c.invoices||[]).filter((i:any)=>!['approved','rejected'].includes(i.status)).length,0)
-  const pct       = committed>0 ? Math.round((paid/committed)*100) : 0
-  return { committed, paid, scheduled, invoices, pending, pct }
+  const pct       = totalCommitted>0 ? Math.round((paid/totalCommitted)*100) : 0
+  // Detect dominant currency (use contract currency, not section currency)
+  const ccySet = new Set(contracts.map(c=>c.currency).filter(Boolean))
+  const dominantCcy = ccySet.size === 1 ? [...ccySet][0] : null
+  return { committed:totalCommitted, paid, scheduled, invoices, pending, pct, dominantCcy }
 }
 
 export default function ProjectDetailPage({ params }: { params: { name: string } }) {
@@ -170,11 +181,12 @@ export default function ProjectDetailPage({ params }: { params: { name: string }
               </div>
 
               {/* Global KPIs */}
+              {(() => { const gCcy = global.dominantCcy || ccy; return (
               <div className="grid grid-cols-4 gap-3 mb-4">
                 {[
-                  { label:'Committed',    value:formatCurrency(global.committed, ccy), color:'#3B82F6', bg:'#EFF6FF' },
-                  { label:'Paid',         value:formatCurrency(global.paid,      ccy), color:'#10B981', bg:'#F0FDF4' },
-                  { label:'Scheduled',    value:formatCurrency(global.scheduled, ccy), color:'#F59E0B', bg:'#FFFBEB' },
+                  { label:'Committed',    value:formatCurrency(global.committed, gCcy), color:'#3B82F6', bg:'#EFF6FF' },
+                  { label:'Paid',         value:formatCurrency(global.paid,      gCcy), color:'#10B981', bg:'#F0FDF4' },
+                  { label:'Scheduled',    value:formatCurrency(global.scheduled, gCcy), color:'#F59E0B', bg:'#FFFBEB' },
                   { label:'Payment Rate', value:`${global.pct}%`, color:global.pct>=80?'#10B981':global.pct>=40?'#F59E0B':'#EF4444', bg:global.pct>=80?'#F0FDF4':global.pct>=40?'#FFFBEB':'#FEF2F2' },
                 ].map(k=>(
                   <div key={k.label} className="rounded-xl px-4 py-3.5" style={{ background:k.bg }}>
@@ -183,6 +195,7 @@ export default function ProjectDetailPage({ params }: { params: { name: string }
                   </div>
                 ))}
               </div>
+              )})()}
               <div className="h-3 rounded-full overflow-hidden" style={{ background:'#F1F5F9' }}>
                 <div className="h-full rounded-full" style={{ width:`${global.pct}%`, background:'linear-gradient(90deg,#3B82F6,#8B5CF6)' }}/>
               </div>
@@ -266,12 +279,13 @@ export default function ProjectDetailPage({ params }: { params: { name: string }
                   </div>
                 </div>
 
-                {/* Section KPIs */}
+                {/* Section KPIs — use the contracts' actual currency */}
+                {(() => { const displayCcy = secStats.dominantCcy || ccy; return (
                 <div className="grid grid-cols-3 gap-2 mb-3">
                   {[
-                    { label:'Committed', value:formatCurrency(secStats.committed, sec.currency||ccy), color:'#3B82F6' },
-                    { label:'Paid',      value:formatCurrency(secStats.paid,      sec.currency||ccy), color:'#10B981' },
-                    { label:'Balance',   value:formatCurrency(secStats.committed-secStats.paid, sec.currency||ccy), color:'#F59E0B' },
+                    { label:'Committed', value:formatCurrency(secStats.committed, displayCcy), color:'#3B82F6' },
+                    { label:'Paid',      value:formatCurrency(secStats.paid,      displayCcy), color:'#10B981' },
+                    { label:'Balance',   value:formatCurrency(secStats.committed-secStats.paid, displayCcy), color:'#F59E0B' },
                   ].map(k=>(
                     <div key={k.label} className="rounded-lg px-3 py-2.5" style={{ background:'#F8FAFC' }}>
                       <p className="text-xs mb-0.5" style={{ color:'#94A3B8' }}>{k.label}</p>
@@ -279,6 +293,7 @@ export default function ProjectDetailPage({ params }: { params: { name: string }
                     </div>
                   ))}
                 </div>
+                )})()}
 
                 {/* Section progress bar */}
                 <div className="h-2 rounded-full overflow-hidden mb-4" style={{ background:'#F1F5F9' }}>
