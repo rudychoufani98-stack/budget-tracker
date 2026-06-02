@@ -45,6 +45,9 @@ export default function ContractDetailPage() {
   const [contractDoc, setContractDoc] = useState<any>(null)
   const [uploadingDoc, setUploadingDoc] = useState(false)
   const contractFileRef = useRef<HTMLInputElement>(null)
+  const [editingSchedule, setEditingSchedule] = useState(false)
+  const [scheduleEdits, setScheduleEdits] = useState<Record<string,any>>({})
+  const [savingSchedule, setSavingSchedule] = useState(false)
 
   async function uploadContractPdf(file: File) {
     setUploadingDoc(true)
@@ -140,6 +143,30 @@ export default function ContractDetailPage() {
     })
     await load()
     setMarking(null)
+  }
+
+  function openScheduleEditor() {
+    const edits: Record<string,any> = {}
+    tranches.forEach((t:any) => {
+      edits[t.id] = { tranche_name: t.tranche_name, amount: t.amount, scheduled_date: t.scheduled_date || '', notes: t.notes || '' }
+    })
+    setScheduleEdits(edits)
+    setEditingSchedule(true)
+  }
+
+  async function saveSchedule() {
+    setSavingSchedule(true)
+    await Promise.all(
+      Object.entries(scheduleEdits).map(([tid, vals]) =>
+        fetch(`/api/tranches/${tid}`, {
+          method:'PATCH', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ tranche_name: vals.tranche_name, amount: Number(vals.amount), scheduled_date: vals.scheduled_date || null, notes: vals.notes || null }),
+        })
+      )
+    )
+    await load()
+    setSavingSchedule(false)
+    setEditingSchedule(false)
   }
 
   async function handleDelete() {
@@ -586,6 +613,14 @@ export default function ContractDetailPage() {
             {contract.payment_type === 'milestone_based' ? '🎯 Milestone-based' : '📅 Date-based'} · {tranchePct}% paid · {fc(tranchePaid)} of {fc(trancheTotal)}
           </p>
           </div>
+          {tranches.length > 0 && (
+            <button onClick={openScheduleEditor}
+              className="text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1.5"
+              style={{ background:'rgba(59,130,246,0.08)', color:'#3B82F6', border:'1px solid rgba(59,130,246,0.2)' }}>
+              <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              Edit Schedule
+            </button>
+          )}
         </div>
 
         {tranches.length === 0 ? (
@@ -684,6 +719,76 @@ export default function ContractDetailPage() {
           </div>
         )}
       </div>
+
+      {/* ── EDIT SCHEDULE MODAL ── */}
+      {editingSchedule && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background:'rgba(0,0,0,0.5)' }}>
+          <div className="w-full max-w-lg rounded-2xl overflow-hidden" style={{ background:C.card, border:`1px solid ${C.border}` }}>
+            <div className="px-6 py-4 flex items-center justify-between" style={{ borderBottom:`1px solid ${C.border}` }}>
+              <h2 className="text-sm font-bold" style={{ color:C.text }}>Edit Payment Schedule</h2>
+              <button onClick={() => setEditingSchedule(false)} style={{ color:C.muted }}>
+                <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+            <div className="p-6 flex flex-col gap-4 max-h-[60vh] overflow-y-auto">
+              {tranches.map((t:any) => {
+                const e = scheduleEdits[t.id] || {}
+                return (
+                  <div key={t.id} className="rounded-xl p-4 flex flex-col gap-3" style={{ background:'#F8FAFC', border:`1px solid ${C.border}` }}>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ background:'rgba(59,130,246,0.1)', color:'#3B82F6' }}>{e.tranche_name}</span>
+                      {t.status === 'paid' && <span className="text-xs font-semibold" style={{ color:'#10B981' }}>Paid — amounts locked</span>}
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-xs font-medium mb-1 block" style={{ color:C.muted }}>Name</label>
+                        <input value={e.tranche_name || ''} disabled={t.status === 'paid'}
+                          onChange={ev => setScheduleEdits(prev => ({ ...prev, [t.id]: { ...prev[t.id], tranche_name: ev.target.value } }))}
+                          className="w-full text-sm px-3 py-2 rounded-lg outline-none"
+                          style={{ border:`1px solid ${C.border}`, background: t.status === 'paid' ? '#F1F5F9' : '#fff', color:C.text }} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-medium mb-1 block" style={{ color:C.muted }}>Amount ({contract.currency})</label>
+                        <input type="number" value={e.amount || ''} disabled={t.status === 'paid'}
+                          onChange={ev => setScheduleEdits(prev => ({ ...prev, [t.id]: { ...prev[t.id], amount: ev.target.value } }))}
+                          className="w-full text-sm px-3 py-2 rounded-lg outline-none"
+                          style={{ border:`1px solid ${C.border}`, background: t.status === 'paid' ? '#F1F5F9' : '#fff', color:C.text }} />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium mb-1 block" style={{ color:C.muted }}>
+                        {contract.payment_type === 'milestone_based' ? 'Milestone description' : 'Scheduled date'}
+                      </label>
+                      {contract.payment_type === 'milestone_based' ? (
+                        <input value={e.notes || ''} disabled={t.status === 'paid'}
+                          onChange={ev => setScheduleEdits(prev => ({ ...prev, [t.id]: { ...prev[t.id], notes: ev.target.value } }))}
+                          placeholder="e.g. Submission of Draft HRRA Report"
+                          className="w-full text-sm px-3 py-2 rounded-lg outline-none"
+                          style={{ border:`1px solid ${C.border}`, background: t.status === 'paid' ? '#F1F5F9' : '#fff', color:C.text }} />
+                      ) : (
+                        <input type="date" value={e.scheduled_date || ''} disabled={t.status === 'paid'}
+                          onChange={ev => setScheduleEdits(prev => ({ ...prev, [t.id]: { ...prev[t.id], scheduled_date: ev.target.value } }))}
+                          className="w-full text-sm px-3 py-2 rounded-lg outline-none"
+                          style={{ border:`1px solid ${C.border}`, background: t.status === 'paid' ? '#F1F5F9' : '#fff', color:C.text }} />
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+            <div className="px-6 py-4 flex justify-end gap-3" style={{ borderTop:`1px solid ${C.border}` }}>
+              <button onClick={() => setEditingSchedule(false)} className="text-sm px-4 py-2 rounded-lg" style={{ border:`1px solid ${C.border}`, color:C.muted }}>
+                Cancel
+              </button>
+              <button onClick={saveSchedule} disabled={savingSchedule}
+                className="text-sm font-semibold px-4 py-2 rounded-lg"
+                style={{ background:'#3B82F6', color:'#fff', opacity: savingSchedule ? 0.6 : 1 }}>
+                {savingSchedule ? 'Saving...' : 'Save Changes'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

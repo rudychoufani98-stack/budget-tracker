@@ -7,7 +7,10 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   const deny = await requireAuth(req)
   if (deny) return deny
   const body = await req.json()
-  if (body.scheduled_date && !body.status) body.status = 'scheduled'
+  if (body.scheduled_date && !body.status) {
+    const { data: existing } = await supabaseAdmin.from('contract_tranches').select('status').eq('id', params.id).single()
+    if (existing && existing.status !== 'paid') body.status = 'scheduled'
+  }
   const { data, error } = await supabaseAdmin.from('contract_tranches').update(body).eq('id', params.id).select().single()
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   await writeAudit('tranche_updated', 'tranche', params.id, null, body)
