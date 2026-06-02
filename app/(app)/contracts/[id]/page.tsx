@@ -159,52 +159,27 @@ export default function ContractDetailPage() {
   )
   if (!contract) return <div className="p-8 text-sm" style={{ color:C.red }}>Contract not found.</div>
 
-  // ── Budget & invoice calculations ──────────────────────────────────
-  const contractBudget  = contract.contract_amount || contract.total_budget || 0
-  const ccy             = contract.currency || 'NGN'
-
-  // Invoice-based tracking (what matters for budget deduction)
-  const nonRejected     = invoices.filter((i:any) => i.status !== 'rejected')
-  const approvedInvs    = invoices.filter((i:any) => i.status === 'approved')
-  const pendingInvs     = invoices.filter((i:any) => !['approved','rejected'].includes(i.status))
-
-  // Convert invoice amount to contract's native currency using signing rate
-  function invToContractCcy(inv: any): number {
-    const amt = inv.amount_ttc || 0
-    const invCcy = inv.currency || nativeCcy
-    if (!amt) return 0
-    if (invCcy === nativeCcy) return amt
-    const rate = contract.fx_rate_at_signing || 1580
-    // invoice is USD, contract is NGN
-    if (invCcy === 'USD' && nativeCcy === 'NGN') return amt * rate
-    // invoice is NGN, contract is USD
-    if (invCcy === 'NGN' && nativeCcy === 'USD') return amt / rate
-    return amt
-  }
-
-  const totalInvoiced   = nonRejected.reduce((s:number,i:any) => s + invToContractCcy(i), 0)
-  const totalApproved   = approvedInvs.reduce((s:number,i:any) => s + invToContractCcy(i), 0)
-  const totalPending    = pendingInvs.reduce((s:number,i:any)  => s + invToContractCcy(i), 0)
-  const remaining       = contractBudget - totalApproved
-  const approvedPct     = contractBudget > 0 ? Math.min(100, Math.round((totalApproved/contractBudget)*100)) : 0
-  const pendingPct      = contractBudget > 0 ? Math.min(100-approvedPct, Math.round((totalPending/contractBudget)*100)) : 0
-
-  // Tranche-based tracking
-  const tranchePaid     = tranches.filter((t:any)=>t.status==='paid').reduce((s:number,t:any)=>s+(t.amount||0),0)
-  const trancheTotal    = tranches.reduce((s:number,t:any)=>s+(t.amount||0),0)
-  const tranchePct      = trancheTotal > 0 ? Math.round((tranchePaid/trancheTotal)*100) : 0
-
-  const catColor = ESG_COLORS[contract.category] || ESG_COLORS.Other
-
-  // Currency conversion — defined early so invoice calculations can use it
+  // ── Currency setup (must be first) ────────────────────────────────
   const signingRate = contract.fx_rate_at_signing || 1580
   const hasRate     = !!contract.fx_rate_at_signing
   const nativeCcy   = contract.currency || 'NGN'
   const displayCcy  = view === 'native' ? nativeCcy : view === 'ngn' ? 'NGN' : 'USD'
+  const catColor    = ESG_COLORS[contract.category] || ESG_COLORS.Other
 
-  // Also display each invoice in the correct currency in the table
+  // Convert invoice to contract's native currency for budget calculations
+  function invToContractCcy(inv: any): number {
+    const amt    = inv.amount_ttc || 0
+    const invCcy = inv.currency || nativeCcy
+    if (!amt || invCcy === nativeCcy) return amt
+    const rate = contract.fx_rate_at_signing || 1580
+    if (invCcy === 'USD' && nativeCcy === 'NGN') return amt * rate
+    if (invCcy === 'NGN' && nativeCcy === 'USD') return amt / rate
+    return amt
+  }
+
+  // Convert invoice to display currency for the invoice table rows
   function invDisplayAmount(inv: any): number {
-    const amt = inv.amount_ttc || 0
+    const amt    = inv.amount_ttc || 0
     const invCcy = inv.currency || nativeCcy
     if (invCcy === displayCcy) return amt
     if (invCcy === 'USD' && displayCcy === 'NGN') return amt * signingRate
@@ -212,13 +187,34 @@ export default function ContractDetailPage() {
     return amt
   }
   function invDisplayHT(inv: any): number {
-    const amt = inv.amount_ht || 0
+    const amt    = inv.amount_ht || 0
     const invCcy = inv.currency || nativeCcy
     if (invCcy === displayCcy) return amt
     if (invCcy === 'USD' && displayCcy === 'NGN') return amt * signingRate
     if (invCcy === 'NGN' && displayCcy === 'USD') return amt / signingRate
     return amt
   }
+
+  // ── Budget & invoice calculations ──────────────────────────────────
+  const contractBudget  = contract.contract_amount || contract.total_budget || 0
+  const ccy             = nativeCcy
+
+  const nonRejected  = invoices.filter((i:any) => i.status !== 'rejected')
+  const approvedInvs = invoices.filter((i:any) => i.status === 'approved')
+  const pendingInvs  = invoices.filter((i:any) => !['approved','rejected'].includes(i.status))
+
+  const totalInvoiced = nonRejected.reduce((s:number,i:any) => s + invToContractCcy(i), 0)
+  const totalApproved = approvedInvs.reduce((s:number,i:any) => s + invToContractCcy(i), 0)
+  const totalPending  = pendingInvs.reduce((s:number,i:any)  => s + invToContractCcy(i), 0)
+  const remaining     = contractBudget - totalApproved
+  const approvedPct   = contractBudget > 0 ? Math.min(100, Math.round((totalApproved/contractBudget)*100)) : 0
+  const pendingPct    = contractBudget > 0 ? Math.min(100-approvedPct, Math.round((totalPending/contractBudget)*100)) : 0
+
+  // Tranche-based tracking
+  const tranchePaid  = tranches.filter((t:any)=>t.status==='paid').reduce((s:number,t:any)=>s+(t.amount||0),0)
+  const trancheTotal = tranches.reduce((s:number,t:any)=>s+(t.amount||0),0)
+  const tranchePct   = trancheTotal > 0 ? Math.round((tranchePaid/trancheTotal)*100) : 0
+
 
   function cvt(amount: number): number {
     if (view === 'native' || nativeCcy === displayCcy) return amount
