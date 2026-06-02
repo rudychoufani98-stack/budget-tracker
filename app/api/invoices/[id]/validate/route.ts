@@ -2,7 +2,8 @@ import { getApiUser, unauthorized, forbidden } from '@/lib/auth-guard'
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { writeAudit } from '@/lib/audit'
-import { sendValidationEmail, sendRejectionEmail, sendFinalApprovalEmail, sendBudgetAlertEmail } from '@/lib/email'
+// Emails disabled — import kept for future use
+// import { sendValidationEmail, sendRejectionEmail, sendFinalApprovalEmail, sendBudgetAlertEmail } from '@/lib/email'
 import type { InvoiceStatus } from '@/lib/types'
 
 const nextStatusOnApproval: Record<string, InvoiceStatus> = {
@@ -41,25 +42,17 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 
     const sub = invoice.subcontractor_name || 'Unknown'
 
-    // Emails are best-effort — never let them break the validation flow
-    try {
-      if (decision === 'approved') {
-        if (newStatus !== 'approved') {
-          await sendValidationEmail(params.id, sub, newStatus, validator_name, comment)
-        } else {
-          await sendFinalApprovalEmail(params.id, sub)
-          if (invoice.tranche_id) {
-            await supabaseAdmin.from('contract_tranches')
-              .update({ status: 'paid', paid_date: new Date().toISOString().split('T')[0] })
-              .eq('id', invoice.tranche_id)
-          }
-          if (invoice.contract_id) await checkBudgetAlert(invoice.contract_id, invoice.amount_ttc || 0)
+    // Emails disabled — enable later when ready
+    // Auto-mark tranche as paid on final approval
+    if (decision === 'approved' && newStatus === 'approved') {
+      try {
+        if (invoice.tranche_id) {
+          await supabaseAdmin.from('contract_tranches')
+            .update({ status: 'paid', paid_date: new Date().toISOString().split('T')[0] })
+            .eq('id', invoice.tranche_id)
         }
-      } else {
-        await sendRejectionEmail(params.id, sub, validator_name, comment)
-      }
-    } catch (emailErr) {
-      console.warn('Email notification failed (non-blocking):', emailErr)
+        if (invoice.contract_id) await checkBudgetAlert(invoice.contract_id, invoice.amount_ttc || 0)
+      } catch { /* non-blocking */ }
     }
 
     return NextResponse.json({ success: true, newStatus })
@@ -78,5 +71,5 @@ async function checkBudgetAlert(contractId: string, newAmount: number) {
   const totalSpent = (approved || []).reduce((s, i) => s + (i.amount_ttc || 0), 0)
   const pct = (totalSpent / budget) * 100
   const prevPct = ((totalSpent - newAmount) / budget) * 100
-  if (pct >= 80 && prevPct < 80) await sendBudgetAlertEmail(contractId, contract.contract_name, pct)
+  // if (pct >= 80 && prevPct < 80) await sendBudgetAlertEmail(contractId, contract.contract_name, pct)
 }
