@@ -44,6 +44,7 @@ function cs(v:number|null, currency:string) {
 export default function UploadPage() {
   const router = useRouter()
   const fileRef = useRef<HTMLInputElement>(null)
+  const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null
 
   const [step, setStep]         = useState<1|2|3>(1)
   const [file, setFile]         = useState<File|null>(null)
@@ -58,13 +59,12 @@ export default function UploadPage() {
   const [contracts,       setContracts]       = useState<any[]>([])
   const [sections,        setSections]        = useState<any[]>([])
   const [tranches,        setTranches]        = useState<any[]>([])
-  const [useRealProjects, setUseRealProjects] = useState(false)
 
-  const [selectedProject,  setSelectedProject]  = useState('')
-  const [selectedSection,  setSelectedSection]  = useState('')
-  const [selectedContract, setSelectedContract] = useState('')
+  const [selectedProject,  setSelectedProject]  = useState(searchParams?.get('project') || '')
+  const [selectedSection,  setSelectedSection]  = useState(searchParams?.get('section') || '')
+  const [selectedContract, setSelectedContract] = useState(searchParams?.get('contract') || '')
   const [selectedProvider, setSelectedProvider] = useState('')
-  const [selectedTranche,  setSelectedTranche]  = useState('')
+  const [selectedTranche,  setSelectedTranche]  = useState(searchParams?.get('tranche') || '')
 
   useEffect(() => {
     Promise.all([
@@ -75,7 +75,7 @@ export default function UploadPage() {
       setProviders(p||[])
       setContracts(c||[])
       if (Array.isArray(proj) && proj.length > 0) {
-        setProjects(proj); setUseRealProjects(true)
+        setProjects(proj)
       } else {
         const seen = new Set<string>()
         const derived: any[] = []
@@ -83,7 +83,17 @@ export default function UploadPage() {
           const name = (contract as any).project?.trim()
           if (name && !seen.has(name)) { seen.add(name); derived.push({ id: name, name }) }
         }
-        setProjects(derived); setUseRealProjects(false)
+        setProjects(derived)
+      }
+      // Auto-fill provider from pre-filled contract
+      const preContract = searchParams?.get('contract')
+      if (preContract) {
+        const found = (c||[]).find((x:any) => x.id === preContract)
+        if (found) {
+          setTranches(found.contract_tranches || [])
+          if (found.service_provider_id) setSelectedProvider(found.service_provider_id)
+          if (found.project_id && !searchParams?.get('project')) setSelectedProject(found.project_id)
+        }
       }
     })
   },[])
@@ -123,8 +133,11 @@ export default function UploadPage() {
     if (c?.service_provider_id) setSelectedProvider(c.service_provider_id)
   },[selectedContract, contracts])
 
-  // Section is optional — invoice can be linked to the whole project or to a specific section
-  const allLinked = !!selectedProject && !!selectedContract && !!selectedProvider
+  // Get selected tranche details for milestone display
+  const selectedTrancheData = tranches.find((t:any) => t.id === selectedTranche)
+
+  // Tranche is now mandatory — it links the invoice to the specific payment
+  const allLinked = !!selectedProject && !!selectedContract && !!selectedProvider && !!selectedTranche
 
   async function handleScan() {
     if (!file) return
@@ -233,7 +246,7 @@ export default function UploadPage() {
               {scanError && <p className="text-sm px-3 py-2 rounded-xl mb-3" style={{ background:'rgba(239,68,68,0.08)',color:'#EF4444',border:'1px solid rgba(239,68,68,0.2)' }}>{scanError}</p>}
               {!allLinked && file && (
                 <p className="text-xs px-3 py-2 rounded-xl mb-3" style={{ background:'rgba(245,158,11,0.08)', color:'#D97706', border:'1px solid rgba(245,158,11,0.3)' }}>
-                  Select a Project, Contract and Consultant before scanning. Section is optional.
+                  Select Project, Contract, Consultant and the specific Payment Tranche before scanning.
                 </p>
               )}
               <button onClick={handleScan} disabled={!file||!allLinked||scanning} className="w-full py-3 rounded-xl text-sm font-semibold disabled:opacity-40 transition-all flex items-center justify-center gap-2" style={{ background:'#3B82F6',color:'#fff' }}>
@@ -327,19 +340,47 @@ export default function UploadPage() {
                   </select>
                 </div>
 
-                {/* Tranche */}
-                {selectedContract && tranches.length>0 && (
-                  <div>
-                    <label className="text-xs font-semibold uppercase tracking-widest mb-2 flex items-center gap-1.5" style={{ color:'#64748B' }}>
-                      <span style={{ width:6,height:6,borderRadius:'50%',background:'#F59E0B',display:'inline-block' }}/>
-                      Tranche
-                    </label>
-                    <select className={inp} style={inpSt} value={selectedTranche} onChange={e=>setSelectedTranche(e.target.value)}>
-                      <option value="">Select tranche...</option>
-                      {tranches.map((t:any)=><option key={t.id} value={t.id}>{t.tranche_name} - {t.amount?.toLocaleString()} ({t.status})</option>)}
-                    </select>
-                  </div>
-                )}
+                {/* Payment Tranche — MANDATORY */}
+                <div>
+                  <label className="text-xs font-semibold uppercase tracking-widest mb-2 flex items-center gap-1.5" style={{ color:'#64748B' }}>
+                    <span style={{ width:6,height:6,borderRadius:'50%',background:'#F59E0B',display:'inline-block' }}/>
+                    Payment Tranche *
+                  </label>
+                  {selectedContract && tranches.length > 0 ? (
+                    <>
+                      <select className={inp} style={inpSt} value={selectedTranche} onChange={e=>setSelectedTranche(e.target.value)}>
+                        <option value="">Select the payment this invoice covers...</option>
+                        {tranches.map((t:any) => (
+                          <option key={t.id} value={t.id} disabled={t.status==='paid'}>
+                            {t.tranche_name} — {t.amount?.toLocaleString()} {t.status==='paid'?' (already paid)':''}
+                          </option>
+                        ))}
+                      </select>
+                      {/* Show milestone description if tranche is milestone-based */}
+                      {selectedTrancheData?.notes && (
+                        <div className="mt-2 px-3 py-2 rounded-lg flex items-start gap-2" style={{ background:'rgba(139,92,246,0.08)', border:'1px solid rgba(139,92,246,0.2)' }}>
+                          <span className="text-sm shrink-0">🎯</span>
+                          <p className="text-xs" style={{ color:'#8B5CF6' }}>
+                            <strong>Milestone:</strong> {selectedTrancheData.notes}
+                          </p>
+                        </div>
+                      )}
+                      {selectedTrancheData?.scheduled_date && (
+                        <p className="text-xs mt-1" style={{ color:'#F59E0B' }}>
+                          📅 Due: {new Date(selectedTrancheData.scheduled_date).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}
+                        </p>
+                      )}
+                    </>
+                  ) : selectedContract ? (
+                    <p className="text-xs px-3 py-2 rounded-lg" style={{ background:'#FEF2F2', color:'#EF4444' }}>
+                      No payment tranches found on this contract. Add them in the contract page first.
+                    </p>
+                  ) : (
+                    <p className="text-xs px-3 py-2 rounded-lg" style={{ background:'#F8FAFC', color:'#94A3B8', border:'1px solid #E2E8F0' }}>
+                      Select a contract first
+                    </p>
+                  )}
+                </div>
               </div>
 
               {/* How it works */}

@@ -424,36 +424,58 @@ export default function ContractDetailPage() {
                           In validation pipeline — view in Validations
                         </Link>
                       </div>
-                    ) : contract.payment_type === 'milestone_based' ? (
-                      <div className="flex flex-col gap-1.5">
-                        {t.notes && (
-                          <p className="text-xs px-3 py-1.5 rounded-lg" style={{ background:'rgba(139,92,246,0.08)', color:'#8B5CF6', border:'1px solid rgba(139,92,246,0.2)' }}>
-                            🎯 {t.notes}
-                          </p>
-                        )}
-                        <button
-                          onClick={() => markMilestoneAchieved(t.id)}
-                          disabled={marking===t.id}
-                          className="text-xs font-semibold px-3 py-1.5 rounded-lg disabled:opacity-50 flex items-center gap-1.5 w-fit"
-                          style={{ background:'rgba(139,92,246,0.1)', color:'#8B5CF6', border:'1px solid rgba(139,92,246,0.25)' }}
-                        >
-                          {marking===t.id ? '...' : '✓ Mark Milestone Achieved → Enter Validation'}
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => sendToAccounting(t.id)}
-                          disabled={marking===t.id}
-                          className="text-xs font-semibold px-3 py-1.5 rounded-lg disabled:opacity-50 flex items-center gap-1.5"
-                          style={{ background:'rgba(59,130,246,0.1)', color:'#3B82F6', border:'1px solid rgba(59,130,246,0.25)' }}
-                        >
-                          {marking===t.id ? '...' : (
-                            <><svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>Send to Accounting</>
-                          )}
-                        </button>
-                      </div>
-                    )}
+                    ) : (() => {
+                      // Find invoice linked to this tranche
+                      const linkedInv = invoices.find((inv:any) => inv.tranche_id === t.id)
+                      const uploadUrl = `/upload?contract=${id}&tranche=${t.id}&project=${contract.project_id || ''}`
+
+                      if (linkedInv) {
+                        // Invoice exists — show its status
+                        const invSt = INV_STATUS[linkedInv.status] || INV_STATUS.pending_review
+                        return (
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <Link href={`/invoices/${linkedInv.id}`}
+                              className="text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1.5"
+                              style={{ background:invSt.bg, color:invSt.color }}>
+                              <svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                              Invoice #{linkedInv.invoice_number || '—'} · {invSt.label}
+                            </Link>
+                          </div>
+                        )
+                      }
+
+                      // No invoice yet
+                      if (contract.payment_type === 'milestone_based') {
+                        return (
+                          <div className="flex flex-col gap-1.5">
+                            {t.notes && (
+                              <p className="text-xs px-3 py-1.5 rounded-lg" style={{ background:'rgba(139,92,246,0.08)', color:'#8B5CF6', border:'1px solid rgba(139,92,246,0.2)' }}>
+                                🎯 {t.notes}
+                              </p>
+                            )}
+                            <p className="text-xs" style={{ color:'#94A3B8' }}>Waiting for consultant invoice</p>
+                            <Link href={uploadUrl}
+                              className="text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1.5 w-fit"
+                              style={{ background:'rgba(139,92,246,0.1)', color:'#8B5CF6', border:'1px solid rgba(139,92,246,0.25)' }}>
+                              <svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                              Upload Invoice for this milestone
+                            </Link>
+                          </div>
+                        )
+                      }
+
+                      return (
+                        <div className="flex items-center gap-2">
+                          <p className="text-xs" style={{ color:'#94A3B8' }}>No invoice yet</p>
+                          <Link href={uploadUrl}
+                            className="text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1.5"
+                            style={{ background:'rgba(59,130,246,0.1)', color:'#3B82F6', border:'1px solid rgba(59,130,246,0.25)' }}>
+                            <svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                            Upload Invoice
+                          </Link>
+                        </div>
+                      )
+                    })()}
                   </div>
                   <span className="text-xs px-2.5 py-1 rounded-full font-semibold" style={{ background:sc.bg, color:sc.color }}>{sc.label}</span>
                 </div>
