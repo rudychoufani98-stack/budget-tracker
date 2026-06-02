@@ -49,8 +49,8 @@ export async function POST(req: NextRequest) {
     contract_amount: contract_amount || 0,
     total_budget:    contract_amount || 0,
     currency:        currency        || 'NGN',
-    start_date:      start_date      || null,
-    end_date:        end_date        || null,
+    start_date:      start_date      || new Date().toISOString().slice(0,10),
+    end_date:        end_date        || new Date(Date.now() + 365*24*60*60*1000).toISOString().slice(0,10),
     status:          status          || 'active',
     fx_rate_at_signing: signingRate,
   }).select().single()
