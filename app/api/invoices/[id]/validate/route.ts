@@ -24,7 +24,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     const { data: invoice, error: fetchError } = await supabaseAdmin.from('invoices').select('*').eq('id', params.id).single()
     if (fetchError || !invoice) return NextResponse.json({ error: 'Invoice not found' }, { status: 404 })
 
-    const roleMap: Record<string, string> = { pending_review: 'rudy', pending_placide: 'placide', pending_dani: 'dani', pending_fares: 'fares' }
+    const roleMap: Record<string, string> = { pending_review: 'rudy', pending_placide: 'placide', pending_dani: 'hitech', pending_fares: 'fares' }
     const validator_role = roleMap[invoice.status]
     if (!validator_role) return NextResponse.json({ error: 'Invoice cannot be validated in its current state' }, { status: 400 })
 

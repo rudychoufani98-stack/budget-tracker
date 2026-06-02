@@ -6,40 +6,54 @@ import Link from 'next/link'
 import { formatCurrency } from '@/lib/format'
 
 const STEPS = [
-  { status:'pending_review',  label:'Rudy',    role:'rudy',    action:'Forward to Placide', color:'#60A5FA', step:1 },
-  { status:'pending_placide', label:'Placide',  role:'placide', action:'Forward to Dani',    color:'#3B82F6', step:2 },
-  { status:'pending_dani',    label:'Dani',     role:'dani',    action:'Forward to Fares',   color:'#2563EB', step:3 },
-  { status:'pending_fares',   label:'Fares',    role:'fares',   action:'Confirm Payment',    color:'#1D4ED8', step:4 },
+  { status:'pending_review',  label:'Rudy',        role:'rudy',    action:'Forward to Placide',    color:'#60A5FA', step:1 },
+  { status:'pending_placide', label:'Placide',      role:'placide', action:'Forward to Dani',       color:'#3B82F6', step:2 },
+  { status:'pending_dani',    label:'Dani',         role:'hitech',  action:'Forward to Accountant', color:'#2563EB', step:3 },
+  { status:'pending_fares',   label:'Accountant',   role:'fares',   action:'Confirm Payment',       color:'#1D4ED8', step:4 },
 ]
 
+// Map user role → which step they act on
+const ROLE_TO_STEP: Record<string,number> = {
+  rudy:1, admin:1, placide:2, dani:3, hitech:3, fares:4
+}
+
 const VALIDATOR_NAME: Record<string,string> = {
-  admin:'Rudy', rudy:'Rudy', placide:'Placide', dani:'Dani', fares:'Fares'
+  admin:'Rudy', rudy:'Rudy', placide:'Placide', dani:'Dani', hitech:'Dani', fares:'Accountant'
 }
 
 function StepBar({ counts, userRole }: { counts: Record<string,number>; userRole: string }) {
-  const myStep = STEPS.find(s => s.role === userRole || (userRole === 'admin' && s.role === 'rudy'))
+  const myStepNum = ROLE_TO_STEP[userRole] || 0
   return (
     <div className="rounded-2xl p-6 mb-6" style={{ background:'#FFFFFF', border:'1px solid #E2E8F0' }}>
       <div className="flex items-center">
         {STEPS.map((s, i) => {
           const count = counts[s.status] || 0
-          const isMe  = s === myStep
-          const done  = myStep ? s.step < myStep.step : false
+          const isMe  = s.step === myStepNum
+          const done  = myStepNum > 0 && s.step < myStepNum
           return (
             <div key={s.status} className="flex items-center flex-1">
               <div className="flex-1">
                 <div className="flex flex-col items-center">
-                  <div
-                    className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold mb-2 transition-all"
-                    style={{
-                      background: isMe ? s.color : count > 0 ? s.color + '25' : '#F1F5F9',
-                      color:      isMe ? '#fff'  : count > 0 ? s.color : '#94A3B8',
-                      boxShadow:  isMe ? `0 0 0 4px ${s.color}25` : 'none',
-                    }}
-                  >
-                    {done ? (
-                      <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-                    ) : count > 0 ? count : s.step}
+                  <div className="relative mb-2">
+                    <div
+                      className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all"
+                      style={{
+                        background: isMe ? s.color : count > 0 ? s.color + '20' : '#F1F5F9',
+                        color:      isMe ? '#fff'  : count > 0 ? s.color : '#94A3B8',
+                        boxShadow:  isMe ? `0 0 0 4px ${s.color}25` : 'none',
+                      }}
+                    >
+                      {done
+                        ? <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                        : s.step
+                      }
+                    </div>
+                    {count > 0 && (
+                      <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold text-white"
+                        style={{ background: s.color, fontSize:10 }}>
+                        {count}
+                      </span>
+                    )}
                   </div>
                   <p className="text-xs font-semibold text-center" style={{ color: isMe ? s.color : '#64748B' }}>
                     {isMe ? 'You' : s.label}
@@ -135,9 +149,10 @@ export default function ValidationsPage() {
     </div>
   )
 
-  const myStep    = STEPS.find(s => s.role === userRole || (userRole === 'admin' && s.role === 'rudy'))
-  const myInvs    = items.filter(i => i.status === myStep?.status)
-  const otherInvs = items.filter(i => i.status !== myStep?.status)
+  const myStepNum = ROLE_TO_STEP[userRole] || 0
+  const myStep    = STEPS.find(s => s.step === myStepNum)
+  const myInvs    = myStep ? items.filter(i => i.status === myStep.status) : []
+  const otherInvs = myStep ? items.filter(i => i.status !== myStep.status) : items
   const counts    = Object.fromEntries(STEPS.map(s => [s.status, items.filter(i=>i.status===s.status).length]))
   const total     = items.length
 
@@ -179,7 +194,7 @@ export default function ValidationsPage() {
                 <h2 className="text-sm font-bold" style={{ color:'#0F172A' }}>
                   {myInvs.length > 0 ? `${myInvs.length} invoice${myInvs.length!==1?'s':''} waiting for your action` : 'Your queue is clear'}
                 </h2>
-                {myStep.step === 4 && <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background:'rgba(16,185,129,0.1)', color:'#10B981' }}>Final step</span>}
+                {myStep.step === 4 && <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background:'rgba(16,185,129,0.1)', color:'#10B981' }}>Payment confirmation</span>}
               </div>
 
               {myInvs.length === 0 ? (
