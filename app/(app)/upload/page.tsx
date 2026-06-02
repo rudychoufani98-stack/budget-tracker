@@ -277,12 +277,7 @@ export default function UploadPage() {
                   <select className={inp} style={inpSt} value={selectedSection} onChange={e=>handleSectionChange(e.target.value)} disabled={!selectedProject}>
                     <option value="">Select section...</option>
                     {sections.map((s:any)=>(
-                      <optgroup key={s.id} label={s.name}>
-                        <option value={s.id}>{s.name} (all sub-sections)</option>
-                        {(s.children||[]).map((ch:any)=>(
-                          <option key={ch.id} value={ch.id}>&nbsp;&nbsp;↳ {ch.name}</option>
-                        ))}
-                      </optgroup>
+                      <option key={s.id} value={s.id}>{s.name}</option>
                     ))}
                   </select>
                   {selectedProject && sections.length===0 && (

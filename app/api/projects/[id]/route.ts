@@ -8,7 +8,7 @@ export async function GET(_: NextRequest, { params }: { params: { id: string } }
   // Fetch project + sections + all contracts in parallel
   const [projRes, sectionsRes, contractsRes] = await Promise.all([
     supabaseAdmin.from('projects').select('*').eq('id', params.id).single(),
-    supabaseAdmin.from('project_sections').select('*, children:project_sections!parent_section_id(*)').eq('project_id', params.id).is('parent_section_id', null).order('created_at'),
+    supabaseAdmin.from('project_sections').select('*').eq('project_id', params.id).order('created_at'),
     supabaseAdmin.from('contracts').select(`
       id, contract_name, category, start_date, end_date, contract_amount, currency, section_id, project_id, project,
       service_providers(name),
@@ -39,21 +39,10 @@ export async function GET(_: NextRequest, { params }: { params: { id: string } }
   }
   const allContracts = Array.from(contractMap.values())
 
-  // Build sections with children — contracts belong to parent OR any child
-  const sections = (sectionsRes.data || []).map((s:any) => {
-    const children: any[] = s.children || []
-    const childIds = children.map((c:any) => c.id)
-    const allSectionIds = [s.id, ...childIds]
-    const sectionContracts = allContracts.filter((c:any) => allSectionIds.includes(c.section_id))
-    return {
-      ...s,
-      children: children.map((child:any) => ({
-        ...child,
-        contracts: allContracts.filter((c:any) => c.section_id === child.id),
-      })),
-      contracts: sectionContracts,
-    }
-  })
+  const sections = (sectionsRes.data || []).map(s => ({
+    ...s,
+    contracts: allContracts.filter((c:any) => c.section_id === s.id),
+  }))
   const directContracts = allContracts.filter((c:any) => !c.section_id)
 
   return NextResponse.json({ ...project, sections, directContracts, allContracts })

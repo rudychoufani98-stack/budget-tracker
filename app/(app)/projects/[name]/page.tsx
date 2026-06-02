@@ -51,7 +51,7 @@ export default function ProjectDetailPage({ params }: { params: { name: string }
 
   // Section modal
   const [showAddSection, setShowAddSection]   = useState(false)
-  const [sectionForm,    setSectionForm]      = useState({ name:'', description:'', budget:'', currency:'NGN', start_date:'', end_date:'', status:'active', parent_section_id:'' })
+  const [sectionForm,    setSectionForm]      = useState({ name:'', description:'', budget:'', currency:'NGN', start_date:'', end_date:'', status:'active' })
   const [addingSection,  setAddingSection]    = useState(false)
   const [sectionError,   setSectionError]     = useState('')
 
@@ -95,12 +95,12 @@ export default function ProjectDetailPage({ params }: { params: { name: string }
     setSectionError('')
     setAddingSection(true)
     const res = await fetch('/api/sections', { method:'POST', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({ ...sectionForm, project_id:projectId, budget:sectionForm.budget?parseFloat(sectionForm.budget):null, start_date:sectionForm.start_date||null, end_date:sectionForm.end_date||null, parent_section_id:sectionForm.parent_section_id||null }) })
+      body:JSON.stringify({ ...sectionForm, project_id:projectId, budget:sectionForm.budget?parseFloat(sectionForm.budget):null, start_date:sectionForm.start_date||null, end_date:sectionForm.end_date||null }) })
     const data = await res.json()
     setAddingSection(false)
     if (!res.ok || data.error) { setSectionError(data.error || 'Failed to create section'); return }
     setShowAddSection(false)
-    setSectionForm({ name:'', description:'', budget:'', currency:'NGN', start_date:'', end_date:'', status:'active', parent_section_id:'' })
+    setSectionForm({ name:'', description:'', budget:'', currency:'NGN', start_date:'', end_date:'', status:'active' })
     setSectionError('')
     await reload()
   }
@@ -228,13 +228,13 @@ export default function ProjectDetailPage({ params }: { params: { name: string }
         </div>
       </div>
 
-      {/* ── 2. SECTIONS ── */}
+      {/* ── 2. SUB-SECTIONS ── */}
       <div className="flex items-center justify-between mb-3">
         <div>
           <h2 className="text-base font-bold" style={{ color:'#0F172A' }}>Sections</h2>
-          <p className="text-xs mt-0.5" style={{ color:'#94A3B8' }}>Each section can have sub-sections (e.g. Section 1 → 1A, 1B, 1C)</p>
+          <p className="text-xs mt-0.5" style={{ color:'#94A3B8' }}>Groupings within this project — each has its own budget and contracts</p>
         </div>
-        <button onClick={()=>{ setSectionForm(f=>({...f, parent_section_id:''})); setShowAddSection(true) }} className="text-sm font-semibold px-4 py-2.5 rounded-xl flex items-center gap-2" style={{ background:'#8B5CF6', color:'#fff' }}>
+        <button onClick={()=>setShowAddSection(true)} className="text-sm font-semibold px-4 py-2.5 rounded-xl flex items-center gap-2" style={{ background:'#8B5CF6', color:'#fff' }}>
           <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           Add Section
         </button>
@@ -243,16 +243,15 @@ export default function ProjectDetailPage({ params }: { params: { name: string }
       {sections.length === 0 && (
         <div className="rounded-2xl p-8 text-center mb-6" style={{ background:'#FFFFFF', border:'1px dashed #E2E8F0' }}>
           <p className="text-sm" style={{ color:'#64748B' }}>No sections yet.</p>
-          <p className="text-xs mt-1" style={{ color:'#94A3B8' }}>Create sections (Section 1, Section 2...) then add sub-sections (1A, 1B, 1C) inside them.</p>
+          <p className="text-xs mt-1" style={{ color:'#94A3B8' }}>Create sections to group contracts by phase, location, or theme.</p>
         </div>
       )}
 
       <div className="space-y-4 mb-6">
         {sections.map((sec:any, si:number) => {
           const secStats = stats(sec.contracts || [])
-          const secColor = PALETTE[si % PALETTE.length]
+          const secColor = PALETTE[(si+1) % PALETTE.length]
           const secStatus = PROJ_STATUS[sec.status] || PROJ_STATUS.active
-          const children: any[] = sec.children || []
           return (
             <div key={sec.id} className="rounded-2xl overflow-hidden" style={{ background:'#FFFFFF', border:'1px solid #E2E8F0' }}>
               <div style={{ height:4, background:secColor }}/>
@@ -263,10 +262,12 @@ export default function ProjectDetailPage({ params }: { params: { name: string }
                     <div className="flex items-center gap-2 mb-1 flex-wrap">
                       <h3 className="text-base font-bold" style={{ color:'#0F172A' }}>{sec.name}</h3>
                       <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background:secStatus.bg, color:secStatus.color }}>{secStatus.label}</span>
-                      {children.length > 0 && <span className="text-xs px-2 py-0.5 rounded-full" style={{ background:'#F1F5F9', color:'#64748B' }}>{children.length} sub-section{children.length!==1?'s':''}</span>}
                     </div>
+                    {sec.description && <p className="text-xs mb-1" style={{ color:'#64748B' }}>{sec.description}</p>}
                     <p className="text-xs" style={{ color:'#94A3B8' }}>
-                      {(sec.contracts||[]).length} contract{(sec.contracts||[]).length!==1?'s':''} total
+                      {(sec.contracts||[]).length} contract{(sec.contracts||[]).length!==1?'s':''}
+                      {sec.budget && ` · Budget: ${formatCurrency(sec.budget, sec.currency||'NGN')}`}
+                      {sec.start_date && ` · ${new Date(sec.start_date).toLocaleDateString('en-GB',{month:'short',year:'numeric'})} → ${new Date(sec.end_date||sec.start_date).toLocaleDateString('en-GB',{month:'short',year:'numeric'})}`}
                     </p>
                   </div>
                   <div className="flex items-center gap-3 shrink-0">
@@ -274,15 +275,11 @@ export default function ProjectDetailPage({ params }: { params: { name: string }
                       <p className="text-2xl font-bold" style={{ color:secColor }}>{secStats.pct}%</p>
                       <p className="text-xs" style={{ color:'#94A3B8' }}>paid</p>
                     </div>
-                    <button onClick={()=>{ setSectionForm(f=>({...f, parent_section_id:sec.id})); setShowAddSection(true) }}
-                      className="text-xs px-2.5 py-1.5 rounded-lg font-semibold" style={{ color:secColor, background:`${secColor}12`, border:`1px solid ${secColor}30` }}>
-                      + Sub-section
-                    </button>
                     <button onClick={()=>deleteSection(sec.id)} className="text-xs px-2 py-1.5 rounded-lg" style={{ color:'#EF4444', background:'rgba(239,68,68,0.08)' }}>Delete</button>
                   </div>
                 </div>
 
-                {/* Section KPIs */}
+                {/* Section KPIs — use the contracts' actual currency */}
                 {(() => { const displayCcy = secStats.dominantCcy || ccy; return (
                 <div className="grid grid-cols-3 gap-2 mb-3">
                   {[
@@ -298,71 +295,17 @@ export default function ProjectDetailPage({ params }: { params: { name: string }
                 </div>
                 )})()}
 
+                {/* Section progress bar */}
                 <div className="h-2 rounded-full overflow-hidden mb-4" style={{ background:'#F1F5F9' }}>
                   <div style={{ width:`${secStats.pct}%`, height:'100%', background:secColor, borderRadius:4 }}/>
                 </div>
 
-                {/* Sub-sections */}
-                {children.length > 0 && (
-                  <div className="space-y-2 mb-3">
-                    {children.map((child:any) => {
-                      const childStats = stats(child.contracts || [])
-                      const childDisplayCcy = childStats.dominantCcy || ccy
-                      return (
-                        <div key={child.id} className="rounded-xl overflow-hidden" style={{ border:`1px solid ${secColor}30`, background:`${secColor}06` }}>
-                          <div className="px-4 py-3">
-                            <div className="flex items-center justify-between mb-2">
-                              <div className="flex items-center gap-2">
-                                <div className="w-1.5 h-1.5 rounded-full" style={{ background:secColor }}/>
-                                <span className="text-sm font-semibold" style={{ color:'#0F172A' }}>{child.name}</span>
-                                <span className="text-xs" style={{ color:'#94A3B8' }}>{(child.contracts||[]).length} contract{(child.contracts||[]).length!==1?'s':''}</span>
-                              </div>
-                              <div className="flex items-center gap-3">
-                                <span className="text-sm font-bold" style={{ color:secColor }}>{childStats.pct}%</span>
-                                <button onClick={()=>{ setContractSectionId(child.id); setShowAddContract(true) }}
-                                  className="text-xs px-2 py-1 rounded-lg font-semibold" style={{ color:secColor, background:`${secColor}15` }}>
-                                  + Contract
-                                </button>
-                                <button onClick={()=>deleteSection(child.id)} className="text-xs px-2 py-1 rounded-lg" style={{ color:'#EF4444', background:'rgba(239,68,68,0.06)' }}>Del</button>
-                              </div>
-                            </div>
-                            <div className="flex gap-4 mb-2">
-                              {[
-                                { label:'Committed', value:formatCurrency(childStats.committed, childDisplayCcy) },
-                                { label:'Paid',      value:formatCurrency(childStats.paid,      childDisplayCcy) },
-                                { label:'Balance',   value:formatCurrency(childStats.committed-childStats.paid, childDisplayCcy) },
-                              ].map(k=>(
-                                <div key={k.label}>
-                                  <p className="text-xs" style={{ color:'#94A3B8' }}>{k.label}</p>
-                                  <p className="text-xs font-semibold" style={{ color:'#0F172A' }}>{k.value}</p>
-                                </div>
-                              ))}
-                            </div>
-                            {(child.contracts||[]).map((c:any) => {
-                              const cs = stats([c]); const catC = ESG_COLOR[c.category]||ESG_COLOR.Other
-                              return (
-                                <Link key={c.id} href={`/contracts/${c.id}`} className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-white/70 transition-colors mt-1" style={{ background:'rgba(255,255,255,0.5)' }}>
-                                  <div className="flex items-center gap-2 min-w-0">
-                                    {c.category && <span className="text-xs px-1.5 py-0.5 rounded font-semibold shrink-0" style={{ background:`${catC}18`, color:catC }}>{c.category}</span>}
-                                    <p className="text-sm font-medium truncate" style={{ color:'#0F172A' }}>{c.contract_name}</p>
-                                    <p className="text-xs truncate" style={{ color:'#94A3B8' }}>{c.service_providers?.name||''}</p>
-                                  </div>
-                                  <span className="text-xs font-semibold shrink-0 ml-2" style={{ color:secColor }}>{formatCurrency(cs.committed, c.currency||ccy)}</span>
-                                </Link>
-                              )
-                            })}
-                          </div>
-                        </div>
-                      )
-                    })}
-                  </div>
-                )}
-
-                {/* Direct contracts on this parent section */}
-                {(sec.contracts||[]).filter((c:any)=>!children.find((ch:any)=>ch.id===c.section_id)).length > 0 && (
-                  <div className="space-y-2 mb-3">
-                    {(sec.contracts||[]).filter((c:any)=>!children.find((ch:any)=>ch.id===c.section_id)).map((c:any) => {
-                      const cs = stats([c]); const catC = ESG_COLOR[c.category]||ESG_COLOR.Other
+                {/* Contracts in this section */}
+                {(sec.contracts||[]).length > 0 && (
+                  <div className="space-y-2">
+                    {(sec.contracts||[]).map((c:any) => {
+                      const cs = stats([c])
+                      const catC = ESG_COLOR[c.category] || ESG_COLOR.Other
                       return (
                         <Link key={c.id} href={`/contracts/${c.id}`} className="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-blue-50/50 transition-colors" style={{ background:'#F8FAFC', border:'1px solid #F1F5F9' }}>
                           <div className="flex items-center gap-2.5 min-w-0">
@@ -372,7 +315,15 @@ export default function ProjectDetailPage({ params }: { params: { name: string }
                               <p className="text-xs truncate" style={{ color:'#94A3B8' }}>{c.service_providers?.name||'No consultant'}</p>
                             </div>
                           </div>
-                          <span className="text-sm font-semibold shrink-0 ml-4" style={{ color:'#0F172A' }}>{formatCurrency(cs.committed, c.currency||ccy)}</span>
+                          <div className="flex items-center gap-4 shrink-0 ml-4">
+                            <div className="text-right">
+                              <p className="text-sm font-semibold" style={{ color:'#0F172A' }}>{formatCurrency(cs.committed, c.currency||ccy)}</p>
+                              <p className="text-xs" style={{ color:'#94A3B8' }}>{cs.pct}% paid</p>
+                            </div>
+                            <div className="w-16 h-1.5 rounded-full overflow-hidden" style={{ background:'#E2E8F0' }}>
+                              <div style={{ width:`${cs.pct}%`, height:'100%', background:secColor }}/>
+                            </div>
+                          </div>
                         </Link>
                       )
                     })}
@@ -382,7 +333,7 @@ export default function ProjectDetailPage({ params }: { params: { name: string }
                 {/* Add contract to this section */}
                 <button
                   onClick={()=>{ setContractSectionId(sec.id); setShowAddContract(true) }}
-                  className="mt-1 w-full py-2 rounded-xl text-xs font-semibold transition-colors hover:bg-slate-100"
+                  className="mt-3 w-full py-2 rounded-xl text-xs font-semibold transition-colors hover:bg-slate-100"
                   style={{ border:`1px dashed ${secColor}40`, color:secColor }}
                 >
                   + Add Contract to this section
@@ -470,14 +421,7 @@ export default function ProjectDetailPage({ params }: { params: { name: string }
           <div className="rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl" style={{ background:'#FFFFFF' }} onClick={e=>e.stopPropagation()}>
             <div style={{ height:4, background:'linear-gradient(90deg,#8B5CF6,#3B82F6)' }}/>
             <div className="p-6">
-              <h3 className="text-lg font-bold mb-1" style={{ color:'#0F172A' }}>
-                {sectionForm.parent_section_id ? `Add Sub-section` : 'Add Section'}
-              </h3>
-              {sectionForm.parent_section_id && (
-                <p className="text-xs mb-4" style={{ color:'#94A3B8' }}>
-                  Under: {sections.find((s:any)=>s.id===sectionForm.parent_section_id)?.name}
-                </p>
-              )}
+              <h3 className="text-lg font-bold mb-5" style={{ color:'#0F172A' }}>Add Section</h3>
               <form onSubmit={handleAddSection} className="space-y-4">
                 <div>
                   <label className="text-xs font-semibold uppercase tracking-widest mb-2 block" style={{ color:'#64748B' }}>Section Name *</label>
