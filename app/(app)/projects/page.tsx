@@ -46,11 +46,13 @@ export default function ProjectsPage() {
         // Compute NGN and USD totals separately using contract currency + signing rate
         let committedNGN = 0, paidNGN = 0, committedUSD = 0, paidUSD = 0
         for (const c of linked) {
-          const ccy  = c.currency || 'NGN'
-          const rate = c.fx_rate_at_signing || fxRates['NGN'] || 1580
+          const ccy      = c.currency || 'NGN'
+          const rate     = c.fx_rate_at_signing || fxRates['NGN'] || 1580
           const tranches: any[] = c.contract_tranches || []
-          const cCommitted = tranches.reduce((s: number, t: any) => s + (t.amount || 0), 0)
-          const cPaid      = tranches.filter((t: any) => t.status === 'paid').reduce((s: number, t: any) => s + (t.amount || 0), 0)
+          // Use contract_amount as committed (full contract value), not just sum of defined tranches
+          const trancheSum  = tranches.reduce((s: number, t: any) => s + (t.amount || 0), 0)
+          const cCommitted  = c.contract_amount || trancheSum
+          const cPaid       = tranches.filter((t: any) => t.status === 'paid').reduce((s: number, t: any) => s + (t.amount || 0), 0)
           committedNGN += convert(cCommitted, ccy, rate, 'NGN')
           paidNGN      += convert(cPaid,      ccy, rate, 'NGN')
           committedUSD += convert(cCommitted, ccy, rate, 'USD')
