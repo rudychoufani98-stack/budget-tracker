@@ -94,7 +94,7 @@ export default function ValidationsPage() {
     const [invRes, curRes, valRes, trancheRes] = await Promise.all([
       supabase.from('invoices').select('*, contracts(contract_name), service_providers(name)').in('status', all).order('submitted_at'),
       supabase.from('invoice_currency').select('invoice_id, currency'),
-      supabase.from('validations').select('*, invoices(subcontractor_name)').order('validated_at', { ascending:false }).limit(60),
+      supabase.from('validations').select('*, invoices(id, invoice_number, subcontractor_name, submitted_at, amount_ttc, contracts(contract_name))').order('validated_at', { ascending:false }).limit(100),
       supabase.from('contract_tranches').select('*, contracts(id, contract_name, currency, service_providers(name))').in('status', all),
     ])
     const cmap: Record<string,string> = {}
@@ -372,47 +372,117 @@ export default function ValidationsPage() {
         </>
       )}
 
-      {tab === 'history' && (
-        <div className="rounded-2xl overflow-hidden" style={{ background:'#FFFFFF', border:'1px solid #E2E8F0' }}>
-          <div className="px-5 py-4" style={{ borderBottom:'1px solid #F1F5F9' }}>
-            <p className="text-sm font-bold" style={{ color:'#0F172A' }}>Validation History</p>
-            <p className="text-xs mt-0.5" style={{ color:'#94A3B8' }}>Last 60 actions</p>
-          </div>
-          {history.length === 0 ? (
-            <p className="text-sm text-center py-10" style={{ color:'#94A3B8' }}>No history yet</p>
-          ) : (
-            <div className="divide-y divide-[#F8FAFC]">
-              {history.map((v: any) => {
-                const approved = v.decision === 'approved'
-                return (
-                  <div key={v.id} className="flex items-center gap-4 px-5 py-3.5">
-                    <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0"
-                      style={{ background: approved ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)' }}>
-                      {approved
-                        ? <svg width="12" height="12" fill="none" stroke="#10B981" strokeWidth="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-                        : <svg width="12" height="12" fill="none" stroke="#EF4444" strokeWidth="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                      }
+      {tab === 'history' && (() => {
+        // Group history by day
+        const ROLE_STEP: Record<string,string> = {
+          rudy:'Step 1 review', placide:'Step 2 review', hitech:'Step 3 review', dani:'Step 3 review', fares:'Payment confirmation'
+        }
+        const grouped: Record<string, any[]> = {}
+        for (const v of history) {
+          const day = new Date(v.validated_at).toLocaleDateString('en-GB', { weekday:'long', day:'2-digit', month:'long', year:'numeric' })
+          if (!grouped[day]) grouped[day] = []
+          grouped[day].push(v)
+        }
+        return (
+        <div className="space-y-4">
+          {Object.entries(grouped).map(([day, entries]) => (
+            <div key={day} className="rounded-2xl overflow-hidden" style={{ background:'#FFFFFF', border:'1px solid #E2E8F0' }}>
+              {/* Day header */}
+              <div className="px-5 py-3 flex items-center gap-3" style={{ background:'#F8FAFC', borderBottom:'1px solid #F1F5F9' }}>
+                <div className="w-2 h-2 rounded-full" style={{ background:'#3B82F6' }}/>
+                <p className="text-xs font-bold uppercase tracking-widest" style={{ color:'#64748B' }}>{day}</p>
+                <span className="text-xs px-2 py-0.5 rounded-full ml-auto" style={{ background:'#E2E8F0', color:'#64748B' }}>{entries.length} action{entries.length!==1?'s':''}</span>
+              </div>
+
+              {/* Entries for this day — group by invoice */}
+              {(() => {
+                const byInvoice: Record<string, any[]> = {}
+                for (const v of entries) {
+                  const key = v.invoice_id || 'unknown'
+                  if (!byInvoice[key]) byInvoice[key] = []
+                  byInvoice[key].push(v)
+                }
+                return Object.entries(byInvoice).map(([invId, steps]) => {
+                  const firstStep = steps[steps.length - 1] // oldest first
+                  const inv = firstStep.invoices
+                  return (
+                    <div key={invId} className="px-5 py-4" style={{ borderBottom:'1px solid #F8FAFC' }}>
+                      {/* Invoice header */}
+                      <div className="flex items-start justify-between mb-3">
+                        <div>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <Link href={`/invoices/${invId}`} className="text-sm font-bold hover:underline" style={{ color:'#0F172A' }}>
+                              {inv?.subcontractor_name || 'Invoice'}
+                            </Link>
+                            {inv?.invoice_number && (
+                              <span className="text-xs font-mono px-2 py-0.5 rounded-lg" style={{ background:'#F1F5F9', color:'#64748B' }}>
+                                #{inv.invoice_number}
+                              </span>
+                            )}
+                          </div>
+                          {inv?.contracts?.contract_name && (
+                            <p className="text-xs mt-0.5" style={{ color:'#94A3B8' }}>{inv.contracts.contract_name}</p>
+                          )}
+                        </div>
+                        {inv?.amount_ttc && (
+                          <p className="text-sm font-bold shrink-0" style={{ color:'#0F172A' }}>
+                            {formatCurrency(inv.amount_ttc, 'NGN')}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Timeline of actions */}
+                      <div className="space-y-1.5 ml-2">
+                        {/* Upload row — from invoice submitted_at */}
+                        {inv?.submitted_at && (
+                          <div className="flex items-center gap-2.5">
+                            <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0" style={{ background:'rgba(139,92,246,0.1)' }}>
+                              <svg width="9" height="9" fill="none" stroke="#8B5CF6" strokeWidth="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                            </div>
+                            <span className="text-xs font-medium" style={{ color:'#8B5CF6' }}>Uploaded</span>
+                            <span className="text-xs" style={{ color:'#94A3B8' }}>
+                              {new Date(inv.submitted_at).toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' })}
+                            </span>
+                          </div>
+                        )}
+
+                        {/* Validation steps */}
+                        {[...steps].reverse().map((v: any) => {
+                          const approved = v.decision === 'approved'
+                          const stepLabel = ROLE_STEP[v.validator_role] || v.validator_role
+                          const time = new Date(v.validated_at).toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' })
+                          return (
+                            <div key={v.id} className="flex items-center gap-2.5">
+                              <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0"
+                                style={{ background: approved ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)' }}>
+                                {approved
+                                  ? <svg width="9" height="9" fill="none" stroke="#10B981" strokeWidth="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                                  : <svg width="9" height="9" fill="none" stroke="#EF4444" strokeWidth="3" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                }
+                              </div>
+                              <span className="text-xs font-semibold" style={{ color: approved ? '#10B981' : '#EF4444' }}>
+                                {approved ? 'Approved' : 'Rejected'}
+                              </span>
+                              <span className="text-xs" style={{ color:'#0F172A' }}>by <strong>{v.validator_name}</strong></span>
+                              <span className="text-xs" style={{ color:'#94A3B8' }}>{stepLabel}</span>
+                              <span className="text-xs ml-auto" style={{ color:'#94A3B8' }}>{time}</span>
+                              {v.comment && (
+                                <span className="text-xs italic truncate max-w-[200px]" style={{ color:'#64748B' }}>"{v.comment}"</span>
+                              )}
+                            </div>
+                          )
+                        })}
+                      </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold truncate" style={{ color:'#0F172A' }}>
-                        {v.invoices?.subcontractor_name || 'Invoice'}
-                      </p>
-                      <p className="text-xs truncate" style={{ color:'#94A3B8' }}>
-                        By {v.validator_name} - {new Date(v.validated_at).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' })}
-                        {v.comment ? ` - "${v.comment}"` : ''}
-                      </p>
-                    </div>
-                    <span className="text-xs px-2.5 py-1 rounded-full font-semibold shrink-0"
-                      style={{ background: approved ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)', color: approved ? '#10B981' : '#EF4444' }}>
-                      {approved ? 'Approved' : 'Rejected'}
-                    </span>
-                  </div>
-                )
-              })}
+                  )
+                })
+              })()}
             </div>
-          )}
+          ))}
         </div>
-      )}
+        )
+      })()}
+
 
       {/* Reject modal */}
       {reject && (
