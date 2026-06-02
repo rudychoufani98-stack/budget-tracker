@@ -8,7 +8,7 @@ export default async function InvoicesPage() {
   const [{ data: invoiceData }, { data: currencyData }] = await Promise.all([
     supabaseAdmin
       .from('invoices')
-      .select('*, service_providers(name), contracts(contract_name, project, project_id, projects(id, name), project_sections(id, name))')
+      .select('*, service_providers(name), contracts(contract_name, project, project_id, currency, fx_rate_at_signing, projects(id, name), project_sections(id, name))')
       .order('created_at', { ascending: false }),
     supabaseAdmin
       .from('invoice_currency')

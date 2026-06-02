@@ -3,7 +3,9 @@ import { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
 import { formatCurrency, formatDate } from '@/lib/format'
 
-const FX = 1441
+function getFX(inv: any): number {
+  return inv.contracts?.fx_rate_at_signing || 0
+}
 
 const STATUS_MAP: Record<string,{label:string;color:string;bg:string}> = {
   pending_review:  { label:'Awaiting Rudy',    color:'#F97316', bg:'rgba(249,115,22,0.1)'  },
@@ -24,9 +26,10 @@ export function InvoicesClient({ invoices }: { invoices: any[] }) {
   const [paidTranches,    setPaidTranches]    = useState<any[]>([])
   const [view, setView] = useState<'native'|'ngn'|'usd'>('native')
 
-  function toView(amount: number, ccy: string): string {
-    if (view === 'ngn') return formatCurrency(ccy === 'USD' ? amount * FX : amount, 'NGN')
-    if (view === 'usd') return formatCurrency(ccy === 'NGN' ? amount / FX : amount, 'USD')
+  function toView(amount: number, ccy: string, inv: any): string {
+    const rate = getFX(inv)
+    if (view === 'ngn') return formatCurrency(ccy === 'USD' ? (rate ? amount * rate : 0) : amount, 'NGN')
+    if (view === 'usd') return formatCurrency(ccy === 'NGN' ? (rate ? amount / rate : 0) : amount, 'USD')
     return formatCurrency(amount, ccy)
   }
 
@@ -61,14 +64,16 @@ export function InvoicesClient({ invoices }: { invoices: any[] }) {
     if (view === 'ngn') {
       const total = list.reduce((s, i) => {
         const amt = i.amount_ttc || 0
-        return s + (i.currency === 'USD' ? amt * FX : amt)
+        const rate = getFX(i)
+        return s + (i.currency === 'USD' ? (rate ? amt * rate : 0) : amt)
       }, 0)
       return formatCurrency(total, 'NGN')
     }
     if (view === 'usd') {
       const total = list.reduce((s, i) => {
         const amt = i.amount_ttc || 0
-        return s + (i.currency === 'NGN' ? amt / FX : amt)
+        const rate = getFX(i)
+        return s + (i.currency === 'NGN' ? (rate ? amt / rate : 0) : amt)
       }, 0)
       return formatCurrency(total, 'USD')
     }
@@ -441,9 +446,9 @@ export function InvoicesClient({ invoices }: { invoices: any[] }) {
                 </span>
               </div>
 
-              <div className="text-sm py-4 pr-3" style={{ color:'#64748B' }}>{toView(inv.amount_ht, ccy)}</div>
+              <div className="text-sm py-4 pr-3" style={{ color:'#64748B' }}>{toView(inv.amount_ht, ccy, inv)}</div>
 
-              <div className="text-sm font-bold py-4 pr-3" style={{ color:'#0F172A' }}>{toView(inv.amount_ttc, ccy)}</div>
+              <div className="text-sm font-bold py-4 pr-3" style={{ color:'#0F172A' }}>{toView(inv.amount_ttc, ccy, inv)}</div>
 
               <div className="py-4 pr-6">
                 <span className="text-xs px-2.5 py-1 rounded-full font-semibold inline-block" style={{ background:st.bg, color:st.color }}>

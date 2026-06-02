@@ -33,7 +33,7 @@ export default function PaymentRegisterPage() {
 
   function convert(amount: number, fromCcy: string, signingRate: number | null): number {
     if (!amount) return 0
-    const rate = signingRate || fxRates['NGN'] || 1580
+    const rate = signingRate || 0
     if (view === 'ngn') {
       if (fromCcy === 'NGN') return amount
       if (fromCcy === 'USD') return amount * rate

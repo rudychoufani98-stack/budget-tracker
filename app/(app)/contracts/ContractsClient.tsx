@@ -48,7 +48,7 @@ export function ContractsClient({ contracts, projects, initialProject, initialSe
   // Convert a contract amount using its signing rate
   function convert(amount: number, ccy: string, signingRate: number | null): number {
     if (!amount) return 0
-    const rate = signingRate || 1580
+    const rate = signingRate || 0
     if (view === 'ngn') {
       if (ccy === 'NGN') return amount
       if (ccy === 'USD') return amount * rate

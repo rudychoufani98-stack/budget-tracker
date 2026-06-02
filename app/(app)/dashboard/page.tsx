@@ -95,7 +95,7 @@ async function getData(projectId?: string, sectionId?: string, baseCcy: string =
   function trancheBaseForProject(t: any): number {
     const amount = t.amount || 0
     const ccy    = (t.contracts as any)?.currency || 'NGN'
-    const signingRate = (t.contracts as any)?.fx_rate_at_signing || fxRates['NGN'] || 1580
+    const signingRate = (t.contracts as any)?.fx_rate_at_signing || 0
     if (baseCcy === 'NGN') {
       if (ccy === 'NGN') return amount
       if (ccy === 'USD') return amount * signingRate
@@ -131,7 +131,7 @@ async function getData(projectId?: string, sectionId?: string, baseCcy: string =
   function trancheBase(t: any): number {
     const amount = t.amount || 0
     const ccy    = (t.contracts as any)?.currency || 'NGN'
-    const signingRate = (t.contracts as any)?.fx_rate_at_signing || fxRates['NGN'] || 1580
+    const signingRate = (t.contracts as any)?.fx_rate_at_signing || 0
 
     if (baseCcy === 'NGN') {
       if (ccy === 'NGN') return amount
@@ -149,7 +149,7 @@ async function getData(projectId?: string, sectionId?: string, baseCcy: string =
   function contractBase(c: any): number {
     const amount = c.contract_amount || c.total_budget || 0
     const ccy    = c.currency || 'NGN'
-    const rate   = c.fx_rate_at_signing || fxRates['NGN'] || 1580
+    const rate   = c.fx_rate_at_signing || 0
     if (baseCcy === 'NGN') {
       if (ccy === 'NGN') return amount
       if (ccy === 'USD') return amount * rate
@@ -197,7 +197,7 @@ async function getData(projectId?: string, sectionId?: string, baseCcy: string =
   // Helper: convert a contract amount to baseCcy using its signing rate
   function contractToBase(amount: number, ccy: string, signingRate: number | null): number {
     if (!amount) return 0
-    const rate = signingRate || fxRates['NGN'] || 1580
+    const rate = signingRate || 0
     if (baseCcy === 'NGN') {
       if (ccy === 'NGN') return amount
       if (ccy === 'USD') return amount * rate

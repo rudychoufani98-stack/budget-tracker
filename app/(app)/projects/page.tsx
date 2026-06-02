@@ -28,7 +28,7 @@ export default function ProjectsPage() {
       function convert(amount: number, fromCcy: string, signingRate: number | null, toCcy: string): number {
         if (!amount) return 0
         if (fromCcy === toCcy) return amount
-        const rate = signingRate || fxRates['NGN'] || 1580
+        const rate = signingRate || 0
         if (toCcy === 'NGN') {
           if (fromCcy === 'USD') return amount * rate
           // other -> USD -> NGN
@@ -47,7 +47,7 @@ export default function ProjectsPage() {
         let committedNGN = 0, paidNGN = 0, committedUSD = 0, paidUSD = 0
         for (const c of linked) {
           const ccy      = c.currency || 'NGN'
-          const rate     = c.fx_rate_at_signing || fxRates['NGN'] || 1580
+          const rate     = c.fx_rate_at_signing || 0
           const tranches: any[] = c.contract_tranches || []
           // Use contract_amount as committed (full contract value), not just sum of defined tranches
           const trancheSum  = tranches.reduce((s: number, t: any) => s + (t.amount || 0), 0)

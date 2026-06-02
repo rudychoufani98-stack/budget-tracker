@@ -75,6 +75,10 @@ export default function NewContractPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault(); setSaving(true); setError('')
+    if (!form.fx_rate_at_signing || parseFloat(form.fx_rate_at_signing) <= 0) {
+      setError('FX rate at signing is required. Enter the exchange rate (NGN per 1 USD) when this contract was signed.')
+      setSaving(false); return
+    }
 
     const finalAmount = contractAmount || scheduledTotal
     const res = await fetch('/api/contracts', {

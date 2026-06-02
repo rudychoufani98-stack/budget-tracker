@@ -187,7 +187,7 @@ export default function ContractDetailPage() {
   if (!contract) return <div className="p-8 text-sm" style={{ color:C.red }}>Contract not found.</div>
 
   // ── Currency setup (must be first) ────────────────────────────────
-  const signingRate = contract.fx_rate_at_signing || 1580
+  const signingRate = contract.fx_rate_at_signing || 0
   const hasRate     = !!contract.fx_rate_at_signing
   const nativeCcy   = contract.currency || 'NGN'
   const displayCcy  = view === 'native' ? nativeCcy : view === 'ngn' ? 'NGN' : 'USD'
@@ -198,7 +198,7 @@ export default function ContractDetailPage() {
     const amt    = inv.amount_ttc || 0
     const invCcy = inv.currency || nativeCcy
     if (!amt || invCcy === nativeCcy) return amt
-    const rate = contract.fx_rate_at_signing || 1580
+    const rate = contract.fx_rate_at_signing || 0
     if (invCcy === 'USD' && nativeCcy === 'NGN') return amt * rate
     if (invCcy === 'NGN' && nativeCcy === 'USD') return amt / rate
     return amt
