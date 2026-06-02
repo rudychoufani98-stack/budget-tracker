@@ -8,9 +8,10 @@ const C = { card:'#FFFFFF', card2:'#F1F5F9', border:'#E2E8F0', border2:'#CBD5E1'
 const TRANCHE_ORDER = ['T1','T2','T3','T4','One-Shot']
 const ESG_COLORS: Record<string,string> = { E:'#10B981', S:'#3B82F6', G:'#8B5CF6', Other:'#6B7280' }
 const STATUS_COLORS: Record<string,{bg:string;color:string;label:string}> = {
-  unpaid:    { bg:'rgba(107,114,128,0.15)', color:'#6B7280',  label:'Unpaid'    },
-  scheduled: { bg:'rgba(245,158,11,0.15)',  color:'#F59E0B',  label:'Scheduled' },
-  paid:      { bg:'rgba(16,185,129,0.15)',  color:'#10B981',  label:'Paid'      },
+  unpaid:          { bg:'rgba(107,114,128,0.15)', color:'#6B7280',  label:'Unpaid'              },
+  scheduled:       { bg:'rgba(245,158,11,0.15)',  color:'#F59E0B',  label:'Scheduled'           },
+  pending_payment: { bg:'rgba(59,130,246,0.15)',  color:'#3B82F6',  label:'Sent to Accounting'  },
+  paid:            { bg:'rgba(16,185,129,0.15)',  color:'#10B981',  label:'Paid'                },
 }
 const INV_STATUS: Record<string,{label:string;color:string;bg:string}> = {
   pending_review:  { label:'Awaiting Rudy',    color:'#F97316', bg:'rgba(249,115,22,0.1)' },
@@ -59,6 +60,16 @@ export default function ContractDetailPage() {
   }
 
   useEffect(() => { load() }, [id])
+
+  async function sendToAccounting(trancheId: string) {
+    setMarking(trancheId)
+    await fetch(`/api/tranches/${trancheId}`, {
+      method:'PATCH', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ status: 'pending_payment' }),
+    })
+    await load()
+    setMarking(null)
+  }
 
   async function markPaid(trancheId: string) {
     setMarking(trancheId)
@@ -334,8 +345,11 @@ export default function ContractDetailPage() {
                         <p className="text-xs font-medium" style={{ color:C.muted }}>POP: {t.pop_reference || '—'}</p>
                         <p className="text-xs mt-0.5" style={{ color:C.muted }}>Paid {formatDate(t.paid_date)}</p>
                       </div>
-                    ) : (
+                    ) : t.status === 'pending_payment' ? (
                       <div className="flex items-center gap-2">
+                        <span className="text-xs px-3 py-1.5 rounded-lg font-medium" style={{ background:'rgba(59,130,246,0.08)', color:'#3B82F6' }}>
+                          Awaiting accounting confirmation
+                        </span>
                         <input
                           type="text"
                           value={popRefs[t.id] || ''}
@@ -351,6 +365,19 @@ export default function ContractDetailPage() {
                           style={{ background:'rgba(16,185,129,0.12)', color:'#10B981', border:'1px solid rgba(16,185,129,0.25)' }}
                         >
                           {marking===t.id ? '...' : '✓ Mark Paid'}
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => sendToAccounting(t.id)}
+                          disabled={marking===t.id}
+                          className="text-xs font-semibold px-3 py-1.5 rounded-lg disabled:opacity-50 flex items-center gap-1.5"
+                          style={{ background:'rgba(59,130,246,0.1)', color:'#3B82F6', border:'1px solid rgba(59,130,246,0.25)' }}
+                        >
+                          {marking===t.id ? '...' : (
+                            <><svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>Send to Accounting</>
+                          )}
                         </button>
                       </div>
                     )}

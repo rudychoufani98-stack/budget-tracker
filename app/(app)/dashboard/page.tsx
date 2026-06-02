@@ -128,7 +128,23 @@ async function getData(projectId?: string, sectionId?: string, baseCcy: string =
     }
   }
 
-  const totalCommitted = tranches.reduce((s:number,t:any) => s + trancheBase(t), 0)
+  // Use contract_amount as committed (not just sum of tranches - avoids missing unscheduled balance)
+  function contractBase(c: any): number {
+    const amount = c.contract_amount || c.total_budget || 0
+    const ccy    = c.currency || 'NGN'
+    const rate   = c.fx_rate_at_signing || fxRates['NGN'] || 1580
+    if (baseCcy === 'NGN') {
+      if (ccy === 'NGN') return amount
+      if (ccy === 'USD') return amount * rate
+      return toBase(amount, ccy) * rate
+    } else {
+      if (ccy === 'USD') return amount
+      if (ccy === 'NGN') return amount / rate
+      return toBase(amount, ccy)
+    }
+  }
+
+  const totalCommitted = contracts.reduce((s:number,c:any) => s + contractBase(c), 0)
   const totalPaid      = tranches.filter((t:any) => t.status === 'paid').reduce((s:number,t:any) => s + trancheBase(t), 0)
 
   const pipeline30 = tranches.filter((t:any) => {
@@ -137,6 +153,9 @@ async function getData(projectId?: string, sectionId?: string, baseCcy: string =
     const d = new Date(t.scheduled_date)
     return d >= now && d <= in30
   }).reduce((s:number,t:any) => s + trancheBase(t), 0)
+
+  const pendingPaymentTranches = tranches.filter((t:any) => t.status === 'pending_payment')
+  const pendingPaymentAmount   = pendingPaymentTranches.reduce((s:number,t:any) => s + trancheBase(t), 0)
 
   const overdueTranches = tranches.filter((t:any) => {
     if (t.status === 'paid') return false
@@ -177,7 +196,8 @@ async function getData(projectId?: string, sectionId?: string, baseCcy: string =
     const ts: any[] = c.contract_tranches || []
     const signingRate = c.fx_rate_at_signing || null
     const ccy = c.currency || 'NGN'
-    const total = ts.reduce((s:number,t:any) => s + contractToBase(t.amount||0, ccy, signingRate), 0)
+    // Use contract_amount as the total (full contract value, not just scheduled tranches)
+    const total = contractToBase(c.contract_amount || c.total_budget || 0, ccy, signingRate)
     const paid  = ts.filter((t:any) => t.status === 'paid').reduce((s:number,t:any) => s + contractToBase(t.amount||0, ccy, signingRate), 0)
     const pct   = total > 0 ? Math.round((paid/total)*100) : 0
 
@@ -379,6 +399,7 @@ async function getData(projectId?: string, sectionId?: string, baseCcy: string =
   return {
     totalCommitted, totalPaid, pipeline30, overdueAmount,
     overdueCount: overdueTranches.length,
+    pendingPaymentTranches, pendingPaymentAmount,
     contractAdvancement,
     timeline,
     providerRows,
@@ -624,8 +645,8 @@ export default async function DashboardPage({
         currentSection={d.currentSection}
       />
 
-      {/* ROW 1 - 4 metric cards */}
-      <div className="grid grid-cols-4 gap-4">
+      {/* ROW 1 - 5 metric cards */}
+      <div className="grid grid-cols-5 gap-4">
         <Link href="/contracts" className="rounded-2xl px-5 py-5 block hover:shadow-md transition-shadow" style={{ background:'#FFFFFF', border:'1px solid #E2E8F0' }}>
           <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color:'#94A3B8' }}>Total Committed</p>
           <p className="text-2xl font-bold mb-1" style={{ color:'#3B82F6' }}>{formatCurrency(d.totalCommitted, baseCcy)}</p>
@@ -637,6 +658,12 @@ export default async function DashboardPage({
           <p className="text-2xl font-bold mb-1" style={{ color:'#10B981' }}>{formatCurrency(d.totalPaid, baseCcy)}</p>
           <p className="text-xs" style={{ color:'#94A3B8' }}>confirmed payments</p>
         </Link>
+
+        <div className="rounded-2xl px-5 py-5 block" style={{ background: d.pendingPaymentAmount > 0 ? '#EFF6FF' : '#FFFFFF', border: d.pendingPaymentAmount > 0 ? '1px solid rgba(59,130,246,0.3)' : '1px solid #E2E8F0' }}>
+          <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: d.pendingPaymentAmount > 0 ? '#3B82F6' : '#94A3B8' }}>Pending Accounting</p>
+          <p className="text-2xl font-bold mb-1" style={{ color:'#3B82F6' }}>{formatCurrency(d.pendingPaymentAmount, baseCcy)}</p>
+          <p className="text-xs" style={{ color:'#3B82F6' }}>{d.pendingPaymentTranches.length} tranche{d.pendingPaymentTranches.length!==1?'s':''} awaiting payment</p>
+        </div>
 
         <Link href="/payment-register?filter=upcoming" className="rounded-2xl px-5 py-5 block hover:shadow-md transition-shadow" style={{ background:'#FFFFFF', border:'1px solid #E2E8F0' }}>
           <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color:'#94A3B8' }}>Pipeline next 30 days</p>
@@ -650,6 +677,48 @@ export default async function DashboardPage({
           <p className="text-xs" style={{ color:'#EF4444' }}>{d.overdueCount} tranche{d.overdueCount!==1?'s':''} overdue</p>
         </Link>
       </div>
+
+      {/* Accounting Queue — only shown when there are pending_payment tranches */}
+      {d.pendingPaymentTranches.length > 0 && (
+        <div className="rounded-2xl overflow-hidden" style={{ background:'#FFFFFF', border:'1.5px solid rgba(59,130,246,0.35)' }}>
+          <div className="px-6 py-4 flex items-center justify-between" style={{ borderBottom:'1px solid #EFF6FF', background:'#EFF6FF' }}>
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background:'#3B82F6' }}>
+                <svg width="15" height="15" fill="none" stroke="#fff" strokeWidth="2.2" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              </div>
+              <div>
+                <p className="text-sm font-bold" style={{ color:'#1E40AF' }}>Accounting Queue</p>
+                <p className="text-xs mt-0.5" style={{ color:'#3B82F6' }}>{d.pendingPaymentTranches.length} tranche{d.pendingPaymentTranches.length!==1?'s':''} sent to accounting — awaiting payment confirmation</p>
+              </div>
+            </div>
+            <p className="text-lg font-bold" style={{ color:'#1E40AF' }}>{formatCurrency(d.pendingPaymentAmount, baseCcy)}</p>
+          </div>
+          <div className="divide-y divide-[#F8FAFC]">
+            {d.pendingPaymentTranches.map((t:any) => {
+              const c = t.contracts as any
+              const catColor = ESG_COLOR[c?.category] || ESG_COLOR.Other
+              return (
+                <div key={t.id} className="px-6 py-3.5 flex items-center gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-0.5">
+                      {c?.category && <span className="text-xs px-1.5 py-0.5 rounded font-semibold" style={{ background:`${catColor}18`, color:catColor }}>{c.category}</span>}
+                      <Link href={`/contracts/${c?.id}`} className="text-sm font-semibold hover:underline truncate" style={{ color:'#0F172A' }}>
+                        {c?.contract_name || 'Contract'}
+                      </Link>
+                      <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background:'rgba(59,130,246,0.1)', color:'#3B82F6' }}>{t.tranche_name}</span>
+                    </div>
+                    <p className="text-xs" style={{ color:'#64748B' }}>{c?.service_providers?.name || ''}</p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className="text-sm font-bold" style={{ color:'#0F172A' }}>{formatCurrency(t.amount, c?.currency || baseCcy)}</p>
+                    {t.scheduled_date && <p className="text-xs mt-0.5" style={{ color:'#64748B' }}>Due {new Date(t.scheduled_date).toLocaleDateString('en-GB',{day:'2-digit',month:'short'})}</p>}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       {/* ROW 2 - Contract advancement + Timeline */}
       <div className="grid grid-cols-2 gap-5">

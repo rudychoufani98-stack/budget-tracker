@@ -5,6 +5,12 @@ import Link from 'next/link'
 
 const TRANCHES = ['T1','T2','T3','T4','One-Shot']
 const ESG: Record<string,string> = { E:'#10B981', S:'#3B82F6', G:'#8B5CF6', Other:'#6B7280' }
+const TRANCHE_STATUS: Record<string,{label:string;color:string}> = {
+  unpaid:          { label:'Unpaid',             color:'#94A3B8' },
+  scheduled:       { label:'Scheduled',          color:'#F59E0B' },
+  pending_payment: { label:'Sent to Accounting', color:'#3B82F6' },
+  paid:            { label:'Paid',               color:'#10B981' },
+}
 
 function tranche(tranches: any[], name: string) {
   return tranches.find((t:any) => t.tranche_name === name) || null
@@ -13,16 +19,14 @@ function tranche(tranches: any[], name: string) {
 function TrancheCell({ t, ccy, saving, onSave }: { t: any|null; ccy: string; saving: boolean; onSave: (field:string,val:string)=>void }) {
   const [pop, setPop] = useState(t?.pop_reference || '')
   if (!t) return <td className="px-3 py-3 text-center"><span style={{ color:'#E2E8F0' }}>-</span></td>
-  const isPaid = t.status === 'paid'
-  const isSched = t.status === 'scheduled'
-  const color = isPaid ? '#10B981' : isSched ? '#F59E0B' : '#94A3B8'
+  const st = TRANCHE_STATUS[t.status] || TRANCHE_STATUS.unpaid
   return (
     <td className="px-3 py-3 text-center" style={{ borderLeft:'1px solid #F1F5F9' }}>
-      <p className="text-xs font-bold mb-0.5" style={{ color }}>{formatCurrency(t.amount, ccy)}</p>
+      <p className="text-xs font-bold mb-0.5" style={{ color:st.color }}>{formatCurrency(t.amount, ccy)}</p>
       {t.scheduled_date && <p className="text-xs" style={{ color:'#94A3B8' }}>{t.scheduled_date.slice(5)}</p>}
       <div className="mt-1 flex items-center justify-center gap-1">
-        <div className="w-2 h-2 rounded-full" style={{ background: color }}/>
-        <span className="text-xs" style={{ color }}>{isPaid ? 'Paid' : isSched ? 'Sched' : 'Unpaid'}</span>
+        <div className="w-2 h-2 rounded-full" style={{ background:st.color }}/>
+        <span className="text-xs" style={{ color:st.color }}>{st.label}</span>
       </div>
     </td>
   )
@@ -209,16 +213,14 @@ export default function PaymentRegisterPage() {
                           {TRANCHES.map(name => {
                             const t = tranche(ts, name)
                             if (!t) return <td key={name} className="px-3 py-3 text-center" style={{ borderLeft:'1px solid #F1F5F9' }}><span style={{ color:'#E2E8F0' }}>-</span></td>
-                            const isPaid = t.status === 'paid'
-                            const isSched = t.status === 'scheduled'
-                            const color = isPaid ? '#10B981' : isSched ? '#F59E0B' : '#94A3B8'
+                            const st = TRANCHE_STATUS[t.status] || TRANCHE_STATUS.unpaid
                             return (
                               <td key={name} className="px-3 py-3 text-center" style={{ borderLeft:'1px solid #F1F5F9' }}>
-                                <p className="text-xs font-bold mb-0.5" style={{ color }}>{formatCurrency(t.amount, ccy)}</p>
+                                <p className="text-xs font-bold mb-0.5" style={{ color:st.color }}>{formatCurrency(t.amount, ccy)}</p>
                                 {t.scheduled_date && <p className="text-xs" style={{ color:'#94A3B8' }}>{new Date(t.scheduled_date).toLocaleDateString('en-GB',{day:'2-digit',month:'short'})}</p>}
                                 <div className="mt-0.5 flex items-center justify-center gap-1">
-                                  <div className="w-1.5 h-1.5 rounded-full" style={{ background:color }}/>
-                                  <span className="text-xs" style={{ color, fontSize:10 }}>{isPaid?'Paid':isSched?'Sched':'Due'}</span>
+                                  <div className="w-1.5 h-1.5 rounded-full" style={{ background:st.color }}/>
+                                  <span className="text-xs" style={{ color:st.color, fontSize:10 }}>{st.label}</span>
                                 </div>
                               </td>
                             )
