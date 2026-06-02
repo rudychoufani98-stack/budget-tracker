@@ -269,6 +269,14 @@ export default function InvoiceDetailPage() {
                       })}
                     </div>
                   </div>
+                  <div>
+                    <label className="text-xs font-semibold uppercase tracking-widest mb-1 block" style={{ color:'#64748B' }}>Currency</label>
+                    <select value={currency} onChange={e=>{ setCurrency(e.target.value); saveCurrency(e.target.value) }}
+                      className="w-full px-3 py-2 text-sm rounded-xl outline-none" style={{ background:'#F8FAFC', border:'1.5px solid #E2E8F0', color:'#0F172A' }}>
+                      <option value="NGN">NGN</option>
+                      <option value="USD">USD</option>
+                    </select>
+                  </div>
                   <DField label={`Amount excl. VAT (${currency})`} value={String(editData.amount_ht||'')} onChange={v=>setEditData(p=>({...p,amount_ht:parseFloat(v)}))} type="number"/>
                   <DField label="VAT rate (%)" value={String(editData.vat_rate||'')} onChange={v=>setEditData(p=>({...p,vat_rate:parseFloat(v)}))} type="number"/>
                   <DField label={`VAT amount (${currency})`} value={String(editData.amount_tva||'')} onChange={v=>setEditData(p=>({...p,amount_tva:parseFloat(v)}))} type="number"/>
@@ -299,9 +307,12 @@ export default function InvoiceDetailPage() {
           <div className="rounded-2xl p-6" style={{ background: C.card, border: `1px solid ${C.border}` }}>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-semibold" style={{ color: C.text }}>Amounts</h2>
-              <span className="text-xs font-bold px-2.5 py-1 rounded-lg" style={{ background:'#E2E8F0', color:C.text }}>
-                {currency}
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold px-2.5 py-1 rounded-lg" style={{ background:'#E2E8F0', color:C.text }}>
+                  {currency}
+                </span>
+                <button onClick={()=>setEditing(true)} className="text-xs" style={{ color:'#94A3B8' }}>wrong? edit</button>
+              </div>
             </div>
             <div className="space-y-2.5">
               <div className="flex justify-between text-sm">
