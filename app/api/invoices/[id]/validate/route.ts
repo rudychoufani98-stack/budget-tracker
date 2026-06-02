@@ -30,24 +30,36 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 
     const newStatus: InvoiceStatus = decision === 'approved' ? nextStatusOnApproval[invoice.status] : 'rejected'
 
-    await supabaseAdmin.from('invoices').update({ status: newStatus }).eq('id', params.id)
+    // DB updates — these MUST succeed
+    const { error: updateErr } = await supabaseAdmin.from('invoices').update({ status: newStatus }).eq('id', params.id)
+    if (updateErr) return NextResponse.json({ error: updateErr.message }, { status: 500 })
+
     await supabaseAdmin.from('validations').insert({ invoice_id: params.id, validator_name, validator_role, decision, comment: comment || null, validated_at: new Date().toISOString() })
-    await writeAudit('invoice_validated', 'invoice', params.id, null, { decision, validator_name, validator_role, newStatus })
+
+    // Audit — non-blocking
+    try { await writeAudit('invoice_validated', 'invoice', params.id, null, { decision, validator_name, validator_role, newStatus }) } catch {}
 
     const sub = invoice.subcontractor_name || 'Unknown'
-    if (decision === 'approved') {
-      if (newStatus !== 'approved') await sendValidationEmail(params.id, sub, newStatus, validator_name, comment)
-      else {
-        await sendFinalApprovalEmail(params.id, sub)
-        // Mark linked tranche as paid if set
-        if (invoice.tranche_id) {
-          await supabaseAdmin.from('contract_tranches').update({ status: 'paid', paid_date: new Date().toISOString().split('T')[0] }).eq('id', invoice.tranche_id)
+
+    // Emails are best-effort — never let them break the validation flow
+    try {
+      if (decision === 'approved') {
+        if (newStatus !== 'approved') {
+          await sendValidationEmail(params.id, sub, newStatus, validator_name, comment)
+        } else {
+          await sendFinalApprovalEmail(params.id, sub)
+          if (invoice.tranche_id) {
+            await supabaseAdmin.from('contract_tranches')
+              .update({ status: 'paid', paid_date: new Date().toISOString().split('T')[0] })
+              .eq('id', invoice.tranche_id)
+          }
+          if (invoice.contract_id) await checkBudgetAlert(invoice.contract_id, invoice.amount_ttc || 0)
         }
-        // Budget alert check
-        if (invoice.contract_id) await checkBudgetAlert(invoice.contract_id, invoice.amount_ttc || 0)
+      } else {
+        await sendRejectionEmail(params.id, sub, validator_name, comment)
       }
-    } else {
-      await sendRejectionEmail(params.id, sub, validator_name, comment)
+    } catch (emailErr) {
+      console.warn('Email notification failed (non-blocking):', emailErr)
     }
 
     return NextResponse.json({ success: true, newStatus })

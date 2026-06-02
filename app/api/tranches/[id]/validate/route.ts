@@ -26,8 +26,13 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   const newStatus = decision === 'approved' ? NEXT_STATUS[tranche.status] : 'scheduled'
   const extra = newStatus === 'paid' ? { paid_date: new Date().toISOString().split('T')[0] } : {}
 
-  await supabaseAdmin.from('contract_tranches').update({ status: newStatus, ...extra }).eq('id', params.id)
-  await writeAudit('tranche_validated', 'tranche', params.id, null, { decision, validator_name, newStatus })
+  const { error: updateErr } = await supabaseAdmin
+    .from('contract_tranches').update({ status: newStatus, ...extra }).eq('id', params.id)
+  if (updateErr) return NextResponse.json({ error: updateErr.message }, { status: 500 })
+
+  try {
+    await writeAudit('tranche_validated', 'tranche', params.id, null, { decision, validator_name, newStatus })
+  } catch { /* audit failure is non-blocking */ }
 
   return NextResponse.json({ success: true, newStatus })
 }

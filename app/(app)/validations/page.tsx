@@ -134,10 +134,22 @@ export default function ValidationsPage() {
     const endpoint = item._type === 'tranche'
       ? `/api/tranches/${itemId}/validate`
       : `/api/invoices/${itemId}/validate`
-    await fetch(endpoint, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ decision, validator_name: VALIDATOR_NAME[userRole] || userRole, comment: comments[itemId] || null }),
-    })
+    try {
+      const res = await fetch(endpoint, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ decision, validator_name: VALIDATOR_NAME[userRole] || userRole, comment: comments[itemId] || null }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        alert(`Error: ${data.error || 'Validation failed. Please try again.'}`)
+        setSubmitting(null)
+        return
+      }
+    } catch (e) {
+      alert('Network error. Please check your connection and try again.')
+      setSubmitting(null)
+      return
+    }
     setSubmitting(null); setReject(null)
     setComments(p => { const n = {...p}; delete n[itemId]; return n })
     await load()
