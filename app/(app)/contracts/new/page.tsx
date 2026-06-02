@@ -16,7 +16,7 @@ export default function NewContractPage() {
   const [error,  setError]  = useState('')
   const [form, setForm] = useState({
     contract_name:'', service_provider_id:'', project_id:'', project:'',
-    category:'E', description:'', currency:'NGN', contract_amount:'',
+    contract_type:'ESG', category:'E', description:'', currency:'NGN', contract_amount:'',
     start_date:'', end_date:'', status:'active',
     fx_rate_at_signing: ''
   })
@@ -232,6 +232,15 @@ export default function NewContractPage() {
                 <select className={inp} style={inpStyle} value={form.service_provider_id} onChange={e=>setForm(p=>({...p,service_provider_id:e.target.value}))}>
                   <option value="">Select consultant...</option>
                   {providers.map((p:any) => <option key={p.id} value={p.id}>{p.name}</option>)}
+                </select>
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-widest mb-2 block" style={{ color: C.muted }}>Contract Type</label>
+                <select className={inp} style={inpStyle} value={form.contract_type} onChange={e=>setForm(p=>({...p,contract_type:e.target.value}))}>
+                  <option value="ESG">ESG</option>
+                  <option value="Deployment">Deployment</option>
+                  <option value="Other">Other</option>
                 </select>
               </div>
 

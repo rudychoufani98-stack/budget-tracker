@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
   const deny = await requireAuth(req)
   if (deny) return deny
   const body = await req.json()
-  const { contract_name, client_name, service_provider_id, project, project_id, section_ids, category,
+  const { contract_name, client_name, contract_type, service_provider_id, project, project_id, section_ids, category,
           description, contract_amount, currency, start_date, end_date, status, fx_rate_at_signing } = body
   if (!contract_name) return NextResponse.json({ error: 'Contract name required' }, { status: 400 })
 
@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
   const { data, error } = await supabaseAdmin.from('contracts').insert({
     contract_name,
     client_name:     client_name     || contract_name,
-    contract_type:   'service',
+    contract_type:   contract_type || 'ESG',
     service_provider_id,
     project, project_id: project_id || null,
     section_id: primarySectionId,
