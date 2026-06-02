@@ -18,7 +18,14 @@ export default function NewContractPage() {
     start_date:'', end_date:'', status:'active', notes:'',
     fx_rate_at_signing: ''
   })
-  const [payments, setPayments] = useState<{ label:string; amount:string; date:string }[]>([])
+
+  // Payment at signature
+  const [sigMode,   setSigMode]   = useState<'amount'|'percent'>('percent')
+  const [sigValue,  setSigValue]  = useState('')
+  const [sigDate,   setSigDate]   = useState('')
+
+  // Future payments
+  const [payments, setPayments] = useState<{ label:string; amount:string; pct:string; mode:'amount'|'percent'; date:string }[]>([])
 
   useEffect(() => {
     Promise.all([
@@ -38,19 +45,28 @@ export default function NewContractPage() {
   }
 
   function addPayment() {
-    const n = payments.length + 1
-    setPayments(p => [...p, { label: `Payment ${n}`, amount: '', date: '' }])
+    const n = payments.length + 2
+    setPayments(p => [...p, { label: `Payment ${n}`, amount: '', pct: '', mode: 'percent', date: '' }])
   }
 
-  const totalPayments = payments.reduce((s,p) => s + (parseFloat(p.amount)||0), 0)
   const contractAmount = parseFloat(form.contract_amount) || 0
+
+  // Resolve amount from value + mode + contractAmount
+  function resolveAmount(value: string, mode: 'amount'|'percent'): number {
+    const v = parseFloat(value) || 0
+    if (mode === 'percent') return contractAmount > 0 ? Math.round(contractAmount * v / 100) : 0
+    return v
+  }
+
+  const sigAmount    = resolveAmount(sigValue, sigMode)
+  const futureTotal  = payments.reduce((s,p) => s + resolveAmount(p.mode === 'percent' ? p.pct : p.amount, p.mode), 0)
+  const scheduledTotal = sigAmount + futureTotal
+  const remaining    = contractAmount - scheduledTotal
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault(); setSaving(true); setError('')
 
-    // Use direct contract amount if provided, otherwise sum of payments
-    const finalAmount = contractAmount || totalPayments
-
+    const finalAmount = contractAmount || scheduledTotal
     const res = await fetch('/api/contracts', {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
@@ -62,15 +78,29 @@ export default function NewContractPage() {
     const data = await res.json()
     if (!res.ok) { setError(data.error || 'Failed to create contract'); setSaving(false); return }
 
-    // Create payment schedule entries as tranches
+    // Create payment at signature
+    if (sigValue) {
+      await fetch('/api/tranches', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          contract_id:    data.id,
+          tranche_name:   'Advance',
+          amount:         sigAmount,
+          scheduled_date: sigDate || null,
+        })
+      })
+    }
+
+    // Create future payments
     for (const p of payments) {
-      if (p.amount || p.date) {
+      const amt = resolveAmount(p.mode === 'percent' ? p.pct : p.amount, p.mode)
+      if (amt || p.date) {
         await fetch('/api/tranches', {
           method:'POST', headers:{'Content-Type':'application/json'},
           body: JSON.stringify({
             contract_id:    data.id,
             tranche_name:   p.label || 'Payment',
-            amount:         parseFloat(p.amount) || 0,
+            amount:         amt,
             scheduled_date: p.date || null,
           })
         })
@@ -81,6 +111,12 @@ export default function NewContractPage() {
 
   const inp = 'w-full px-3 py-2.5 text-sm rounded-xl outline-none'
   const inpStyle = { background:'#F8FAFC', border:'1.5px solid #E2E8F0', color:'#0F172A' }
+  const modeBtn  = (active: boolean) => ({
+    padding: '4px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer',
+    background: active ? '#3B82F6' : 'transparent',
+    color: active ? '#fff' : '#94A3B8',
+    border: 'none',
+  })
 
   return (
     <div className="px-6 py-8 max-w-3xl mx-auto">
@@ -98,7 +134,6 @@ export default function NewContractPage() {
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="grid grid-cols-2 gap-4">
 
-              {/* Contract Name */}
               <div className="col-span-2">
                 <label className="text-xs font-semibold uppercase tracking-widest mb-2 block" style={{ color: C.muted }}>Contract Name *</label>
                 <input className={inp} style={inpStyle} value={form.contract_name}
@@ -106,7 +141,6 @@ export default function NewContractPage() {
                   required placeholder="e.g. Environmental Assessment 2025" />
               </div>
 
-              {/* Project */}
               <div className="col-span-2">
                 <label className="text-xs font-semibold uppercase tracking-widest mb-2 block" style={{ color: C.muted }}>
                   Project
@@ -128,7 +162,6 @@ export default function NewContractPage() {
                 )}
               </div>
 
-              {/* Consultant */}
               <div>
                 <label className="text-xs font-semibold uppercase tracking-widest mb-2 block" style={{ color: C.muted }}>Consultant</label>
                 <select className={inp} style={inpStyle} value={form.service_provider_id} onChange={e=>setForm(p=>({...p,service_provider_id:e.target.value}))}>
@@ -137,7 +170,6 @@ export default function NewContractPage() {
                 </select>
               </div>
 
-              {/* ESG Category */}
               <div>
                 <label className="text-xs font-semibold uppercase tracking-widest mb-2 block" style={{ color: C.muted }}>ESG Category</label>
                 <select className={inp} style={inpStyle} value={form.category} onChange={e=>setForm(p=>({...p,category:e.target.value}))}>
@@ -148,7 +180,6 @@ export default function NewContractPage() {
                 </select>
               </div>
 
-              {/* Currency */}
               <div>
                 <label className="text-xs font-semibold uppercase tracking-widest mb-2 block" style={{ color: C.muted }}>Currency</label>
                 <select className={inp} style={inpStyle} value={form.currency} onChange={e=>setForm(p=>({...p,currency:e.target.value}))}>
@@ -156,63 +187,103 @@ export default function NewContractPage() {
                 </select>
               </div>
 
-              {/* Total Contract Amount */}
               <div>
-                <label className="text-xs font-semibold uppercase tracking-widest mb-2 block" style={{ color: C.muted }}>
-                  Total Contract Amount
-                </label>
-                <input
-                  type="number" className={inp} style={inpStyle}
+                <label className="text-xs font-semibold uppercase tracking-widest mb-2 block" style={{ color: C.muted }}>Total Contract Amount *</label>
+                <input type="number" className={inp} style={inpStyle}
                   value={form.contract_amount}
                   onChange={e=>setForm(p=>({...p,contract_amount:e.target.value}))}
-                  placeholder={totalPayments > 0 ? `Auto: ${totalPayments.toLocaleString()}` : 'e.g. 5000000'}
-                  step="0.01"
-                />
-                <p className="text-xs mt-1" style={{ color:'#94A3B8' }}>
-                  {totalPayments > 0 && !form.contract_amount
-                    ? `Will use sum of payments below: ${totalPayments.toLocaleString()} ${form.currency}`
-                    : 'Enter the total value of this contract'}
-                </p>
+                  placeholder="e.g. 50000000" step="0.01" required />
+                {contractAmount > 0 && (
+                  <p className="text-xs mt-1 font-medium" style={{ color:'#3B82F6' }}>
+                    {contractAmount.toLocaleString()} {form.currency}
+                  </p>
+                )}
               </div>
 
-              {/* FX Rate */}
               <div>
-                <label className="text-xs font-semibold uppercase tracking-widest mb-1 block" style={{ color: C.muted }}>
-                  Rate at Signing (1 USD = &#8358; X)
-                </label>
-                <p className="text-xs mb-2" style={{ color:'#94A3B8' }}>Auto-fetched today. Edit if different.</p>
+                <label className="text-xs font-semibold uppercase tracking-widest mb-1 block" style={{ color: C.muted }}>Rate at Signing (1 USD = &#8358; X)</label>
+                <p className="text-xs mb-2" style={{ color:'#94A3B8' }}>Auto-fetched. Edit if different.</p>
                 <input type="number" className={inp} style={inpStyle} value={form.fx_rate_at_signing}
                   onChange={e=>setForm(p=>({...p,fx_rate_at_signing:e.target.value}))}
                   placeholder="e.g. 1580" step="0.01" />
               </div>
 
-              {/* Start Date */}
               <div>
                 <label className="text-xs font-semibold uppercase tracking-widest mb-2 block" style={{ color: C.muted }}>Start Date</label>
                 <input type="date" className={inp} style={inpStyle} value={form.start_date} onChange={e=>setForm(p=>({...p,start_date:e.target.value}))} />
               </div>
 
-              {/* End Date */}
               <div>
                 <label className="text-xs font-semibold uppercase tracking-widest mb-2 block" style={{ color: C.muted }}>End Date</label>
                 <input type="date" className={inp} style={inpStyle} value={form.end_date} onChange={e=>setForm(p=>({...p,end_date:e.target.value}))} />
               </div>
 
-              {/* Description */}
               <div className="col-span-2">
                 <label className="text-xs font-semibold uppercase tracking-widest mb-2 block" style={{ color: C.muted }}>Description</label>
-                <textarea className={inp} style={inpStyle} rows={3}
+                <textarea className={inp} style={inpStyle} rows={2}
                   value={form.description} onChange={e=>setForm(p=>({...p,description:e.target.value}))}
                   placeholder="Contract scope and description..." />
               </div>
             </div>
 
-            {/* Payment Schedule */}
+            {/* ── PAYMENT AT SIGNATURE ── */}
+            <div className="rounded-2xl overflow-hidden" style={{ border:'1px solid #E2E8F0' }}>
+              <div className="px-4 py-3 flex items-center gap-2" style={{ background:'linear-gradient(90deg,rgba(16,185,129,0.08),rgba(16,185,129,0.03))', borderBottom:'1px solid #E2E8F0' }}>
+                <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background:'rgba(16,185,129,0.15)' }}>
+                  <svg width="13" height="13" fill="none" stroke="#10B981" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                </div>
+                <p className="text-sm font-semibold" style={{ color:'#0F172A' }}>Payment at Signature</p>
+                <p className="text-xs ml-auto" style={{ color:'#94A3B8' }}>First payment due on contract signing</p>
+              </div>
+              <div className="p-4">
+                <div className="grid gap-3" style={{ gridTemplateColumns:'1fr 1.4fr 1fr' }}>
+                  {/* Mode toggle + value */}
+                  <div>
+                    <div className="flex items-center gap-1 mb-2 p-1 rounded-lg w-fit" style={{ background:'#F1F5F9' }}>
+                      <button type="button" style={modeBtn(sigMode==='percent')} onClick={()=>setSigMode('percent')}>%</button>
+                      <button type="button" style={modeBtn(sigMode==='amount')} onClick={()=>setSigMode('amount')}>Amount</button>
+                    </div>
+                    <input
+                      type="number" className={inp} style={inpStyle}
+                      value={sigValue}
+                      onChange={e=>setSigValue(e.target.value)}
+                      placeholder={sigMode==='percent' ? 'e.g. 30' : 'e.g. 15000000'}
+                      step={sigMode==='percent' ? '1' : '0.01'}
+                      min="0" max={sigMode==='percent' ? '100' : undefined}
+                    />
+                  </div>
+                  {/* Computed amount */}
+                  <div className="flex items-end pb-1">
+                    {sigValue && contractAmount > 0 ? (
+                      <div className="w-full px-3 py-2.5 rounded-xl" style={{ background:'rgba(16,185,129,0.08)', border:'1px solid rgba(16,185,129,0.2)' }}>
+                        <p className="text-xs mb-0.5" style={{ color:'#64748B' }}>
+                          {sigMode==='percent' ? `${sigValue}% of contract` : 'Fixed amount'}
+                        </p>
+                        <p className="text-sm font-bold" style={{ color:'#10B981' }}>
+                          {sigAmount.toLocaleString()} {form.currency}
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="w-full px-3 py-2.5 rounded-xl" style={{ background:'#F8FAFC', border:'1px solid #E2E8F0' }}>
+                        <p className="text-xs" style={{ color:'#CBD5E1' }}>Enter value on the left</p>
+                      </div>
+                    )}
+                  </div>
+                  {/* Date */}
+                  <div>
+                    <label className="text-xs font-semibold uppercase tracking-widest mb-2 block" style={{ color: C.muted }}>Signature Date</label>
+                    <input type="date" className={inp} style={inpStyle} value={sigDate} onChange={e=>setSigDate(e.target.value)} />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* ── FUTURE PAYMENTS ── */}
             <div>
               <div className="flex items-center justify-between mb-3">
                 <div>
-                  <p className="text-sm font-semibold" style={{ color: '#0F172A' }}>Payment Schedule</p>
-                  <p className="text-xs mt-0.5" style={{ color:'#94A3B8' }}>Add expected payment dates and amounts</p>
+                  <p className="text-sm font-semibold" style={{ color: '#0F172A' }}>Future Payments</p>
+                  <p className="text-xs mt-0.5" style={{ color:'#94A3B8' }}>Remaining scheduled payments after signature</p>
                 </div>
                 <button type="button" onClick={addPayment} className="text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1.5" style={{ background:'rgba(59,130,246,0.1)', color: C.blue }}>
                   <svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -221,57 +292,94 @@ export default function NewContractPage() {
               </div>
 
               {payments.length === 0 && (
-                <div className="text-center py-6 rounded-xl" style={{ border:'1px dashed #E2E8F0', background:'#F8FAFC' }}>
-                  <p className="text-sm" style={{ color:'#94A3B8' }}>No payments scheduled yet.</p>
-                  <p className="text-xs mt-1" style={{ color:'#CBD5E1' }}>Click "Add Payment" to schedule payment dates.</p>
+                <div className="text-center py-5 rounded-xl" style={{ border:'1px dashed #E2E8F0', background:'#F8FAFC' }}>
+                  <p className="text-sm" style={{ color:'#94A3B8' }}>No future payments yet.</p>
+                  <p className="text-xs mt-1" style={{ color:'#CBD5E1' }}>Click "Add Payment" to schedule future payments.</p>
                 </div>
               )}
 
               <div className="space-y-2">
-                {payments.map((p, i) => (
-                  <div key={i} className="grid gap-3 p-3 rounded-xl items-center" style={{ background:'#F8FAFC', border:'1px solid #E2E8F0', gridTemplateColumns:'1.2fr 1fr 1.2fr auto' }}>
-                    {/* Label */}
-                    <input className={inp} style={inpStyle} placeholder="e.g. Advance, Final..."
-                      value={p.label}
-                      onChange={e=>setPayments(prev=>prev.map((x,j)=>j===i?{...x,label:e.target.value}:x))} />
-                    {/* Amount */}
-                    <input type="number" className={inp} style={inpStyle} placeholder="Amount"
-                      value={p.amount}
-                      onChange={e=>setPayments(prev=>prev.map((x,j)=>j===i?{...x,amount:e.target.value}:x))} />
-                    {/* Date */}
-                    <input type="date" className={inp} style={inpStyle}
-                      value={p.date}
-                      onChange={e=>setPayments(prev=>prev.map((x,j)=>j===i?{...x,date:e.target.value}:x))} />
-                    {/* Remove */}
-                    <button type="button" onClick={()=>setPayments(prev=>prev.filter((_,j)=>j!==i))}
-                      className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ color:'#EF4444', background:'rgba(239,68,68,0.08)' }}>
-                      <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                    </button>
-                  </div>
-                ))}
+                {payments.map((p, i) => {
+                  const resolvedAmt = resolveAmount(p.mode==='percent' ? p.pct : p.amount, p.mode)
+                  return (
+                    <div key={i} className="p-3 rounded-xl" style={{ background:'#F8FAFC', border:'1px solid #E2E8F0' }}>
+                      <div className="grid gap-3 items-start" style={{ gridTemplateColumns:'1.3fr 0.9fr 1.1fr 1fr auto' }}>
+                        {/* Label */}
+                        <div>
+                          <label className="text-xs mb-1 block" style={{ color:'#94A3B8' }}>Label</label>
+                          <input className={inp} style={inpStyle} placeholder="e.g. Milestone 1"
+                            value={p.label}
+                            onChange={e=>setPayments(prev=>prev.map((x,j)=>j===i?{...x,label:e.target.value}:x))} />
+                        </div>
+                        {/* Mode toggle */}
+                        <div>
+                          <label className="text-xs mb-1 block" style={{ color:'#94A3B8' }}>Type</label>
+                          <div className="flex items-center gap-1 p-1 rounded-lg" style={{ background:'#E2E8F0' }}>
+                            <button type="button" style={modeBtn(p.mode==='percent')} onClick={()=>setPayments(prev=>prev.map((x,j)=>j===i?{...x,mode:'percent'}:x))}>%</button>
+                            <button type="button" style={modeBtn(p.mode==='amount')} onClick={()=>setPayments(prev=>prev.map((x,j)=>j===i?{...x,mode:'amount'}:x))}>Amt</button>
+                          </div>
+                        </div>
+                        {/* Value */}
+                        <div>
+                          <label className="text-xs mb-1 block" style={{ color:'#94A3B8' }}>{p.mode==='percent' ? 'Percentage (%)' : 'Amount'}</label>
+                          <input type="number" className={inp} style={inpStyle}
+                            placeholder={p.mode==='percent' ? 'e.g. 40' : 'e.g. 20000000'}
+                            value={p.mode==='percent' ? p.pct : p.amount}
+                            onChange={e=>setPayments(prev=>prev.map((x,j)=>j===i ? (p.mode==='percent'?{...x,pct:e.target.value}:{...x,amount:e.target.value}) : x))} />
+                        </div>
+                        {/* Date */}
+                        <div>
+                          <label className="text-xs mb-1 block" style={{ color:'#94A3B8' }}>Due Date</label>
+                          <input type="date" className={inp} style={inpStyle}
+                            value={p.date}
+                            onChange={e=>setPayments(prev=>prev.map((x,j)=>j===i?{...x,date:e.target.value}:x))} />
+                        </div>
+                        {/* Remove */}
+                        <div className="pt-5">
+                          <button type="button" onClick={()=>setPayments(prev=>prev.filter((_,j)=>j!==i))}
+                            className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ color:'#EF4444', background:'rgba(239,68,68,0.08)' }}>
+                            <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                          </button>
+                        </div>
+                      </div>
+                      {/* Show resolved amount */}
+                      {resolvedAmt > 0 && p.mode==='percent' && contractAmount > 0 && (
+                        <p className="text-xs mt-2 ml-1" style={{ color:'#3B82F6' }}>
+                          = {resolvedAmt.toLocaleString()} {form.currency}
+                        </p>
+                      )}
+                    </div>
+                  )
+                })}
               </div>
 
-              {/* Totals summary */}
-              {(payments.length > 0 || contractAmount > 0) && (
-                <div className="mt-3 px-4 py-3 rounded-xl flex items-center justify-between" style={{ background:'rgba(59,130,246,0.05)', border:'1px solid rgba(59,130,246,0.15)' }}>
-                  <div className="flex items-center gap-4">
-                    <div>
-                      <p className="text-xs" style={{ color:'#64748B' }}>Contract total</p>
-                      <p className="text-sm font-bold" style={{ color:'#0F172A' }}>
-                        {(contractAmount || totalPayments).toLocaleString()} {form.currency}
-                      </p>
-                    </div>
-                    {payments.length > 0 && contractAmount > 0 && (
-                      <div>
-                        <p className="text-xs" style={{ color:'#64748B' }}>Scheduled</p>
-                        <p className="text-sm font-semibold" style={{ color: totalPayments > contractAmount ? '#EF4444' : '#10B981' }}>
-                          {totalPayments.toLocaleString()} {form.currency}
-                          {totalPayments > contractAmount && ' (exceeds total!)'}
-                        </p>
+              {/* Summary bar */}
+              {contractAmount > 0 && (sigValue || payments.length > 0) && (
+                <div className="mt-4 p-4 rounded-xl" style={{ background:'#F8FAFC', border:'1px solid #E2E8F0' }}>
+                  <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color:'#94A3B8' }}>Payment Summary</p>
+                  <div className="grid grid-cols-4 gap-3">
+                    {[
+                      { label:'Contract Total',  value:`${contractAmount.toLocaleString()} ${form.currency}`,    color:'#3B82F6' },
+                      { label:'At Signature',    value:sigAmount > 0 ? `${sigAmount.toLocaleString()} ${form.currency}` : '—', color:'#10B981' },
+                      { label:'Future Payments', value:`${futureTotal.toLocaleString()} ${form.currency}`,        color:'#8B5CF6' },
+                      { label:'Unscheduled',     value:`${Math.max(0,remaining).toLocaleString()} ${form.currency}`, color: remaining < 0 ? '#EF4444' : remaining === 0 ? '#10B981' : '#F59E0B' },
+                    ].map(s=>(
+                      <div key={s.label} className="text-center">
+                        <p className="text-xs mb-1" style={{ color:'#94A3B8' }}>{s.label}</p>
+                        <p className="text-sm font-bold" style={{ color:s.color }}>{s.value}</p>
                       </div>
-                    )}
+                    ))}
                   </div>
-                  <p className="text-xs" style={{ color:'#94A3B8' }}>{payments.length} payment{payments.length!==1?'s':''} scheduled</p>
+                  {/* Progress bar */}
+                  {contractAmount > 0 && (
+                    <div className="mt-3 h-2 rounded-full overflow-hidden flex" style={{ background:'#E2E8F0' }}>
+                      <div style={{ width:`${Math.min(100,Math.round(sigAmount/contractAmount*100))}%`, background:'#10B981', transition:'width 0.3s' }}/>
+                      <div style={{ width:`${Math.min(100-Math.round(sigAmount/contractAmount*100),Math.round(futureTotal/contractAmount*100))}%`, background:'#8B5CF6', transition:'width 0.3s' }}/>
+                    </div>
+                  )}
+                  {remaining < 0 && (
+                    <p className="text-xs mt-2" style={{ color:'#EF4444' }}>Warning: scheduled payments exceed contract total by {Math.abs(remaining).toLocaleString()} {form.currency}</p>
+                  )}
                 </div>
               )}
             </div>
