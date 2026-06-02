@@ -21,13 +21,16 @@ export default function NewContractPage() {
     fx_rate_at_signing: ''
   })
 
+  // Payment type
+  const [paymentType, setPaymentType] = useState<'date_based'|'milestone_based'>('date_based')
+
   // Payment at signature
   const [sigMode,   setSigMode]   = useState<'amount'|'percent'>('percent')
   const [sigValue,  setSigValue]  = useState('')
   const [sigDate,   setSigDate]   = useState('')
 
   // Future payments
-  const [payments, setPayments] = useState<{ label:string; amount:string; pct:string; mode:'amount'|'percent'; date:string }[]>([])
+  const [payments, setPayments] = useState<{ label:string; amount:string; pct:string; mode:'amount'|'percent'; date:string; milestone:string }[]>([])
 
   useEffect(() => {
     Promise.all([
@@ -53,7 +56,7 @@ export default function NewContractPage() {
 
   function addPayment() {
     const n = payments.length + 2
-    setPayments(p => [...p, { label: `Payment ${n}`, amount: '', pct: '', mode: 'percent', date: '' }])
+    setPayments(p => [...p, { label: `Payment ${n}`, amount: '', pct: '', mode: 'percent', date: '', milestone: '' }])
   }
 
   const contractAmount = parseFloat(form.contract_amount) || 0
@@ -80,6 +83,7 @@ export default function NewContractPage() {
         ...form,
         contract_amount: finalAmount,
         section_ids: selectedSection ? [selectedSection] : [],
+        payment_type: paymentType,
         fx_rate_at_signing: form.fx_rate_at_signing ? parseFloat(form.fx_rate_at_signing) : null,
       })
     })
@@ -102,14 +106,15 @@ export default function NewContractPage() {
     // Create future payments
     for (const p of payments) {
       const amt = resolveAmount(p.mode === 'percent' ? p.pct : p.amount, p.mode)
-      if (amt || p.date) {
+      if (amt || p.date || p.milestone) {
         await fetch('/api/tranches', {
           method:'POST', headers:{'Content-Type':'application/json'},
           body: JSON.stringify({
             contract_id:    data.id,
             tranche_name:   p.label || `Payment ${payments.indexOf(p) + 2}`,
             amount:         amt,
-            scheduled_date: p.date || null,
+            scheduled_date: paymentType === 'date_based' ? (p.date || null) : null,
+            notes:          paymentType === 'milestone_based' ? (p.milestone || null) : null,
           })
         })
       }
@@ -147,6 +152,30 @@ export default function NewContractPage() {
                 <input className={inp} style={inpStyle} value={form.contract_name}
                   onChange={e=>setForm(p=>({...p,contract_name:e.target.value}))}
                   required placeholder="e.g. Environmental Assessment 2025" />
+              </div>
+
+              {/* Payment type toggle */}
+              <div className="col-span-2">
+                <label className="text-xs font-semibold uppercase tracking-widest mb-3 block" style={{ color: C.muted }}>Payment Schedule Type</label>
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { value:'date_based',      icon:'📅', title:'Date-based',      desc:'Fixed payment dates (e.g. 30% on Jan 1, 40% on March 15)' },
+                    { value:'milestone_based', icon:'🎯', title:'Milestone-based', desc:'Payments triggered by deliverable completion' },
+                  ].map(opt => (
+                    <button key={opt.value} type="button" onClick={() => setPaymentType(opt.value as any)}
+                      className="flex items-start gap-3 px-4 py-3.5 rounded-xl text-left transition-all"
+                      style={{
+                        background: paymentType === opt.value ? 'rgba(59,130,246,0.06)' : '#F8FAFC',
+                        border: paymentType === opt.value ? '2px solid #3B82F6' : '1.5px solid #E2E8F0',
+                      }}>
+                      <span className="text-xl mt-0.5">{opt.icon}</span>
+                      <div>
+                        <p className="text-sm font-semibold" style={{ color: paymentType === opt.value ? '#1D4ED8' : '#0F172A' }}>{opt.title}</p>
+                        <p className="text-xs mt-0.5" style={{ color:'#94A3B8' }}>{opt.desc}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <div className="col-span-2">
@@ -343,11 +372,11 @@ export default function NewContractPage() {
                   const resolvedAmt = resolveAmount(p.mode==='percent' ? p.pct : p.amount, p.mode)
                   return (
                     <div key={i} className="p-3 rounded-xl" style={{ background:'#F8FAFC', border:'1px solid #E2E8F0' }}>
-                      <div className="grid gap-3 items-start" style={{ gridTemplateColumns:'1.3fr 0.9fr 1.1fr 1fr auto' }}>
+                      <div className="grid gap-3 items-start" style={{ gridTemplateColumns: paymentType === 'milestone_based' ? '1fr 0.7fr 1fr 1.8fr auto' : '1.3fr 0.9fr 1.1fr 1fr auto' }}>
                         {/* Label */}
                         <div>
                           <label className="text-xs mb-1 block" style={{ color:'#94A3B8' }}>Label</label>
-                          <input className={inp} style={inpStyle} placeholder="e.g. Milestone 1"
+                          <input className={inp} style={inpStyle} placeholder={paymentType === 'milestone_based' ? 'e.g. Phase 1 delivery' : 'e.g. Payment 2'}
                             value={p.label}
                             onChange={e=>setPayments(prev=>prev.map((x,j)=>j===i?{...x,label:e.target.value}:x))} />
                         </div>
@@ -367,13 +396,23 @@ export default function NewContractPage() {
                             value={p.mode==='percent' ? p.pct : p.amount}
                             onChange={e=>setPayments(prev=>prev.map((x,j)=>j===i ? (p.mode==='percent'?{...x,pct:e.target.value}:{...x,amount:e.target.value}) : x))} />
                         </div>
-                        {/* Date */}
-                        <div>
-                          <label className="text-xs mb-1 block" style={{ color:'#94A3B8' }}>Due Date</label>
-                          <input type="date" className={inp} style={inpStyle}
-                            value={p.date}
-                            onChange={e=>setPayments(prev=>prev.map((x,j)=>j===i?{...x,date:e.target.value}:x))} />
-                        </div>
+                        {/* Date OR Milestone */}
+                        {paymentType === 'date_based' ? (
+                          <div>
+                            <label className="text-xs mb-1 block" style={{ color:'#94A3B8' }}>Due Date</label>
+                            <input type="date" className={inp} style={inpStyle}
+                              value={p.date}
+                              onChange={e=>setPayments(prev=>prev.map((x,j)=>j===i?{...x,date:e.target.value}:x))} />
+                          </div>
+                        ) : (
+                          <div>
+                            <label className="text-xs mb-1 block" style={{ color:'#8B5CF6' }}>🎯 Milestone — what triggers this payment?</label>
+                            <input className={inp} style={{ ...inpStyle, border:'1.5px solid rgba(139,92,246,0.4)' }}
+                              placeholder="e.g. Delivery and validation of Phase 1 report"
+                              value={p.milestone}
+                              onChange={e=>setPayments(prev=>prev.map((x,j)=>j===i?{...x,milestone:e.target.value}:x))} />
+                          </div>
+                        )}
                         {/* Remove */}
                         <div className="pt-5">
                           <button type="button" onClick={()=>setPayments(prev=>prev.filter((_,j)=>j!==i))}

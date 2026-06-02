@@ -235,7 +235,12 @@ export default function PaymentRegisterPage() {
                             return (
                               <td key={name} className="px-3 py-3 text-center" style={{ borderLeft:'1px solid #F1F5F9' }}>
                                 <p className="text-xs font-bold mb-0.5" style={{ color:st.color }}>{formatCurrency(amt, displayCcy)}</p>
-                                {t.scheduled_date && <p className="text-xs" style={{ color:'#94A3B8' }}>{new Date(t.scheduled_date).toLocaleDateString('en-GB',{day:'2-digit',month:'short'})}</p>}
+                                {t.scheduled_date
+                                  ? <p className="text-xs" style={{ color:'#94A3B8' }}>{new Date(t.scheduled_date).toLocaleDateString('en-GB',{day:'2-digit',month:'short'})}</p>
+                                  : t.notes
+                                    ? <p className="text-xs truncate max-w-[90px]" title={t.notes} style={{ color:'#8B5CF6' }}>🎯 {t.notes}</p>
+                                    : null
+                                }
                                 <div className="mt-0.5 flex items-center justify-center gap-1">
                                   <div className="w-1.5 h-1.5 rounded-full" style={{ background:st.color }}/>
                                   <span className="text-xs" style={{ color:st.color, fontSize:10 }}>{st.label}</span>

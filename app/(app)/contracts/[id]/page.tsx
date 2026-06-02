@@ -75,6 +75,17 @@ export default function ContractDetailPage() {
     setMarking(null)
   }
 
+  async function markMilestoneAchieved(trancheId: string) {
+    setMarking(trancheId)
+    const today = new Date().toISOString().split('T')[0]
+    await fetch(`/api/tranches/${trancheId}`, {
+      method:'PATCH', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ status: 'pending_review', scheduled_date: today }),
+    })
+    await load()
+    setMarking(null)
+  }
+
   async function markPaid(trancheId: string) {
     setMarking(trancheId)
     await fetch(`/api/tranches/${trancheId}/mark-paid`, {
@@ -371,7 +382,9 @@ export default function ContractDetailPage() {
         <div className="px-6 py-4 flex items-center justify-between" style={{ borderBottom:`1px solid #F1F5F9` }}>
           <div>
             <h2 className="text-sm font-bold" style={{ color:C.text }}>Payment Milestones</h2>
-            <p className="text-xs mt-0.5" style={{ color:C.muted }}>{tranchePct}% of tranches paid · {fc(tranchePaid)} of {fc(trancheTotal)}</p>
+            <p className="text-xs mt-0.5" style={{ color:C.muted }}>
+            {contract.payment_type === 'milestone_based' ? '🎯 Milestone-based' : '📅 Date-based'} · {tranchePct}% paid · {fc(tranchePaid)} of {fc(trancheTotal)}
+          </p>
           </div>
         </div>
 
@@ -386,9 +399,18 @@ export default function ContractDetailPage() {
                   <div className="w-16 shrink-0">
                     <span className="text-sm font-bold" style={{ color:C.text }}>{t.tranche_name}</span>
                   </div>
-                  <div className="w-36 shrink-0">
+                  <div className="w-44 shrink-0">
                     <p className="text-sm font-semibold" style={{ color:C.text }}>{fc(t.amount)}</p>
                     {t.scheduled_date && <p className="text-xs mt-0.5" style={{ color:C.muted }}>{formatDate(t.scheduled_date)}</p>}
+                    {!t.scheduled_date && t.notes && (
+                      <p className="text-xs mt-0.5 flex items-center gap-1" style={{ color:'#8B5CF6' }}>
+                        <span>🎯</span>
+                        <span className="truncate max-w-[140px]" title={t.notes}>{t.notes}</span>
+                      </p>
+                    )}
+                    {!t.scheduled_date && !t.notes && contract.payment_type === 'milestone_based' && (
+                      <p className="text-xs mt-0.5" style={{ color:'#CBD5E1' }}>No milestone set</p>
+                    )}
                   </div>
                   <div className="flex-1">
                     {t.status === 'paid' ? (
@@ -401,6 +423,22 @@ export default function ContractDetailPage() {
                         <Link href="/validations" className="text-xs px-3 py-1.5 rounded-lg font-medium hover:underline" style={{ background:'rgba(59,130,246,0.08)', color:'#3B82F6' }}>
                           In validation pipeline — view in Validations
                         </Link>
+                      </div>
+                    ) : contract.payment_type === 'milestone_based' ? (
+                      <div className="flex flex-col gap-1.5">
+                        {t.notes && (
+                          <p className="text-xs px-3 py-1.5 rounded-lg" style={{ background:'rgba(139,92,246,0.08)', color:'#8B5CF6', border:'1px solid rgba(139,92,246,0.2)' }}>
+                            🎯 {t.notes}
+                          </p>
+                        )}
+                        <button
+                          onClick={() => markMilestoneAchieved(t.id)}
+                          disabled={marking===t.id}
+                          className="text-xs font-semibold px-3 py-1.5 rounded-lg disabled:opacity-50 flex items-center gap-1.5 w-fit"
+                          style={{ background:'rgba(139,92,246,0.1)', color:'#8B5CF6', border:'1px solid rgba(139,92,246,0.25)' }}
+                        >
+                          {marking===t.id ? '...' : '✓ Mark Milestone Achieved → Enter Validation'}
+                        </button>
                       </div>
                     ) : (
                       <div className="flex items-center gap-2">

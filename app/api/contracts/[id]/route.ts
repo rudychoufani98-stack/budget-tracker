@@ -6,7 +6,7 @@ import { requireAuth } from '@/lib/auth-guard'
 export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
   const deny = await requireAuth(_req)
   if (deny) return deny
-  const { data: contract } = await supabaseAdmin.from('contracts').select('*, service_providers(*), contract_tranches(*)').eq('id', params.id).single()
+  const { data: contract } = await supabaseAdmin.from('contracts').select('*, service_providers(*), contract_tranches(id, tranche_name, amount, status, scheduled_date, paid_date, pop_reference, notes)').eq('id', params.id).single()
   if (!contract) return NextResponse.json({ error: 'Not found' }, { status: 404 })
   const [{ data: invoices }, { data: currencies }] = await Promise.all([
     supabaseAdmin.from('invoices').select('*').eq('contract_id', params.id).order('created_at', { ascending: false }),

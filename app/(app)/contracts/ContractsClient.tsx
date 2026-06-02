@@ -203,7 +203,12 @@ export function ContractsClient({ contracts, projects, initialProject, initialSe
                     <p className="text-sm font-semibold truncate" style={{ color:'#0F172A' }}>{c.contract_name}</p>
                     <span className="text-xs px-1.5 py-0.5 rounded-full font-semibold shrink-0" style={{ background:cs.bg, color:cs.color }}>{cs.label}</span>
                   </div>
-                  <p className="text-xs truncate" style={{ color:'#94A3B8' }}>{c.service_providers?.name || c.client_name || '--'}</p>
+                  <div className="flex items-center gap-1.5">
+                    <p className="text-xs truncate" style={{ color:'#94A3B8' }}>{c.service_providers?.name || c.client_name || '--'}</p>
+                    {c.payment_type === 'milestone_based' && (
+                      <span className="text-xs px-1.5 py-0.5 rounded-full font-semibold shrink-0" style={{ background:'rgba(139,92,246,0.1)', color:'#8B5CF6' }}>🎯 Milestone</span>
+                    )}
+                  </div>
                 </div>
               </div>
 

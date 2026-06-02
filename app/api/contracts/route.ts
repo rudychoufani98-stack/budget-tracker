@@ -7,7 +7,7 @@ export async function GET(req: NextRequest) {
   if (deny) return deny
   const { data, error } = await supabaseAdmin
     .from('contracts')
-    .select('*, service_providers(*), contract_tranches(*), projects(id, name), project_sections(id, name), contract_sections(section_id, project_sections(id, name))')
+    .select('*, service_providers(*), contract_tranches(id, tranche_name, amount, status, scheduled_date, paid_date, pop_reference, notes), projects(id, name), project_sections(id, name), contract_sections(section_id, project_sections(id, name))')
     .order('created_at', { ascending: false })
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json(data || [])
