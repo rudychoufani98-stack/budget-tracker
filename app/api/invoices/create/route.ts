@@ -25,9 +25,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Store currency in its own table (fresh table, always in schema cache)
-    await supabaseAdmin
+    const { error: ccyErr } = await supabaseAdmin
       .from('invoice_currency')
       .insert({ invoice_id: inv.id, currency })
+    if (ccyErr) {
+      console.error('invoice_currency insert failed:', ccyErr)
+      // Try upsert as fallback
+      await supabaseAdmin.from('invoice_currency').upsert({ invoice_id: inv.id, currency }, { onConflict: 'invoice_id' })
+    }
 
     // Auto-save PDF to Document Vault
     if (invoiceWithoutCurrency.pdf_url) {

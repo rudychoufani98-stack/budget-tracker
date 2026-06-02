@@ -18,10 +18,11 @@ export default async function InvoicesPage() {
   const currencyMap: Record<string, string> = {}
   for (const c of currencyData || []) currencyMap[c.invoice_id] = c.currency
 
-  const invoices = (invoiceData || []).map((inv: any) => ({
-    ...inv,
-    currency: currencyMap[inv.id] || inv.currency || 'NGN',
-  }))
+  const invoices = (invoiceData || []).map((inv: any) => {
+    const ccy = currencyMap[inv.id]
+    if (!ccy) console.warn(`invoice_currency missing for invoice ${inv.id} (${inv.invoice_number})`)
+    return { ...inv, currency: ccy || inv.currency || 'NGN' }
+  })
 
   return (
     <div className="px-6 py-8 max-w-7xl mx-auto">
