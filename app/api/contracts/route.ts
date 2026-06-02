@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
   if (deny) return deny
   const body = await req.json()
   const { contract_name, client_name, service_provider_id, project, project_id, section_id, category,
-          description, contract_amount, currency, start_date, end_date, status, notes, fx_rate_at_signing } = body
+          description, contract_amount, currency, start_date, end_date, status, fx_rate_at_signing } = body
   if (!contract_name) return NextResponse.json({ error: 'Contract name required' }, { status: 400 })
 
   // Auto-fetch NGN/USD rate if not provided
@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
     currency: currency || 'NGN',
     start_date:  start_date  || null,
     end_date:    end_date    || null,
-    status: status || 'active', notes,
+    status: status || 'active',
     fx_rate_at_signing: signingRate,
   }).select().single()
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
