@@ -10,11 +10,12 @@ export default function NewContractPage() {
   const router = useRouter()
   const [providers, setProviders] = useState<any[]>([])
   const [projects,  setProjects]  = useState<any[]>([])
-  const [sections,  setSections]  = useState<any[]>([])
+  const [sections,     setSections]     = useState<any[]>([])
+  const [selectedSections, setSelectedSections] = useState<string[]>([])
   const [saving, setSaving] = useState(false)
   const [error,  setError]  = useState('')
   const [form, setForm] = useState({
-    contract_name:'', service_provider_id:'', project_id:'', project:'', section_id:'',
+    contract_name:'', service_provider_id:'', project_id:'', project:'',
     category:'E', description:'', currency:'NGN', contract_amount:'',
     start_date:'', end_date:'', status:'active',
     fx_rate_at_signing: ''
@@ -42,11 +43,18 @@ export default function NewContractPage() {
 
   function handleProjectChange(projectId: string) {
     const proj = projects.find((p:any) => p.id === projectId)
-    setForm(f => ({ ...f, project_id: projectId, project: proj?.name || '', section_id: '' }))
+    setForm(f => ({ ...f, project_id: projectId, project: proj?.name || '' }))
     setSections([])
+    setSelectedSections([])
     if (projectId) {
       fetch(`/api/sections?project_id=${projectId}`).then(r=>r.json()).then(d=>setSections(Array.isArray(d)?d:[]))
     }
+  }
+
+  function toggleSection(id: string) {
+    setSelectedSections(prev =>
+      prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]
+    )
   }
 
   function addPayment() {
@@ -77,6 +85,7 @@ export default function NewContractPage() {
       body: JSON.stringify({
         ...form,
         contract_amount: finalAmount,
+        section_ids: selectedSections,
         fx_rate_at_signing: form.fx_rate_at_signing ? parseFloat(form.fx_rate_at_signing) : null,
       })
     })
@@ -167,18 +176,41 @@ export default function NewContractPage() {
                 )}
               </div>
 
-              {/* Section — only shown when a project with sections is selected */}
+              {/* Sections — multi-select checkboxes */}
               {form.project_id && (
                 <div className="col-span-2">
                   <label className="text-xs font-semibold uppercase tracking-widest mb-2 block" style={{ color: C.muted }}>
-                    Section
-                    <span className="ml-1.5 text-xs font-normal" style={{ color:'#94A3B8' }}>(optional)</span>
+                    Sections
+                    <span className="ml-1.5 text-xs font-normal" style={{ color:'#94A3B8' }}>— select one or more (optional)</span>
                   </label>
                   {sections.length > 0 ? (
-                    <select className={inp} style={inpStyle} value={form.section_id} onChange={e=>setForm(p=>({...p,section_id:e.target.value}))}>
-                      <option value="">No section — direct to project</option>
-                      {sections.map((s:any) => <option key={s.id} value={s.id}>{s.name}</option>)}
-                    </select>
+                    <div className="grid grid-cols-2 gap-2">
+                      {sections.map((s:any) => {
+                        const checked = selectedSections.includes(s.id)
+                        return (
+                          <button
+                            key={s.id}
+                            type="button"
+                            onClick={() => toggleSection(s.id)}
+                            className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-left transition-all"
+                            style={{
+                              background: checked ? 'rgba(59,130,246,0.08)' : '#F8FAFC',
+                              border: checked ? '1.5px solid #3B82F6' : '1.5px solid #E2E8F0',
+                            }}
+                          >
+                            {/* Checkbox */}
+                            <div className="w-4 h-4 rounded flex items-center justify-center shrink-0" style={{ background: checked ? '#3B82F6' : '#fff', border: checked ? '2px solid #3B82F6' : '2px solid #CBD5E1' }}>
+                              {checked && (
+                                <svg width="9" height="9" fill="none" stroke="#fff" strokeWidth="3" viewBox="0 0 24 24">
+                                  <polyline points="20 6 9 17 4 12"/>
+                                </svg>
+                              )}
+                            </div>
+                            <span className="text-sm font-medium" style={{ color: checked ? '#1D4ED8' : '#0F172A' }}>{s.name}</span>
+                          </button>
+                        )
+                      })}
+                    </div>
                   ) : (
                     <div className="px-3 py-2.5 rounded-xl text-sm" style={{ background:'#F8FAFC', border:'1.5px solid #E2E8F0', color:'#94A3B8' }}>
                       No sections in this project —{' '}
@@ -186,6 +218,11 @@ export default function NewContractPage() {
                         add one in the project page
                       </Link>
                     </div>
+                  )}
+                  {selectedSections.length > 0 && (
+                    <p className="text-xs mt-2" style={{ color:'#3B82F6' }}>
+                      {selectedSections.length} section{selectedSections.length > 1 ? 's' : ''} selected
+                    </p>
                   )}
                 </div>
               )}
