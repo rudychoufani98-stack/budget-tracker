@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { formatCurrency, formatDate } from '@/lib/format'
@@ -42,6 +42,30 @@ export default function ContractDetailPage() {
   const [editing,     setEditing]    = useState(false)
   const [editData,    setEditData]   = useState<any>({})
   const [savingEdit,  setSavingEdit] = useState(false)
+  const [contractDoc, setContractDoc] = useState<any>(null)
+  const [uploadingDoc, setUploadingDoc] = useState(false)
+  const contractFileRef = useRef<HTMLInputElement>(null)
+
+  async function uploadContractPdf(file: File) {
+    setUploadingDoc(true)
+    const fd = new FormData()
+    fd.append('file', file)
+    fd.append('path', `contracts/${id}/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`)
+    const res = await fetch('/api/storage/upload', { method: 'POST', body: fd })
+    const { signedUrl, error } = await res.json()
+    if (error) { alert(`Upload failed: ${error}`); setUploadingDoc(false); return }
+    // Save to documents table
+    await fetch('/api/documents', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contract_id: id, filename: file.name, file_url: signedUrl, file_type: 'contract' }) })
+    await loadContractDoc()
+    setUploadingDoc(false)
+  }
+
+  async function loadContractDoc() {
+    const res = await fetch(`/api/documents?contract_id=${id}&file_type=contract`)
+    const data = await res.json()
+    if (Array.isArray(data) && data.length > 0) setContractDoc(data[0])
+  }
 
   async function saveEdit() {
     setSavingEdit(true)
@@ -85,7 +109,7 @@ export default function ContractDetailPage() {
     setLoading(false)
   }
 
-  useEffect(() => { load() }, [id])
+  useEffect(() => { load(); loadContractDoc() }, [id])
 
   async function sendToAccounting(trancheId: string) {
     setMarking(trancheId)
@@ -365,6 +389,64 @@ export default function ContractDetailPage() {
               {deleting ? 'Deleting...' : 'Delete'}
             </button>
           </div>
+        </div>
+      </div>
+
+      {/* ── CONTRACT DOCUMENT ── */}
+      <div className="rounded-2xl overflow-hidden mb-6" style={{ background:C.card, border:`1px solid ${C.border}` }}>
+        <div className="px-6 py-4 flex items-center justify-between" style={{ borderBottom:'1px solid #F1F5F9' }}>
+          <div>
+            <h2 className="text-sm font-bold" style={{ color:C.text }}>Contract Document</h2>
+            <p className="text-xs mt-0.5" style={{ color:C.muted }}>Signed contract PDF</p>
+          </div>
+          <div className="flex items-center gap-2">
+            {contractDoc && (
+              <a href={contractDoc.file_url} target="_blank" rel="noreferrer"
+                className="text-xs font-semibold px-3 py-2 rounded-xl flex items-center gap-1.5"
+                style={{ background:'rgba(59,130,246,0.1)', color:'#3B82F6' }}>
+                <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                Open PDF
+              </a>
+            )}
+            <button onClick={() => contractFileRef.current?.click()} disabled={uploadingDoc}
+              className="text-xs font-semibold px-3 py-2 rounded-xl flex items-center gap-1.5 disabled:opacity-50"
+              style={{ background:'#3B82F6', color:'#fff' }}>
+              {uploadingDoc
+                ? <><div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin"/>Uploading...</>
+                : <><svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>{contractDoc ? 'Replace PDF' : 'Upload Contract PDF'}</>
+              }
+            </button>
+            <input ref={contractFileRef} type="file" accept=".pdf" className="hidden"
+              onChange={e => { const f = e.target.files?.[0]; if (f) uploadContractPdf(f); e.target.value = '' }} />
+          </div>
+        </div>
+        <div className="px-6 py-4">
+          {contractDoc ? (
+            <div className="flex items-center gap-3 px-4 py-3 rounded-xl" style={{ background:'#F8FAFC', border:'1px solid #E2E8F0' }}>
+              <svg width="20" height="20" fill="none" stroke="#EF4444" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold truncate" style={{ color:C.text }}>{contractDoc.filename}</p>
+                <p className="text-xs" style={{ color:C.muted }}>
+                  Uploaded {new Date(contractDoc.uploaded_at).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' })}
+                </p>
+              </div>
+              <a href={contractDoc.file_url} target="_blank" rel="noreferrer"
+                className="text-xs font-semibold px-3 py-1.5 rounded-lg shrink-0"
+                style={{ background:'rgba(59,130,246,0.1)', color:'#3B82F6' }}>
+                View
+              </a>
+            </div>
+          ) : (
+            <div className="text-center py-6 rounded-xl" style={{ border:'1px dashed #E2E8F0', background:'#F8FAFC' }}>
+              <svg width="32" height="32" fill="none" stroke="#CBD5E1" strokeWidth="1.5" viewBox="0 0 24 24" className="mx-auto mb-2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <p className="text-sm" style={{ color:'#94A3B8' }}>No contract PDF uploaded yet</p>
+              <button onClick={() => contractFileRef.current?.click()}
+                className="text-xs font-semibold mt-2 px-3 py-1.5 rounded-lg"
+                style={{ background:'#3B82F6', color:'#fff' }}>
+                Upload PDF
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
