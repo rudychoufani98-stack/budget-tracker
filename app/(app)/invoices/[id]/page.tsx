@@ -299,14 +299,9 @@ export default function InvoiceDetailPage() {
           <div className="rounded-2xl p-6" style={{ background: C.card, border: `1px solid ${C.border}` }}>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-semibold" style={{ color: C.text }}>Amounts</h2>
-              <div className="flex items-center gap-2">
-                {savingCurrency && <span className="text-xs" style={{ color: C.muted }}>Saving…</span>}
-                <select value={currency} onChange={e=>saveCurrency(e.target.value)} className="text-xs font-semibold rounded-lg px-2 py-1.5" style={{ background:'#E2E8F0', color:C.text, border:`1px solid ${C.border2}` }}>
-                  {['NGN','USD'].map(c=>(
-                    <option key={c} value={c}>{c}</option>
-                  ))}
-                </select>
-              </div>
+              <span className="text-xs font-bold px-2.5 py-1 rounded-lg" style={{ background:'#E2E8F0', color:C.text }}>
+                {currency}
+              </span>
             </div>
             <div className="space-y-2.5">
               <div className="flex justify-between text-sm">
