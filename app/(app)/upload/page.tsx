@@ -108,13 +108,10 @@ export default function UploadPage() {
     setTranches([])
   }
 
-  // Filter contracts: by section if selected, else by project
+  // Filter contracts by section (if selected) or project
   const filteredContracts = (() => {
     if (selectedSection) return contracts.filter((c:any) => c.section_id === selectedSection)
-    if (selectedProject) {
-      const projName = projects.find((p:any) => p.id === selectedProject)?.name || selectedProject
-      return contracts.filter((c:any) => c.project_id === selectedProject || c.project?.trim() === projName)
-    }
+    if (selectedProject) return contracts.filter((c:any) => c.project_id === selectedProject)
     return contracts
   })()
 

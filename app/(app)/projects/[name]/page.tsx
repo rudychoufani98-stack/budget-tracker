@@ -108,7 +108,7 @@ export default function ProjectDetailPage({ params }: { params: { name: string }
   async function handleAddContract(e: React.FormEvent) {
     e.preventDefault(); setAddingContract(true)
     const res = await fetch('/api/contracts', { method:'POST', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({ ...contractForm, project_id:projectId, project:project?.name||'', section_id:contractSectionId||null, status:'active', contract_amount:0 }) })
+      body:JSON.stringify({ ...contractForm, project_id:projectId, project:project?.name||'', section_ids: contractSectionId ? [contractSectionId] : [], status:'active', contract_amount:0 }) })
     const data = await res.json()
     setAddingContract(false)
     if (!res.ok || data.error) { alert(data.error || 'Failed to create contract'); return }
