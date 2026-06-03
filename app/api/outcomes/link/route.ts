@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
+import { requireAuth } from '@/lib/auth-guard'
 
-// POST: link or unlink a contract to an outcome
 export async function POST(req: NextRequest) {
+  const deny = await requireAuth(req)
+  if (deny) return deny
   const { contract_id, outcome_id, action } = await req.json()
   if (action === 'unlink') {
     const { error } = await supabaseAdmin.from('contract_outcomes').delete()

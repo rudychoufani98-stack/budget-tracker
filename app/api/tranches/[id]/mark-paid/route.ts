@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { writeAudit } from '@/lib/audit'
-import { requireAuth } from '@/lib/auth-guard'
+import { requireRole } from '@/lib/auth-guard'
 
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
-  const deny = await requireAuth(req)
+  // Only Rudy/admin can manually mark a tranche as paid
+  const deny = await requireRole(req, ['admin', 'rudy', 'placide'])
   if (deny) return deny
   const { pop_reference } = await req.json().catch(() => ({}))
   const { data, error } = await supabaseAdmin

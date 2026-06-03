@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { writeAudit } from '@/lib/audit'
-import { requireAuth } from '@/lib/auth-guard'
+import { requireAuth, requireRole } from '@/lib/auth-guard'
 
 export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
   const deny = await requireAuth(_req)
@@ -23,17 +23,38 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
 }
 
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
-  const deny = await requireAuth(req)
+  // Only Rudy/admin/Placide can edit contracts
+  const deny = await requireRole(req, ['admin', 'rudy', 'placide'])
   if (deny) return deny
   const body = await req.json()
-  const { data, error } = await supabaseAdmin.from('contracts').update({ ...body, updated_at: new Date().toISOString() }).eq('id', params.id).select().single()
+  // Allowlist only safe fields — prevent mass assignment
+  const safe = {
+    contract_name:       body.contract_name,
+    description:         body.description,
+    contract_amount:     body.contract_amount,
+    currency:            body.currency,
+    category:            body.category,
+    status:              body.status,
+    start_date:          body.start_date,
+    end_date:            body.end_date,
+    payment_type:        body.payment_type,
+    fx_rate_at_signing:  body.fx_rate_at_signing,
+    service_provider_id: body.service_provider_id,
+    project_id:          body.project_id,
+    section_id:          body.section_id,
+    updated_at:          new Date().toISOString(),
+  }
+  // Remove undefined keys
+  const update = Object.fromEntries(Object.entries(safe).filter(([, v]) => v !== undefined))
+  const { data, error } = await supabaseAdmin.from('contracts').update(update).eq('id', params.id).select().single()
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  await writeAudit('contract_updated', 'contract', params.id, null, body)
+  await writeAudit('contract_updated', 'contract', params.id, null, update)
   return NextResponse.json(data)
 }
 
 export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
-  const deny = await requireAuth(_req)
+  // Only Rudy/admin can delete contracts
+  const deny = await requireRole(_req, ['admin', 'rudy'])
   if (deny) return deny
   await supabaseAdmin.from('contract_tranches').delete().eq('contract_id', params.id)
   const { error } = await supabaseAdmin.from('contracts').delete().eq('id', params.id)

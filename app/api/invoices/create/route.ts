@@ -11,11 +11,12 @@ export async function POST(request: NextRequest) {
     const currency = invoice.currency || 'NGN'
 
     // Remove currency — invoices table has no currency column, stored in invoice_currency
-    const { currency: _c, ...invoiceWithoutCurrency } = invoice
+    const { currency: _c, status: _s, ...invoiceWithoutCurrency } = invoice
 
+    // Always start at pending_review — never trust status from client
     const { data: inv, error: invErr } = await supabaseAdmin
       .from('invoices')
-      .insert(invoiceWithoutCurrency)
+      .insert({ ...invoiceWithoutCurrency, status: 'pending_review' })
       .select()
       .single()
 
