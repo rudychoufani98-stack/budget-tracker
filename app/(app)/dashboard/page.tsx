@@ -22,7 +22,7 @@ async function getData(projectId?: string, sectionId?: string, baseCcy: string =
   const in30 = new Date(now.getTime() + 30*86400000)
   const in14 = new Date(now.getTime() + 14*86400000)
 
-  const [tranchesRes, contractsRes, invoicesRes, allInvRes, currencyRes, providersRes, projectsRes, sectionsCountRes, fxRes] = await Promise.all([
+  const [tranchesRes, contractsRes, invoicesRes, allInvRes, currencyRes, providersRes, projectsRes, sectionsCountRes, fxRes, linksRes] = await Promise.all([
     supabaseAdmin.from('contract_tranches').select('*, contracts(id, contract_name, category, currency, fx_rate_at_signing, project_id, section_id, service_providers(id, name))').order('scheduled_date', { ascending: true }).select('id, tranche_name, amount, status, scheduled_date, paid_date, contract_id, contracts(id, contract_name, category, currency, fx_rate_at_signing, project_id, section_id, service_providers(id, name))'),
     supabaseAdmin.from('contracts').select('id, contract_name, category, currency, fx_rate_at_signing, contract_amount, start_date, end_date, project_id, section_id, service_providers(id, name), contract_tranches(id, tranche_name, amount, status, scheduled_date, paid_date), invoices(id, status, submitted_at, amount_ttc)').order('created_at', { ascending: false }),
     supabaseAdmin.from('invoices').select('id, status, subcontractor_name, submitted_at, amount_ttc, contract_id, tranche_id').order('submitted_at', { ascending: false }),
@@ -32,6 +32,7 @@ async function getData(projectId?: string, sectionId?: string, baseCcy: string =
     supabaseAdmin.from('projects').select('id, name, status, currency'),
     supabaseAdmin.from('project_sections').select('id, project_id, name'),
     supabaseAdmin.from('exchange_rates').select('currency, rate, fetched_at').eq('base', 'USD'),
+    supabaseAdmin.from('contract_links').select('contract_id_1, contract_id_2'),
   ])
 
   const allTranches  = tranchesRes.data  || []
@@ -41,6 +42,33 @@ async function getData(projectId?: string, sectionId?: string, baseCcy: string =
   const providers    = providersRes.data || []
   const rawProjects  = projectsRes.data  || []
   const allSections  = sectionsCountRes.data || []
+
+  // Build link group colors
+  const LINK_PALETTE = ['#F59E0B','#8B5CF6','#EC4899','#06B6D4','#F97316','#6366F1','#14B8A6','#EF4444']
+  const links = linksRes.data || []
+  const _parent: Record<string, string> = {}
+  function _find(x: string): string {
+    if (!_parent[x]) _parent[x] = x
+    if (_parent[x] !== x) _parent[x] = _find(_parent[x])
+    return _parent[x]
+  }
+  links.forEach((l: any) => { _parent[_find(l.contract_id_1)] = _find(l.contract_id_2) })
+  const _rootMembers: Record<string, string[]> = {}
+  allContracts.forEach((c: any) => {
+    const root = _find(c.id)
+    if (!_rootMembers[root]) _rootMembers[root] = []
+    _rootMembers[root].push(c.id)
+  })
+  const _rootColor: Record<string, string> = {}
+  let _ci = 0
+  Object.entries(_rootMembers).forEach(([root, members]) => {
+    if (members.length > 1) _rootColor[root] = LINK_PALETTE[_ci++ % LINK_PALETTE.length]
+  })
+  const linkGroupColor: Record<string, string> = {}
+  allContracts.forEach((c: any) => {
+    const color = _rootColor[_find(c.id)]
+    if (color) linkGroupColor[c.id] = color
+  })
 
   // FX rates (all vs USD as base)
   const fxRates: Record<string, number> = { USD: 1 }
@@ -460,6 +488,7 @@ async function getData(projectId?: string, sectionId?: string, baseCcy: string =
     fxRates,
     consultantChart, monthlyChart, projectChart,
     fxFetchedAt,
+    linkGroupColor,
   }
 }
 
@@ -561,7 +590,7 @@ function ContractTimeline({ contracts, now }: { contracts: any[]; now: Date }) {
         {/* Rows */}
         <div className="space-y-2">
           {contracts.map((c:any) => {
-            const catC     = ESG_COLOR[c.category] || ESG_COLOR.Other
+            const catC     = d.linkGroupColor[c.id] || ESG_COLOR[c.category] || ESG_COLOR.Other
             const pctColor = c.pct === 100 ? '#059669' : c.pct >= 80 ? '#10B981' : c.pct >= 65 ? '#34D399' : c.pct >= 50 ? '#FBBF24' : c.pct >= 35 ? '#F59E0B' : c.pct >= 20 ? '#F97316' : c.pct > 0 ? '#EF4444' : '#CBD5E1'
             const barL     = pos(c.startDate ? new Date(c.startDate).getTime() : c.minDate)
             const barR     = pos(c.endDate   ? new Date(c.endDate).getTime()   : c.maxDate)
@@ -787,7 +816,7 @@ export default async function DashboardPage({
               <p className="text-sm text-center py-10" style={{ color:'#94A3B8' }}>No contracts yet</p>
             )}
             {d.contractAdvancement.slice(0,8).map((c:any) => {
-              const catC = ESG_COLOR[c.category] || ESG_COLOR.Other
+              const catC = d.linkGroupColor[c.id] || ESG_COLOR[c.category] || ESG_COLOR.Other
               const deadlineColor = c.daysToNext === null ? '#94A3B8'
                 : c.daysToNext < 0 ? '#EF4444'
                 : c.daysToNext <= 14 ? '#F59E0B'

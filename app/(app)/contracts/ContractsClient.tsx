@@ -24,9 +24,10 @@ interface Props {
   projects: { id: string; name: string }[]
   initialProject: string
   initialSection: string
+  linkGroupColor?: Record<string, string>
 }
 
-export function ContractsClient({ contracts, projects, initialProject, initialSection }: Props) {
+export function ContractsClient({ contracts, projects, initialProject, initialSection, linkGroupColor = {} }: Props) {
   const [selectedProject, setSelectedProject] = useState(initialProject)
   const [selectedSection, setSelectedSection] = useState(initialSection)
   const [sections,        setSections]        = useState<{ id: string; name: string }[]>([])
@@ -221,7 +222,8 @@ export function ContractsClient({ contracts, projects, initialProject, initialSe
           const rate        = budget > 0 ? Math.round((paid/budget)*100) : 0
           const esg         = ESG_COLORS[c.category] || ESG_COLORS.Other
           const cs          = CONTRACT_STATUS[c.status] || CONTRACT_STATUS.active
-          const barColor    = PALETTE[i % PALETTE.length]
+          const barColor    = linkGroupColor[c.id] || PALETTE[i % PALETTE.length]
+          const isLinked    = !!linkGroupColor[c.id]
           const projectName = c.projects?.name || c.project || ''
           // Show all linked sections (primary + junction table)
           const sectionNames: string[] = []
@@ -239,7 +241,14 @@ export function ContractsClient({ contracts, projects, initialProject, initialSe
 
               {/* Contract + status badge on separate line */}
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-1 h-8 rounded-full shrink-0" style={{ background:barColor }}/>
+                <div className="relative shrink-0">
+                  <div className="w-1 h-8 rounded-full" style={{ background:barColor }}/>
+                  {isLinked && (
+                    <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full flex items-center justify-center" style={{ background:barColor }}>
+                      <svg width="7" height="7" fill="none" stroke="#fff" strokeWidth="2" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                    </div>
+                  )}
+                </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
                     <p className="text-sm font-semibold truncate" style={{ color:'#0F172A' }}>{c.contract_name}</p>
