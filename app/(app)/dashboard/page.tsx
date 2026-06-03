@@ -517,7 +517,7 @@ function invStatusLabel(status: string) {
   return INV_STATUS[status] || { label:status, color:'#64748B', bg:'#F8FAFC' }
 }
 
-function ContractTimeline({ contracts, now }: { contracts: any[]; now: Date }) {
+function ContractTimeline({ contracts, now, linkGroupColor = {} }: { contracts: any[]; now: Date; linkGroupColor?: Record<string,string> }) {
   if (contracts.length === 0) {
     return (
       <div className="rounded-2xl p-10 text-center" style={{ background:'#FFFFFF', border:'1px solid #E2E8F0' }}>
@@ -1061,7 +1061,7 @@ export default async function DashboardPage({
       </div>
 
       {/* ROW 4 — Contract Timeline (Gantt) */}
-      <ContractTimeline contracts={d.contractTimeline} now={now} />
+      <ContractTimeline contracts={d.contractTimeline} now={now} linkGroupColor={d.linkGroupColor} />
 
     </div>
   )
