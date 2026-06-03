@@ -51,7 +51,7 @@ You have access to live financial data as of ${now.toLocaleDateString('en-GB', {
 
 == PLATFORM OVERVIEW ==
 SkyKapital ESG Budget Tracker manages ESG (Environmental, Social, Governance) contracts, invoice validation, and payment tracking for construction/consulting projects in Africa.
-Validation workflow: Invoice uploaded -> Step 1 (Rudy, admin) -> Step 2 (Placide, ESG Manager) -> Step 3 (Dani, MD) -> Approved.
+Validation workflow: Invoice uploaded -> Step 1 (Rudy, admin) -> Step 2 (Placide, ESG Manager) -> Step 3 (Dany, MD) -> Approved.
 
 == LIVE DATA SUMMARY ==
 Total committed: ${totalCommitted.toLocaleString()} (across all contracts)

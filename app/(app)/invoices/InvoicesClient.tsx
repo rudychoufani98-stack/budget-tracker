@@ -10,7 +10,7 @@ function getFX(inv: any): number {
 const STATUS_MAP: Record<string,{label:string;color:string;bg:string}> = {
   pending_review:  { label:'Awaiting Rudy',    color:'#F97316', bg:'rgba(249,115,22,0.1)'  },
   pending_placide: { label:'Awaiting Placide', color:'#8B5CF6', bg:'rgba(139,92,246,0.1)'  },
-  pending_dani:    { label:'Awaiting Dani',    color:'#3B82F6', bg:'rgba(59,130,246,0.1)'  },
+  pending_dani:    { label:'Awaiting Dany',    color:'#3B82F6', bg:'rgba(59,130,246,0.1)'  },
   pending_fares:   { label:'Awaiting Payment', color:'#0EA5E9', bg:'rgba(14,165,233,0.1)'  },
   approved:        { label:'Paid',             color:'#10B981', bg:'rgba(16,185,129,0.1)'  },
   rejected:        { label:'Rejected',         color:'#EF4444', bg:'rgba(239,68,68,0.1)'   },

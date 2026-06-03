@@ -7,8 +7,8 @@ import { formatCurrency } from '@/lib/format'
 
 const STEPS = [
   { status:'pending_review',  label:'Rudy',        role:'rudy',    action:'Forward to Placide',    color:'#60A5FA', step:1 },
-  { status:'pending_placide', label:'Placide',      role:'placide', action:'Forward to Dani',       color:'#3B82F6', step:2 },
-  { status:'pending_dani',    label:'Dani',         role:'hitech',  action:'Forward to Accountant', color:'#2563EB', step:3 },
+  { status:'pending_placide', label:'Placide',      role:'placide', action:'Forward to Dany',       color:'#3B82F6', step:2 },
+  { status:'pending_dani',    label:'Dany',         role:'hitech',  action:'Forward to Accountant', color:'#2563EB', step:3 },
   { status:'pending_fares',   label:'Accountant',   role:'fares',   action:'Confirm Payment',       color:'#1D4ED8', step:4 },
 ]
 
@@ -18,7 +18,7 @@ const ROLE_TO_STEP: Record<string,number> = {
 }
 
 const VALIDATOR_NAME: Record<string,string> = {
-  admin:'Rudy', rudy:'Rudy', placide:'Placide', dani:'Dani', hitech:'Dani', fares:'Accountant'
+  admin:'Rudy', rudy:'Rudy', placide:'Placide', dani:'Dany', hitech:'Dany', fares:'Accountant'
 }
 
 function StepBar({ counts, userRole }: { counts: Record<string,number>; userRole: string }) {
@@ -84,10 +84,12 @@ export default function ValidationsPage() {
   const [userRole,   setUserRole]   = useState('')
   const [history,    setHistory]    = useState<any[]>([])
   const [loading,    setLoading]    = useState(true)
-  const [submitting, setSubmitting] = useState<string|null>(null)
-  const [comments,   setComments]   = useState<Record<string,string>>({})
-  const [reject,     setReject]     = useState<string|null>(null)
-  const [tab,        setTab]        = useState<'queue'|'history'>('queue')
+  const [submitting,   setSubmitting]   = useState<string|null>(null)
+  const [comments,     setComments]     = useState<Record<string,string>>({})
+  const [reject,       setReject]       = useState<string|null>(null)
+  const [tab,          setTab]          = useState<'queue'|'history'>('queue')
+  const [proofFile,    setProofFile]    = useState<Record<string,File>>({})
+  const [proofRef,     setProofRef]     = useState<Record<string,string>>({})
 
   async function load() {
     const all = ['pending_review','pending_placide','pending_dani','pending_fares']
@@ -131,6 +133,54 @@ export default function ValidationsPage() {
     const item = items.find(i => i.id === itemId)
     if (!item) return
     setSubmitting(itemId)
+
+    // Step 4 (accountant confirming payment): upload proof doc first
+    const isStep4 = (ROLE_TO_STEP[userRole] || 0) === 4
+    if (isStep4 && decision === 'approved') {
+      const file = proofFile[itemId]
+      const ref  = proofRef[itemId] || ''
+      if (file) {
+        try {
+          const fd = new FormData()
+          fd.append('file', file)
+          fd.append('path', `payment-proofs/${itemId}/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9._-]/g,'_')}`)
+          const upRes  = await fetch('/api/storage/upload', { method:'POST', body:fd })
+          const upData = await upRes.json()
+          if (upData.signedUrl) {
+            await fetch('/api/documents', {
+              method:'POST', headers:{'Content-Type':'application/json'},
+              body: JSON.stringify({
+                invoice_id: item._type === 'invoice' ? itemId : null,
+                contract_id: item._type === 'tranche' ? item.contracts?.id : (item.contract_id || null),
+                filename: file.name,
+                file_url: upData.signedUrl,
+                file_type: 'payment_proof',
+              }),
+            })
+          }
+        } catch { /* non-blocking — continue with validation */ }
+      }
+      // Store bank ref as comment if no comment already
+      const comment = comments[itemId] || (ref ? `Payment ref: ${ref}` : null)
+      const endpoint = item._type === 'tranche'
+        ? `/api/tranches/${itemId}/validate`
+        : `/api/invoices/${itemId}/validate`
+      try {
+        const res = await fetch(endpoint, {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ decision, validator_name: VALIDATOR_NAME[userRole] || userRole, comment }),
+        })
+        const data = await res.json()
+        if (!res.ok) { alert(`Error: ${data.error || 'Failed.'}`); setSubmitting(null); return }
+      } catch { alert('Network error.'); setSubmitting(null); return }
+      setSubmitting(null); setReject(null)
+      setComments(p => { const n = {...p}; delete n[itemId]; return n })
+      setProofFile(p => { const n = {...p}; delete n[itemId]; return n })
+      setProofRef(p  => { const n = {...p}; delete n[itemId]; return n })
+      await load()
+      return
+    }
+
     const endpoint = item._type === 'tranche'
       ? `/api/tranches/${itemId}/validate`
       : `/api/invoices/${itemId}/validate`
@@ -267,6 +317,24 @@ export default function ValidationsPage() {
 
                             {/* Actions */}
                             <div className="shrink-0 flex flex-col gap-2 items-end">
+                              {myStep.step === 4 && (
+                                <div className="flex flex-col gap-2 mb-1" style={{ width:280 }}>
+                                  <input
+                                    value={proofRef[inv.id] || ''}
+                                    onChange={e => setProofRef(p=>({...p,[inv.id]:e.target.value}))}
+                                    placeholder="Bank transfer ref / payment ID..."
+                                    className="text-xs px-3 py-2 rounded-lg outline-none"
+                                    style={{ background:'#F8FAFC', border:'1px solid #E2E8F0', color:'#0F172A' }}
+                                  />
+                                  <label className="flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer text-xs font-medium"
+                                    style={{ background:'#F0FDF4', border:'1px dashed #10B981', color:'#059669' }}>
+                                    <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                    {proofFile[inv.id] ? proofFile[inv.id].name : 'Attach proof of payment (optional)'}
+                                    <input type="file" accept=".pdf,.jpg,.jpeg,.png" className="hidden"
+                                      onChange={e => { const f = e.target.files?.[0]; if (f) setProofFile(p=>({...p,[inv.id]:f})) }} />
+                                  </label>
+                                </div>
+                              )}
                               <div className="flex items-center gap-2">
                                 <button
                                   onClick={() => act(inv.id, 'approved')}
@@ -292,14 +360,16 @@ export default function ValidationsPage() {
                                   Reject
                                 </button>
                               </div>
-                              <textarea
-                                rows={1}
-                                value={comments[inv.id] || ''}
-                                onChange={e => setComments(p=>({...p,[inv.id]:e.target.value}))}
-                                placeholder="Add comment (optional)..."
-                                className="text-xs px-3 py-1.5 rounded-lg resize-none outline-none"
-                                style={{ background:'#F8FAFC', border:'1px solid #E2E8F0', color:'#0F172A', width:280 }}
-                              />
+                              {myStep.step !== 4 && (
+                                <textarea
+                                  rows={1}
+                                  value={comments[inv.id] || ''}
+                                  onChange={e => setComments(p=>({...p,[inv.id]:e.target.value}))}
+                                  placeholder="Add comment (optional)..."
+                                  className="text-xs px-3 py-1.5 rounded-lg resize-none outline-none"
+                                  style={{ background:'#F8FAFC', border:'1px solid #E2E8F0', color:'#0F172A', width:280 }}
+                                />
+                              )}
                             </div>
                           </div>
                         </div>

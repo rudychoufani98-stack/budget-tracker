@@ -10,7 +10,7 @@ const config: Record<InvoiceStatus, { label: string; className: string }> = {
     className: 'bg-orange-100 text-orange-800',
   },
   pending_dani: {
-    label: 'Awaiting Dani',
+    label: 'Awaiting Dany',
     className: 'bg-blue-100 text-blue-800',
   },
   pending_fares: {

@@ -31,7 +31,7 @@ export async function sendNewInvoiceEmail(invoiceId: string, subcontractor: stri
 export async function sendValidationEmail(invoiceId: string, subcontractor: string, nextStage: string, validatorName: string, comment?: string) {
   const targets: Record<string, { email: string; name: string }> = {
     pending_placide: { email: process.env.PLACIDE_EMAIL || '', name: 'Placide' },
-    pending_dani:    { email: process.env.DANI_EMAIL    || process.env.HITECH_EMAIL || '', name: 'Dani'   },
+    pending_dani:    { email: process.env.DANI_EMAIL    || process.env.HITECH_EMAIL || '', name: 'Dany'   },
     pending_fares:   { email: process.env.FARES_EMAIL   || '', name: 'Fares'  },
     approved:        { email: process.env.RUDY_EMAIL    || '', name: 'Rudy'   },
   }

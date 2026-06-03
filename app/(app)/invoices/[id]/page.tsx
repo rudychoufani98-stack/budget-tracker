@@ -31,14 +31,14 @@ const ALL_CATEGORIES = [
 const STATUS: Record<string, { label: string; color: string; bg: string; dot: string }> = {
   pending_review:  { label: 'Awaiting Rudy',    color: '#F97316', bg: 'rgba(249,115,22,0.12)',  dot: '#F97316' },
   pending_placide: { label: 'Awaiting Placide',  color: '#8B5CF6', bg: 'rgba(139,92,246,0.12)', dot: '#8B5CF6' },
-  pending_dani:    { label: 'Awaiting Dani',     color: '#3B82F6', bg: 'rgba(59,130,246,0.12)', dot: '#3B82F6' },
+  pending_dani:    { label: 'Awaiting Dany',     color: '#3B82F6', bg: 'rgba(59,130,246,0.12)', dot: '#3B82F6' },
   pending_fares:   { label: 'Awaiting Payment',  color: '#0EA5E9', bg: 'rgba(14,165,233,0.12)', dot: '#0EA5E9' },
   approved:        { label: 'Approved',           color: '#10B981', bg: 'rgba(16,185,129,0.12)', dot: '#10B981' },
   rejected:        { label: 'Rejected',           color: '#EF4444', bg: 'rgba(239,68,68,0.12)',  dot: '#EF4444' },
 }
 
 const STEPS = ['pending_review', 'pending_placide', 'pending_dani', 'pending_fares', 'approved']
-const STEP_LABELS = ['Rudy', 'Placide', 'Dani', 'Accountant', 'Done']
+const STEP_LABELS = ['Rudy', 'Placide', 'Dany', 'Accountant', 'Done']
 
 export default function InvoiceDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -149,7 +149,7 @@ export default function InvoiceDetailPage() {
   }
   const stepAllowed = roleForStep[invoice.status] ?? []
   const canValidate = stepAllowed.includes(userRole)
-  const validatorLabelMap: Record<string,string> = { pending_review:'Rudy', pending_placide:'Placide', pending_dani:'Dani', pending_fares:'Accountant', approved:'', rejected:'' }
+  const validatorLabelMap: Record<string,string> = { pending_review:'Rudy', pending_placide:'Placide', pending_dani:'Dany', pending_fares:'Accountant', approved:'', rejected:'' }
   const validatorLabel = validatorLabelMap[invoice.status] || 'Validator'
   const isWaitingForOther = ['pending_review','pending_placide','pending_dani','pending_fares'].includes(invoice.status) && !canValidate
   const s = STATUS[invoice.status] ?? STATUS.pending_review

@@ -199,7 +199,7 @@ export default function ProviderDetailPage() {
           </div>
           {invoices.map((inv:any) => {
             const sc = inv.status==='approved'?'#10B981':inv.status==='rejected'?'#EF4444':'#F59E0B'
-            const sl = inv.status==='approved'?'Approved':inv.status==='rejected'?'Rejected':inv.status==='pending_review'?'Awaiting Rudy':inv.status==='pending_placide'?'Awaiting Placide':'Awaiting Dani'
+            const sl = inv.status==='approved'?'Approved':inv.status==='rejected'?'Rejected':inv.status==='pending_review'?'Awaiting Rudy':inv.status==='pending_placide'?'Awaiting Placide':'Awaiting Dany'
             return (
               <Link key={inv.id} href={`/invoices/${inv.id}`} className="flex items-center justify-between px-6 py-3.5 hover:bg-slate-50 transition-colors" style={{ borderBottom:'1px solid #F8FAFC' }}>
                 <div>

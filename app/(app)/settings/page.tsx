@@ -201,7 +201,7 @@ export default function SettingsPage() {
             {[
               { step:1, role:'rudy / admin', label:'Step 1 — Rudy',        desc:'Reviews invoice accuracy and match with contract',       color:'#F97316' },
               { step:2, role:'placide',      label:'Step 2 — Placide',      desc:'ESG Manager approval and budget verification',           color:'#D97706' },
-              { step:3, role:'hitech',       label:'Step 3 — Dani',         desc:'Final validation before sending to accounting',          color:'#FACC15' },
+              { step:3, role:'hitech',       label:'Step 3 — Dany',         desc:'Final validation before sending to accounting',          color:'#FACC15' },
               { step:4, role:'fares',        label:'Step 4 — Accountant',   desc:'Confirms payment done + uploads proof of payment',       color:'#10B981' },
             ].map(s=>(
               <div key={s.step} className="flex items-center gap-4 p-4 rounded-xl" style={{ background:C.card2, border:`1px solid ${C.border}` }}>

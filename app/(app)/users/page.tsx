@@ -9,7 +9,7 @@ const ROLE_LABELS: Record<string,string> = {
   admin:    'Administrator',
   rudy:     'Director',
   placide:  'ESG Manager',
-  hitech:   'MD / Dani',
+  hitech:   'MD / Dany',
   fares:    'Accountant',
   uploader: 'Intern (Data Entry)',
   viewer:   'Viewer',
