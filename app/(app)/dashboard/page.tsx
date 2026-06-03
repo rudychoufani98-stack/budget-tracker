@@ -95,14 +95,14 @@ async function getData(projectId?: string, sectionId?: string, baseCcy: string =
   function trancheBaseForProject(t: any): number {
     const amount = t.amount || 0
     const ccy    = (t.contracts as any)?.currency || 'NGN'
-    const signingRate = (t.contracts as any)?.fx_rate_at_signing || 0
+    const rate   = (t.contracts as any)?.fx_rate_at_signing || null
     if (baseCcy === 'NGN') {
       if (ccy === 'NGN') return amount
-      if (ccy === 'USD') return amount * signingRate
-      return (amount / (fxRates[ccy] || 1)) * signingRate
+      if (ccy === 'USD') return rate ? amount * rate : amount
+      return rate ? (amount / (fxRates[ccy] || 1)) * rate : amount
     } else {
       if (ccy === 'USD') return amount
-      if (ccy === 'NGN') return amount / signingRate
+      if (ccy === 'NGN') return rate ? amount / rate : amount
       return amount / (fxRates[ccy] || 1)
     }
   }
@@ -197,14 +197,15 @@ async function getData(projectId?: string, sectionId?: string, baseCcy: string =
   // Helper: convert a contract amount to baseCcy using its signing rate
   function contractToBase(amount: number, ccy: string, signingRate: number | null): number {
     if (!amount) return 0
-    const rate = signingRate || 0
+    const rate = signingRate || null
     if (baseCcy === 'NGN') {
       if (ccy === 'NGN') return amount
-      if (ccy === 'USD') return amount * rate
-      return toBase(amount, ccy) * rate
+      // If no rate, show USD amount as-is (no conversion possible)
+      if (ccy === 'USD') return rate ? amount * rate : amount
+      return rate ? toBase(amount, ccy) * rate : toBase(amount, ccy)
     } else {
       if (ccy === 'USD') return amount
-      if (ccy === 'NGN') return amount / rate
+      if (ccy === 'NGN') return rate ? amount / rate : amount
       return toBase(amount, ccy)
     }
   }
@@ -582,15 +583,17 @@ function ContractTimeline({ contracts, now }: { contracts: any[]; now: Date }) {
                 {/* Bar */}
                 <div className="relative flex-1 h-8 rounded" style={{ background:'#F8FAFC' }}>
                   {/* Duration bar background */}
-                  <div className="absolute h-full rounded overflow-hidden" style={{ left:`${barL}%`, width:`${barW}%`, background:`${catC}20`, border:`1px solid ${catC}40` }}>
+                  <div className="absolute h-full rounded overflow-hidden" style={{ left:`${barL}%`, width:`${Math.max(2, barW)}%`, background:`${catC}20`, border:`1px solid ${catC}40` }}>
                     {/* Progress fill */}
                     <div className="h-full" style={{ width:`${c.pct}%`, background:`${catC}60` }}/>
                   </div>
 
                   {/* % label */}
-                  <div className="absolute inset-y-0 flex items-center text-xs font-bold" style={{ left:`${barL + barW / 2}%`, transform:'translateX(-50%)', color:catC, pointerEvents:'none', fontSize:11 }}>
-                    {c.pct}%
-                  </div>
+                  {barW > 5 && (
+                    <div className="absolute inset-y-0 flex items-center text-xs font-bold" style={{ left:`${barL + Math.max(2,barW) / 2}%`, transform:'translateX(-50%)', color:catC, pointerEvents:'none', fontSize:11 }}>
+                      {c.pct}%
+                    </div>
+                  )}
 
                   {/* Today line */}
                   <div className="absolute top-0 bottom-0 w-px" style={{ left:`${todayPct}%`, background:'rgba(239,68,68,0.6)', zIndex:10 }}/>
