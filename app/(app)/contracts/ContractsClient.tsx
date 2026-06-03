@@ -31,6 +31,18 @@ export function ContractsClient({ contracts, projects, initialProject, initialSe
   const [selectedSection, setSelectedSection] = useState(initialSection)
   const [sections,        setSections]        = useState<{ id: string; name: string }[]>([])
   const [view,            setView]            = useState<'ngn'|'usd'>('ngn')
+  const [sortCol,         setSortCol]         = useState<string>('contract_name')
+  const [sortDir,         setSortDir]         = useState<'asc'|'desc'>('asc')
+
+  function toggleSort(col: string) {
+    if (sortCol === col) setSortDir(d => d === 'asc' ? 'desc' : 'asc')
+    else { setSortCol(col); setSortDir('asc') }
+  }
+
+  function SortIcon({ col }: { col: string }) {
+    if (sortCol !== col) return <span style={{ color:'#CBD5E1', fontSize:10 }}>↕</span>
+    return <span style={{ color:'#3B82F6', fontSize:10 }}>{sortDir === 'asc' ? '↑' : '↓'}</span>
+  }
 
   useEffect(() => {
     if (!selectedProject) { setSections([]); return }
@@ -63,12 +75,26 @@ export function ContractsClient({ contracts, projects, initialProject, initialSe
   const baseCcy = view === 'ngn' ? 'NGN' : 'USD'
 
   const filtered = useMemo(() => {
-    return contracts.filter((c: any) => {
+    const list = contracts.filter((c: any) => {
       if (selectedProject && c.project_id !== selectedProject) return false
       if (selectedSection && c.section_id !== selectedSection) return false
       return true
     })
-  }, [contracts, selectedProject, selectedSection])
+    return [...list].sort((a, b) => {
+      let av: any, bv: any
+      if (sortCol === 'contract_name')  { av = a.contract_name || ''; bv = b.contract_name || '' }
+      else if (sortCol === 'project')   { av = a.projects?.name || ''; bv = b.projects?.name || '' }
+      else if (sortCol === 'category')  { av = a.category || ''; bv = b.category || '' }
+      else if (sortCol === 'status')    { av = a.status || ''; bv = b.status || '' }
+      else if (sortCol === 'value')     { av = convert(a.contract_amount||0, a.currency||'NGN', a.fx_rate_at_signing); bv = convert(b.contract_amount||0, b.currency||'NGN', b.fx_rate_at_signing) }
+      else if (sortCol === 'paid')      { av = convert((a.contract_tranches||[]).filter((t:any)=>t.status==='paid').reduce((s:number,t:any)=>s+t.amount,0), a.currency||'NGN', a.fx_rate_at_signing); bv = convert((b.contract_tranches||[]).filter((t:any)=>t.status==='paid').reduce((s:number,t:any)=>s+t.amount,0), b.currency||'NGN', b.fx_rate_at_signing) }
+      else if (sortCol === 'progress')  { av = a.contract_amount > 0 ? (a.contract_tranches||[]).filter((t:any)=>t.status==='paid').reduce((s:number,t:any)=>s+t.amount,0)/a.contract_amount : 0; bv = b.contract_amount > 0 ? (b.contract_tranches||[]).filter((t:any)=>t.status==='paid').reduce((s:number,t:any)=>s+t.amount,0)/b.contract_amount : 0 }
+      else { av = ''; bv = '' }
+      if (av < bv) return sortDir === 'asc' ? -1 : 1
+      if (av > bv) return sortDir === 'asc' ? 1 : -1
+      return 0
+    })
+  }, [contracts, selectedProject, selectedSection, sortCol, sortDir, view])
 
   const totalValue = filtered.reduce((s:number,c:any) => {
     const budget = c.contract_amount || c.total_budget || 0
@@ -150,15 +176,24 @@ export function ContractsClient({ contracts, projects, initialProject, initialSe
         <div className="grid px-6 py-3 text-xs font-semibold uppercase tracking-widest"
           style={{ color:'#94A3B8', borderBottom:'1px solid #F1F5F9', background:'#FAFBFC',
                    gridTemplateColumns:'2fr 1fr 1fr 0.5fr 1fr 1fr 1fr 1.3fr 0.4fr' }}>
-          <div>Contract</div>
-          <div>Project</div>
-          <div>Section</div>
-          <div>Cat</div>
-          <div>Value ({baseCcy})</div>
-          <div>Paid ({baseCcy})</div>
-          <div>Balance ({baseCcy})</div>
-          <div>Progress</div>
-          <div></div>
+          {[
+            { label:'Contract',          col:'contract_name' },
+            { label:'Project',           col:'project'       },
+            { label:'Section',           col:''              },
+            { label:'Cat',               col:'category'      },
+            { label:`Value (${baseCcy})`,col:'value'         },
+            { label:`Paid (${baseCcy})`, col:'paid'          },
+            { label:`Balance (${baseCcy})`,col:''            },
+            { label:'Progress',          col:'progress'      },
+          ].map(({ label, col }) => (
+            <div key={label}
+              onClick={() => col && toggleSort(col)}
+              className="flex items-center gap-1"
+              style={{ cursor: col ? 'pointer' : 'default', userSelect:'none' }}>
+              {label} {col && <SortIcon col={col} />}
+            </div>
+          ))}
+          <div/>
         </div>
 
         {filtered.length === 0 ? (
