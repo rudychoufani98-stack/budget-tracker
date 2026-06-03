@@ -48,6 +48,12 @@ export default function ContractDetailPage() {
   const [editingSchedule, setEditingSchedule] = useState(false)
   const [scheduleEdits, setScheduleEdits] = useState<Record<string,any>>({})
   const [savingSchedule, setSavingSchedule] = useState(false)
+  const [outcomes,        setOutcomes]        = useState<any[]>([])
+  const [contractOutcome, setContractOutcome] = useState<any>(null)
+  const [showOutcomeModal, setShowOutcomeModal] = useState(false)
+  const [newOutcomeName,   setNewOutcomeName]   = useState('')
+  const [newOutcomeDesc,   setNewOutcomeDesc]   = useState('')
+  const [savingOutcome,    setSavingOutcome]    = useState(false)
 
   async function uploadContractPdf(file: File) {
     setUploadingDoc(true)
@@ -101,6 +107,7 @@ export default function ContractDetailPage() {
     const res  = await fetch(`/api/contracts/${id}`)
     const data = await res.json()
     setContract(data)
+    if (data.project_id) loadOutcomes(data.project_id)
     const sorted = [...(data.contract_tranches || [])].sort(
       (a,b) => TRANCHE_ORDER.indexOf(a.tranche_name) - TRANCHE_ORDER.indexOf(b.tranche_name)
     )
@@ -110,6 +117,44 @@ export default function ContractDetailPage() {
     sorted.forEach((t:any) => { refs[t.id] = t.pop_reference || '' })
     setPopRefs(refs)
     setLoading(false)
+  }
+
+  async function loadOutcomes(projectId: string) {
+    const res = await fetch(`/api/outcomes?project_id=${projectId}`)
+    const data = await res.json()
+    const list = Array.isArray(data) ? data : []
+    setOutcomes(list)
+    // Find if this contract is linked to any outcome
+    const linked = list.find((o: any) => o.contract_outcomes?.some((co: any) => co.contract_id === id))
+    setContractOutcome(linked || null)
+  }
+
+  async function linkToOutcome(outcomeId: string) {
+    setSavingOutcome(true)
+    // Unlink from current outcome if any
+    if (contractOutcome) {
+      await fetch('/api/outcomes/link', { method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ contract_id: id, outcome_id: contractOutcome.id, action: 'unlink' }) })
+    }
+    if (outcomeId) {
+      await fetch('/api/outcomes/link', { method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ contract_id: id, outcome_id: outcomeId, action: 'link' }) })
+    }
+    await loadOutcomes(contract.project_id)
+    setSavingOutcome(false)
+  }
+
+  async function createOutcome() {
+    if (!newOutcomeName.trim()) return
+    setSavingOutcome(true)
+    const res = await fetch('/api/outcomes', { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ name: newOutcomeName.trim(), description: newOutcomeDesc.trim() || null, project_id: contract.project_id }) })
+    const outcome = await res.json()
+    await fetch('/api/outcomes/link', { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ contract_id: id, outcome_id: outcome.id, action: 'link' }) })
+    await loadOutcomes(contract.project_id)
+    setNewOutcomeName(''); setNewOutcomeDesc(''); setShowOutcomeModal(false)
+    setSavingOutcome(false)
   }
 
   useEffect(() => { load(); loadContractDoc() }, [id])
@@ -603,6 +648,114 @@ export default function ContractDetailPage() {
           </>
         )}
       </div>
+
+      {/* ── OUTCOME ── */}
+      <div className="rounded-2xl overflow-hidden" style={{ background:C.card, border:`1px solid ${C.border}` }}>
+        <div className="px-6 py-4 flex items-center justify-between" style={{ borderBottom:`1px solid #F1F5F9` }}>
+          <div>
+            <h2 className="text-sm font-bold" style={{ color:C.text }}>Outcome</h2>
+            <p className="text-xs mt-0.5" style={{ color:C.muted }}>Lier ce contrat a un livrable commun avec d&apos;autres contrats</p>
+          </div>
+          <button onClick={() => setShowOutcomeModal(true)}
+            className="text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1.5"
+            style={{ background:'rgba(139,92,246,0.08)', color:'#8B5CF6', border:'1px solid rgba(139,92,246,0.2)' }}>
+            <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            {contractOutcome ? 'Changer' : 'Assigner un outcome'}
+          </button>
+        </div>
+
+        {contractOutcome ? (
+          <div className="px-6 py-4">
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <p className="text-sm font-bold" style={{ color:C.text }}>{contractOutcome.name}</p>
+                {contractOutcome.description && <p className="text-xs mt-0.5" style={{ color:C.muted }}>{contractOutcome.description}</p>}
+              </div>
+              <button onClick={() => linkToOutcome('')} className="text-xs" style={{ color:'#EF4444' }}>Retirer</button>
+            </div>
+            <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color:C.muted }}>
+              Contrats liés ({(contractOutcome.contract_outcomes || []).length})
+            </p>
+            <div className="flex flex-col gap-2">
+              {(contractOutcome.contract_outcomes || []).map((co: any) => {
+                const c = co.contracts
+                if (!c) return null
+                const isCurrent = c.id === id
+                return (
+                  <div key={c.id} className="flex items-center justify-between px-4 py-3 rounded-xl"
+                    style={{ background: isCurrent ? 'rgba(139,92,246,0.06)' : '#F8FAFC', border: isCurrent ? '1px solid rgba(139,92,246,0.2)' : '1px solid #F1F5F9' }}>
+                    <div>
+                      <p className="text-sm font-semibold flex items-center gap-2" style={{ color:C.text }}>
+                        {c.contract_name}
+                        {isCurrent && <span className="text-xs px-2 py-0.5 rounded-full" style={{ background:'rgba(139,92,246,0.1)', color:'#8B5CF6' }}>Ce contrat</span>}
+                      </p>
+                      <p className="text-xs mt-0.5" style={{ color:C.muted }}>{c.service_providers?.name || '--'}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-bold" style={{ color:C.text }}>{fc(c.contract_amount)}</p>
+                      <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: c.status==='active' ? 'rgba(16,185,129,0.1)' : 'rgba(107,114,128,0.1)', color: c.status==='active' ? '#10B981' : '#6B7280' }}>{c.status}</span>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        ) : (
+          <div className="px-6 py-8 text-center">
+            <p className="text-sm" style={{ color:C.muted }}>Aucun outcome assigné — ce contrat n&apos;est lié a aucun autre contrat</p>
+          </div>
+        )}
+      </div>
+
+      {/* Outcome modal */}
+      {showOutcomeModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background:'rgba(0,0,0,0.5)' }}>
+          <div className="w-full max-w-md rounded-2xl overflow-hidden" style={{ background:C.card, border:`1px solid ${C.border}` }}>
+            <div className="px-6 py-4 flex items-center justify-between" style={{ borderBottom:`1px solid ${C.border}` }}>
+              <h2 className="text-sm font-bold" style={{ color:C.text }}>Assigner un Outcome</h2>
+              <button onClick={() => setShowOutcomeModal(false)} style={{ color:C.muted }}>
+                <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+            <div className="p-6 flex flex-col gap-4">
+              {outcomes.length > 0 && (
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color:C.muted }}>Outcomes existants</p>
+                  <div className="flex flex-col gap-2">
+                    {outcomes.map((o: any) => (
+                      <button key={o.id} onClick={async () => { await linkToOutcome(o.id); setShowOutcomeModal(false) }}
+                        className="flex items-center justify-between px-4 py-3 rounded-xl text-left transition-all hover:opacity-80"
+                        style={{ background: contractOutcome?.id === o.id ? 'rgba(139,92,246,0.08)' : '#F8FAFC', border: contractOutcome?.id === o.id ? '1px solid rgba(139,92,246,0.3)' : '1px solid #E2E8F0' }}>
+                        <div>
+                          <p className="text-sm font-semibold" style={{ color:C.text }}>{o.name}</p>
+                          {o.description && <p className="text-xs" style={{ color:C.muted }}>{o.description}</p>}
+                        </div>
+                        <span className="text-xs" style={{ color:C.muted }}>{(o.contract_outcomes||[]).length} contrat(s)</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              <div style={{ borderTop:`1px solid ${C.border}`, paddingTop:16 }}>
+                <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color:C.muted }}>Creer un nouvel outcome</p>
+                <input value={newOutcomeName} onChange={e => setNewOutcomeName(e.target.value)}
+                  placeholder="Nom du livrable (ex: Rapport HRRA Final)"
+                  className="w-full text-sm px-3 py-2.5 rounded-xl outline-none mb-2"
+                  style={{ border:`1px solid ${C.border}`, color:C.text }} />
+                <input value={newOutcomeDesc} onChange={e => setNewOutcomeDesc(e.target.value)}
+                  placeholder="Description (optionnel)"
+                  className="w-full text-sm px-3 py-2.5 rounded-xl outline-none mb-3"
+                  style={{ border:`1px solid ${C.border}`, color:C.text }} />
+                <button onClick={createOutcome} disabled={!newOutcomeName.trim() || savingOutcome}
+                  className="w-full py-2.5 rounded-xl text-sm font-semibold"
+                  style={{ background:'#8B5CF6', color:'#fff', opacity: !newOutcomeName.trim() ? 0.5 : 1 }}>
+                  {savingOutcome ? 'Enregistrement...' : 'Creer et assigner'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── PAYMENT TRANCHES ── */}
       <div className="rounded-2xl overflow-hidden" style={{ background:C.card, border:`1px solid ${C.border}` }}>
