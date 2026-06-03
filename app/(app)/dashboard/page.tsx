@@ -915,65 +915,77 @@ export default async function DashboardPage({
       {/* ROW 4 - Tranche tracker + Alerts */}
       <div className="grid grid-cols-2 gap-5">
 
-        {/* Left: Tranche tracker per provider */}
+        {/* Left: Milestone Tracker per provider */}
         <div className="rounded-2xl overflow-hidden" style={{ background:'#FFFFFF', border:'1px solid #E2E8F0' }}>
           <div className="px-5 py-4" style={{ borderBottom:'1px solid #F1F5F9' }}>
-            <p className="text-sm font-bold" style={{ color:'#0F172A' }}>Tranche Tracker by Consultant</p>
-            <p className="text-xs mt-0.5" style={{ color:'#94A3B8' }}>Green=paid, Amber=pending, Blue=upcoming, Red=overdue</p>
+            <p className="text-sm font-bold" style={{ color:'#0F172A' }}>Milestone Tracker by Consultant</p>
+            <p className="text-xs mt-0.5" style={{ color:'#94A3B8' }}>X = paid, empty = pending/upcoming, red = overdue</p>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-xs">
               <thead>
                 <tr style={{ background:'#FAFBFC', borderBottom:'1px solid #F1F5F9' }}>
-                  <th className="px-4 py-2.5 text-left font-semibold uppercase tracking-widest" style={{ color:'#94A3B8' }}>Consultant</th>
-                  <th className="px-4 py-2.5 text-left font-semibold uppercase tracking-widest" style={{ color:'#94A3B8' }}>Contract</th>
-                  {TRANCHE_ORDER.map(t => (
-                    <th key={t} className="px-2 py-2.5 text-center font-semibold uppercase tracking-widest" style={{ color:'#94A3B8' }}>{t}</th>
-                  ))}
+                  <th className="px-4 py-2.5 text-left font-semibold uppercase tracking-widest" style={{ color:'#94A3B8', minWidth:110 }}>Consultant</th>
+                  <th className="px-4 py-2.5 text-left font-semibold uppercase tracking-widest" style={{ color:'#94A3B8', minWidth:120 }}>Contract</th>
+                  <th className="px-4 py-2.5 text-left font-semibold uppercase tracking-widest" style={{ color:'#94A3B8' }}>Milestones</th>
                   <th className="px-4 py-2.5 text-right font-semibold uppercase tracking-widest" style={{ color:'#94A3B8' }}>Paid</th>
                   <th className="px-4 py-2.5 text-right font-semibold uppercase tracking-widest" style={{ color:'#94A3B8' }}>Balance</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#F8FAFC]">
                 {d.providerRows.length === 0 && (
-                  <tr><td colSpan={9} className="text-center py-8" style={{ color:'#94A3B8' }}>No data</td></tr>
+                  <tr><td colSpan={5} className="text-center py-8" style={{ color:'#94A3B8' }}>No data</td></tr>
                 )}
                 {d.providerRows.map((prov:any) =>
-                  prov.contracts.map((c:any, ci:number) => (
-                    <tr key={`${prov.id}-${c.contractId}`} className="hover:bg-slate-50 transition-colors">
-                      {ci === 0 ? (
-                        <td className="px-4 py-2.5" rowSpan={prov.contracts.length}>
-                          <Link href={`/providers/${prov.id}`} className="font-semibold hover:text-blue-600 transition-colors" style={{ color:'#0F172A' }}>
-                            {prov.name}
-                          </Link>
-                        </td>
-                      ) : null}
-                      <td className="px-4 py-2.5 max-w-[120px]">
-                        <Link href={`/contracts/${c.contractId}`} className="truncate block hover:text-blue-600 transition-colors" style={{ color:'#64748B' }}>
-                          {c.contractName}
-                        </Link>
-                      </td>
-                      {TRANCHE_ORDER.map(tn => {
-                        const t = c.tranches[tn]
-                        const col = trancheColor(t, now)
-                        if (!t) return (
-                          <td key={tn} className="px-2 py-2.5 text-center">
-                            <div className="w-5 h-5 rounded mx-auto" style={{ background:'#F1F5F9' }}/>
-                          </td>
-                        )
-                        const href = t.id && d.invoiceByTranche[t.id] ? `/invoices/${d.invoiceByTranche[t.id].id}` : `/contracts/${c.contractId}`
-                        return (
-                          <td key={tn} className="px-2 py-2.5 text-center">
-                            <Link href={href} title={`${tn}: ${t.status} - ${formatCurrency(t.amount, c.ccy)}`}>
-                              <div className="w-5 h-5 rounded mx-auto hover:scale-125 transition-transform" style={{ background:col }}/>
+                  prov.contracts.map((c:any, ci:number) => {
+                    const tranches = Object.values(c.tranches) as any[]
+                    return (
+                      <tr key={`${prov.id}-${c.contractId}`} className="hover:bg-slate-50 transition-colors">
+                        {ci === 0 ? (
+                          <td className="px-4 py-3" rowSpan={prov.contracts.length} style={{ verticalAlign:'top', paddingTop:12 }}>
+                            <Link href={`/providers/${prov.id}`} className="font-semibold hover:text-blue-600 transition-colors" style={{ color:'#0F172A' }}>
+                              {prov.name}
                             </Link>
                           </td>
-                        )
-                      })}
-                      <td className="px-4 py-2.5 text-right font-semibold" style={{ color:'#10B981' }}>{formatCurrency(c.totalPaid, c.ccy)}</td>
-                      <td className="px-4 py-2.5 text-right font-semibold" style={{ color:c.balance>0?'#F59E0B':'#94A3B8' }}>{formatCurrency(c.balance, c.ccy)}</td>
-                    </tr>
-                  ))
+                        ) : null}
+                        <td className="px-4 py-3" style={{ maxWidth:140 }}>
+                          <Link href={`/contracts/${c.contractId}`} className="block hover:text-blue-600 transition-colors truncate" style={{ color:'#64748B' }}>
+                            {c.contractName}
+                          </Link>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            {tranches.length === 0 && <span style={{ color:'#CBD5E1' }}>—</span>}
+                            {tranches.map((t:any) => {
+                              const isPaid    = t.status === 'paid'
+                              const isOverdue = !isPaid && t.scheduled_date && new Date(t.scheduled_date) < now
+                              const isPending = !isPaid && !isOverdue && t.scheduled_date && new Date(t.scheduled_date).getTime() - now.getTime() < 14*86400000
+                              const bg  = isPaid ? '#DCFCE7' : isOverdue ? '#FEE2E2' : isPending ? '#FEF9C3' : '#F1F5F9'
+                              const col = isPaid ? '#15803D' : isOverdue ? '#DC2626' : isPending ? '#854D0E' : '#94A3B8'
+                              const href = t.id && d.invoiceByTranche[t.id] ? `/invoices/${d.invoiceByTranche[t.id].id}` : `/contracts/${c.contractId}`
+                              const label = t.notes ? t.notes.slice(0,12) : t.tranche_name
+                              return (
+                                <Link key={t.id} href={href}
+                                  title={`${t.tranche_name}${t.notes ? ': '+t.notes : ''} — ${t.status}${t.scheduled_date ? ' — '+new Date(t.scheduled_date).toLocaleDateString('en-GB',{day:'2-digit',month:'short'}) : ''}`}
+                                  className="flex items-center gap-1 px-2 py-1 rounded-lg hover:opacity-80 transition-opacity"
+                                  style={{ background:bg, border:`1px solid ${col}30` }}>
+                                  {isPaid
+                                    ? <svg width="11" height="11" fill="none" stroke={col} strokeWidth="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                                    : isOverdue
+                                      ? <svg width="11" height="11" fill="none" stroke={col} strokeWidth="3" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                      : <div className="w-2 h-2 rounded-full" style={{ background:col }}/>
+                                  }
+                                  <span className="text-xs font-semibold" style={{ color:col, maxWidth:70, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{label}</span>
+                                </Link>
+                              )
+                            })}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 text-right font-semibold" style={{ color:'#10B981' }}>{formatCurrency(c.totalPaid, c.ccy)}</td>
+                        <td className="px-4 py-3 text-right font-semibold" style={{ color:c.balance>0?'#F59E0B':'#94A3B8' }}>{formatCurrency(c.balance, c.ccy)}</td>
+                      </tr>
+                    )
+                  })
                 )}
               </tbody>
             </table>
