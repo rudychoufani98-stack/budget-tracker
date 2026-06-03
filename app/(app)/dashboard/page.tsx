@@ -562,7 +562,7 @@ function ContractTimeline({ contracts, now }: { contracts: any[]; now: Date }) {
         <div className="space-y-2">
           {contracts.map((c:any) => {
             const catC     = ESG_COLOR[c.category] || ESG_COLOR.Other
-            const pctColor = c.pct >= 80 ? '#10B981' : c.pct >= 40 ? '#F59E0B' : '#EF4444'
+            const pctColor = c.pct === 100 ? '#059669' : c.pct >= 80 ? '#10B981' : c.pct >= 65 ? '#34D399' : c.pct >= 50 ? '#FBBF24' : c.pct >= 35 ? '#F59E0B' : c.pct >= 20 ? '#F97316' : c.pct > 0 ? '#EF4444' : '#CBD5E1'
             const barL     = pos(c.startDate ? new Date(c.startDate).getTime() : c.minDate)
             const barR     = pos(c.endDate   ? new Date(c.endDate).getTime()   : c.maxDate)
             const barW     = Math.max(1, barR - barL)
@@ -792,7 +792,7 @@ export default async function DashboardPage({
                 : c.daysToNext < 0 ? '#EF4444'
                 : c.daysToNext <= 14 ? '#F59E0B'
                 : '#94A3B8'
-              const pctColor = c.pct >= 80 ? '#10B981' : c.pct >= 40 ? '#F59E0B' : '#EF4444'
+              const pctColor = c.pct === 100 ? '#059669' : c.pct >= 80 ? '#10B981' : c.pct >= 65 ? '#34D399' : c.pct >= 50 ? '#FBBF24' : c.pct >= 35 ? '#F59E0B' : c.pct >= 20 ? '#F97316' : c.pct > 0 ? '#EF4444' : '#CBD5E1'
               return (
                 <Link key={c.id} href={`/contracts/${c.id}`}
                   className="flex items-center gap-3 px-5 py-3.5 hover:bg-slate-50 transition-colors"
