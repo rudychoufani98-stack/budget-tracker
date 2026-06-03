@@ -590,7 +590,7 @@ function ContractTimeline({ contracts, now, linkGroupColor = {} }: { contracts: 
         {/* Rows */}
         <div className="space-y-2">
           {contracts.map((c:any) => {
-            const catC     = d.linkGroupColor[c.id] || ESG_COLOR[c.category] || ESG_COLOR.Other
+            const catC     = linkGroupColor[c.id] || ESG_COLOR[c.category] || ESG_COLOR.Other
             const pctColor = c.pct === 100 ? '#059669' : c.pct >= 80 ? '#10B981' : c.pct >= 65 ? '#34D399' : c.pct >= 50 ? '#FBBF24' : c.pct >= 35 ? '#F59E0B' : c.pct >= 20 ? '#F97316' : c.pct > 0 ? '#EF4444' : '#CBD5E1'
             const barL     = pos(c.startDate ? new Date(c.startDate).getTime() : c.minDate)
             const barR     = pos(c.endDate   ? new Date(c.endDate).getTime()   : c.maxDate)
