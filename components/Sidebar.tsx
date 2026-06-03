@@ -95,9 +95,9 @@ export function Sidebar() {
   return (
     <aside className="w-56 min-h-screen flex flex-col shrink-0" style={{ background: BG, borderRight: '1px solid #323D5E' }}>
       <div className="px-4 pt-5 pb-4" style={{ borderBottom: '1px solid #323D5E' }}>
-        <div className="rounded-xl px-3 py-2.5 flex items-center justify-center" style={{ background: '#fff' }}>
+        <Link href="/dashboard" className="rounded-xl px-3 py-2.5 flex items-center justify-center" style={{ background: '#fff' }}>
           <Image src="/logo.png" alt="Skykapital" width={130} height={38} priority style={{ objectFit: 'contain' }} />
-        </div>
+        </Link>
       </div>
 
       <nav className="flex-1 px-2 py-4 overflow-y-auto">
