@@ -242,14 +242,34 @@ async function getData(projectId?: string, sectionId?: string, baseCcy: string =
     }
   }
 
+  // Build approved invoice totals per contract (with currency conversion)
+  const approvedInvByContract: Record<string, number> = {}
+  for (const inv of allInv) {
+    if (inv.status !== 'approved') continue
+    const contract = allContracts.find((c:any) => c.id === inv.contract_id)
+    if (!contract) continue
+    const invCcy  = currencyMap[inv.id] || 'NGN'
+    const cCcy    = contract.currency || 'NGN'
+    const rate    = contract.fx_rate_at_signing || null
+    // Convert invoice to contract's native currency first
+    let amt = inv.amount_ttc || 0
+    if (invCcy !== cCcy) {
+      if (invCcy === 'NGN' && cCcy === 'USD') amt = rate ? amt / rate : amt
+      else if (invCcy === 'USD' && cCcy === 'NGN') amt = rate ? amt * rate : amt
+    }
+    // Then convert to baseCcy for display
+    approvedInvByContract[inv.contract_id] = (approvedInvByContract[inv.contract_id] || 0) + contractToBase(amt, cCcy, rate)
+  }
+
   // Contract advancement (filtered)
   const contractAdvancement = contracts.map((c:any) => {
     const ts: any[] = c.contract_tranches || []
     const signingRate = c.fx_rate_at_signing || null
     const ccy = c.currency || 'NGN'
     const total = contractToBase(c.contract_amount || c.total_budget || 0, ccy, signingRate)
-    const paid  = ts.filter((t:any) => t.status === 'paid').reduce((s:number,t:any) => s + contractToBase(t.amount||0, ccy, signingRate), 0)
-    const pct   = total > 0 ? Math.round((paid/total)*100) : 0
+    // Use approved invoice amounts — reflects what was actually paid, not scheduled tranche amounts
+    const paid  = approvedInvByContract[c.id] || 0
+    const pct   = total > 0 ? Math.min(100, Math.round((paid/total)*100)) : 0
 
     const upcoming = ts
       .filter((t:any) => t.status !== 'paid' && t.scheduled_date)
@@ -421,9 +441,9 @@ async function getData(projectId?: string, sectionId?: string, baseCcy: string =
       ].filter(Boolean).map((d:string) => new Date(d).getTime())
       const minDate = datesWithData.length ? Math.min(...datesWithData) : today - 30*86400000
       const maxDate = datesWithData.length ? Math.max(...datesWithData) : today + 90*86400000
-      const total = ts.reduce((s:number,t:any)=>s+(t.amount||0),0)
-      const paid  = ts.filter((t:any)=>t.status==='paid').reduce((s:number,t:any)=>s+(t.amount||0),0)
-      const pct   = total>0 ? Math.round((paid/total)*100) : 0
+      const total = c.contract_amount || c.total_budget || ts.reduce((s:number,t:any)=>s+(t.amount||0),0)
+      const paid  = approvedInvByContract[c.id] || 0
+      const pct   = total>0 ? Math.min(100, Math.round((paid/total)*100)) : 0
       return {
         id: c.id,
         name: c.contract_name,
