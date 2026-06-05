@@ -103,9 +103,18 @@ export function ContractsClient({ contracts, projects, initialProject, initialSe
   }, 0)
 
   const totalPaid = filtered.reduce((s:number,c:any) => {
-    const ts = (c.contract_tranches||[]) as ContractTranche[]
-    const paid = ts.filter(t=>t.status==='paid').reduce((ss,t)=>ss+t.amount,0)
-    return s + convert(paid, c.currency||'NGN', c.fx_rate_at_signing)
+    const ccy = c.currency || 'NGN'
+    const rate = c.fx_rate_at_signing || null
+    const paid = (c.invoices||[]).filter((i:any)=>i.status==='approved').reduce((ss:number,i:any)=>{
+      const invCcy = i.currency || ccy
+      let amt = i.amount_ttc || 0
+      if (invCcy !== ccy) {
+        if (invCcy === 'NGN' && ccy === 'USD') amt = rate ? amt / rate : amt
+        else if (invCcy === 'USD' && ccy === 'NGN') amt = rate ? amt * rate : amt
+      }
+      return ss + amt
+    }, 0)
+    return s + convert(paid, ccy, rate)
   }, 0)
 
   const activeCount = filtered.filter((c:any) => c.status==='active').length
@@ -214,12 +223,21 @@ export function ContractsClient({ contracts, projects, initialProject, initialSe
           const ccy         = c.currency || 'NGN'
           const signingRate = c.fx_rate_at_signing || null
           const rawBudget   = c.contract_amount || c.total_budget || 0
-          const rawPaid     = tranches.filter(t=>t.status==='paid').reduce((s,t)=>s+t.amount, 0)
           const rawSched    = tranches.filter(t=>t.status==='scheduled').reduce((s,t)=>s+t.amount, 0)
-          const budget      = convert(rawBudget,  ccy, signingRate)
-          const paid        = convert(rawPaid,    ccy, signingRate)
+          // Use approved invoice amounts — actual money paid, not scheduled tranche amounts
+          const rawPaid     = (c.invoices||[]).filter((i:any)=>i.status==='approved').reduce((s:number,i:any)=>{
+            const invCcy = i.currency || ccy
+            let amt = i.amount_ttc || 0
+            if (invCcy !== ccy) {
+              if (invCcy === 'NGN' && ccy === 'USD') amt = signingRate ? amt / signingRate : amt
+              else if (invCcy === 'USD' && ccy === 'NGN') amt = signingRate ? amt * signingRate : amt
+            }
+            return s + amt
+          }, 0)
+          const budget      = convert(rawBudget, ccy, signingRate)
+          const paid        = convert(rawPaid,   ccy, signingRate)
           const balance     = budget - paid
-          const rate        = budget > 0 ? Math.round((paid/budget)*100) : 0
+          const rate        = budget > 0 ? Math.min(100, Math.round((paid/budget)*100)) : 0
           const esg         = ESG_COLORS[c.category] || ESG_COLORS.Other
           const cs          = CONTRACT_STATUS[c.status] || CONTRACT_STATUS.active
           const barColor    = linkGroupColor[c.id] || PALETTE[i % PALETTE.length]

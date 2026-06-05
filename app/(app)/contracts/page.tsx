@@ -7,10 +7,10 @@ export const revalidate = 0
 const LINK_PALETTE = ['#F59E0B','#8B5CF6','#EC4899','#06B6D4','#F97316','#6366F1','#14B8A6','#EF4444']
 
 export default async function ContractsPage() {
-  const [contractsRes, projectsRes, linksRes] = await Promise.all([
+  const [contractsRes, projectsRes, linksRes, invoiceCurrencyRes] = await Promise.all([
     supabaseAdmin
       .from('contracts')
-      .select('*, service_providers(name), contract_tranches(*), projects(id, name), project_sections(id, name)')
+      .select('*, service_providers(name), contract_tranches(*), projects(id, name), project_sections(id, name), invoices(id, status, amount_ttc)')
       .order('created_at', { ascending: false }),
     supabaseAdmin
       .from('projects')
@@ -19,11 +19,26 @@ export default async function ContractsPage() {
     supabaseAdmin
       .from('contract_links')
       .select('contract_id_1, contract_id_2'),
+    supabaseAdmin
+      .from('invoice_currency')
+      .select('invoice_id, currency'),
   ])
 
   const contracts = contractsRes.data || []
   const projects  = projectsRes.data  || []
   const links     = linksRes.data     || []
+
+  // Build invoice currency map
+  const invoiceCurrencyMap: Record<string, string> = {}
+  for (const ic of invoiceCurrencyRes.data || []) invoiceCurrencyMap[ic.invoice_id] = ic.currency
+
+  // Attach invoice currency to each contract's invoices
+  contracts.forEach((c: any) => {
+    c.invoices = (c.invoices || []).map((inv: any) => ({
+      ...inv,
+      currency: invoiceCurrencyMap[inv.id] || 'NGN',
+    }))
+  })
 
   // Build union-find groups: contracts sharing any link get the same group color
   const parent: Record<string, string> = {}
