@@ -624,7 +624,8 @@ function ContractTimeline({ contracts, now, linkGroupColor = {} }: { contracts: 
             const catC     = linkGroupColor[c.id] || ESG_COLOR[c.category] || ESG_COLOR.Other
             const pctColor = c.pct === 100 ? '#059669' : c.pct >= 80 ? '#10B981' : c.pct >= 65 ? '#34D399' : c.pct >= 50 ? '#FBBF24' : c.pct >= 35 ? '#F59E0B' : c.pct >= 20 ? '#F97316' : c.pct > 0 ? '#EF4444' : '#CBD5E1'
             const barL     = pos(c.startDate ? new Date(c.startDate).getTime() : c.minDate)
-            const barR     = pos(c.endDate   ? new Date(c.endDate).getTime()   : c.maxDate)
+            // If no end date set, extend bar to today minimum (contract still open)
+            const barR     = pos(c.endDate ? new Date(c.endDate).getTime() : Math.max(c.maxDate, todayMs))
             const barW     = Math.max(1, barR - barL)
 
             return (
