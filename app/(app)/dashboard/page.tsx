@@ -455,7 +455,7 @@ async function getData(projectId?: string, sectionId?: string, baseCcy: string =
         name: c.contract_name,
         provider: c.service_providers?.name || '',
         category: c.category || 'Other',
-        ccy: c.currency || 'NGN',
+        ccy: baseCcy,
         total, paid, pct,
         startDate: c.start_date || null,
         endDate: c.end_date || null,
