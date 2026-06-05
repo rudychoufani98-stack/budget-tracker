@@ -184,6 +184,7 @@ export default function UploadPage() {
     const {signedUrl, error:uploadErr} = await uploadRes.json()
     if (uploadErr) { setSubmitError(`Upload failed: ${uploadErr}`); setSubmitting(false); return }
     const {line_items,...invoiceFields} = scanned
+    if (!invoiceFields.category) invoiceFields.category = 'Other'
     const body = {
       invoice: {
         ...invoiceFields,
