@@ -22,7 +22,7 @@ async function getData(projectId?: string, sectionId?: string, baseCcy: string =
   const in30 = new Date(now.getTime() + 30*86400000)
   const in14 = new Date(now.getTime() + 14*86400000)
 
-  const [tranchesRes, contractsRes, invoicesRes, allInvRes, currencyRes, providersRes, projectsRes, sectionsCountRes, fxRes, linksRes] = await Promise.all([
+  const [tranchesRes, contractsRes, invoicesRes, allInvRes, currencyRes, providersRes, projectsRes, sectionsCountRes, fxRes, linksRes, expensesRes] = await Promise.all([
     supabaseAdmin.from('contract_tranches').select('*, contracts(id, contract_name, category, currency, fx_rate_at_signing, project_id, section_id, service_providers(id, name))').order('scheduled_date', { ascending: true }).select('id, tranche_name, amount, status, scheduled_date, paid_date, contract_id, contracts(id, contract_name, category, currency, fx_rate_at_signing, project_id, section_id, service_providers(id, name))'),
     supabaseAdmin.from('contracts').select('id, contract_name, category, currency, fx_rate_at_signing, contract_amount, start_date, end_date, project_id, section_id, service_providers(id, name), contract_tranches(id, tranche_name, amount, status, scheduled_date, paid_date), invoices(id, status, submitted_at, amount_ttc)').order('created_at', { ascending: false }),
     supabaseAdmin.from('invoices').select('id, status, subcontractor_name, submitted_at, amount_ttc, contract_id, tranche_id').order('submitted_at', { ascending: false }),
@@ -33,6 +33,7 @@ async function getData(projectId?: string, sectionId?: string, baseCcy: string =
     supabaseAdmin.from('project_sections').select('id, project_id, name'),
     supabaseAdmin.from('exchange_rates').select('currency, rate, fetched_at').eq('base', 'USD'),
     supabaseAdmin.from('contract_links').select('contract_id_1, contract_id_2'),
+    supabaseAdmin.from('expenses').select('id, amount, currency, status, project_id').eq('status', 'pending'),
   ])
 
   const allTranches  = tranchesRes.data  || []
@@ -42,6 +43,9 @@ async function getData(projectId?: string, sectionId?: string, baseCcy: string =
   const providers    = providersRes.data || []
   const rawProjects  = projectsRes.data  || []
   const allSections  = sectionsCountRes.data || []
+  const pendingExpenses = expensesRes.data || []
+  const pendingExpensesNGN = pendingExpenses.filter((e:any) => e.currency === 'NGN').reduce((s:number,e:any) => s + (e.amount||0), 0)
+  const pendingExpensesUSD = pendingExpenses.filter((e:any) => e.currency === 'USD').reduce((s:number,e:any) => s + (e.amount||0), 0)
 
   // Build link group colors
   const LINK_PALETTE = ['#F59E0B','#8B5CF6','#EC4899','#06B6D4','#F97316','#6366F1','#14B8A6','#EF4444']
@@ -474,6 +478,7 @@ async function getData(projectId?: string, sectionId?: string, baseCcy: string =
   return {
     totalCommitted, totalPaid, pipeline30, overdueAmount,
     overdueCount: overdueTranches.length,
+    pendingExpensesNGN, pendingExpensesUSD, pendingExpensesCount: pendingExpenses.length,
     pendingPaymentTranches, pendingPaymentAmount,
     contractAdvancement,
     timeline,
@@ -724,8 +729,8 @@ export default async function DashboardPage({
         currentSection={d.currentSection}
       />
 
-      {/* ROW 1 - 5 metric cards */}
-      <div className="grid grid-cols-5 gap-4">
+      {/* ROW 1 - 6 metric cards */}
+      <div className="grid grid-cols-6 gap-4">
         <Link href="/contracts" className="rounded-2xl px-5 py-5 block hover:shadow-md transition-shadow" style={{ background:'#FFFFFF', border:'1px solid #E2E8F0' }}>
           <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color:'#94A3B8' }}>Total Committed</p>
           <p className="text-2xl font-bold mb-1" style={{ color:'#3B82F6' }}>{formatCurrency(d.totalCommitted, baseCcy)}</p>
@@ -754,6 +759,13 @@ export default async function DashboardPage({
           <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: d.overdueAmount > 0 ? '#EF4444' : '#94A3B8' }}>Overdue Payments</p>
           <p className="text-2xl font-bold mb-1" style={{ color:'#EF4444' }}>{formatCurrency(d.overdueAmount, baseCcy)}</p>
           <p className="text-xs" style={{ color:'#EF4444' }}>{d.overdueCount} tranche{d.overdueCount!==1?'s':''} overdue</p>
+        </Link>
+
+        <Link href="/expenses" className="rounded-2xl px-5 py-5 block hover:shadow-md transition-shadow" style={{ background: d.pendingExpensesCount > 0 ? '#FFFBEB' : '#FFFFFF', border: d.pendingExpensesCount > 0 ? '1px solid rgba(245,158,11,0.3)' : '1px solid #E2E8F0' }}>
+          <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: d.pendingExpensesCount > 0 ? '#D97706' : '#94A3B8' }}>Notes de Frais</p>
+          <p className="text-lg font-bold mb-0.5" style={{ color:'#F59E0B' }}>{formatCurrency(d.pendingExpensesNGN, 'NGN')}</p>
+          {d.pendingExpensesUSD > 0 && <p className="text-sm font-semibold mb-0.5" style={{ color:'#F59E0B' }}>{formatCurrency(d.pendingExpensesUSD, 'USD')}</p>}
+          <p className="text-xs" style={{ color:'#D97706' }}>{d.pendingExpensesCount} pending approval</p>
         </Link>
       </div>
 
