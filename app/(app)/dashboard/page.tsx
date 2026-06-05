@@ -248,15 +248,8 @@ async function getData(projectId?: string, sectionId?: string, baseCcy: string =
     const signingRate = c.fx_rate_at_signing || null
     const ccy = c.currency || 'NGN'
     const total = contractToBase(c.contract_amount || c.total_budget || 0, ccy, signingRate)
-
-    // Use approved invoices — same logic as contract detail page
-    const contractInvoices = (c.invoices || []).filter((i:any) => i.status === 'approved')
-    const paid = contractInvoices.reduce((s:number, i:any) => {
-      const amt = i.amount_ttc || 0
-      // invoices are stored in contract currency (already converted at upload)
-      return s + contractToBase(amt, ccy, signingRate)
-    }, 0)
-    const pct   = total > 0 ? Math.min(100, Math.round((paid/total)*100)) : 0
+    const paid  = ts.filter((t:any) => t.status === 'paid').reduce((s:number,t:any) => s + contractToBase(t.amount||0, ccy, signingRate), 0)
+    const pct   = total > 0 ? Math.round((paid/total)*100) : 0
 
     const upcoming = ts
       .filter((t:any) => t.status !== 'paid' && t.scheduled_date)
@@ -428,10 +421,9 @@ async function getData(projectId?: string, sectionId?: string, baseCcy: string =
       ].filter(Boolean).map((d:string) => new Date(d).getTime())
       const minDate = datesWithData.length ? Math.min(...datesWithData) : today - 30*86400000
       const maxDate = datesWithData.length ? Math.max(...datesWithData) : today + 90*86400000
-      const total = c.contract_amount || c.total_budget || ts.reduce((s:number,t:any)=>s+(t.amount||0),0)
-      const approvedInvs = (c.invoices||[]).filter((i:any)=>i.status==='approved')
-      const paid  = approvedInvs.reduce((s:number,i:any)=>s+(i.amount_ttc||0),0)
-      const pct   = total>0 ? Math.min(100, Math.round((paid/total)*100)) : 0
+      const total = ts.reduce((s:number,t:any)=>s+(t.amount||0),0)
+      const paid  = ts.filter((t:any)=>t.status==='paid').reduce((s:number,t:any)=>s+(t.amount||0),0)
+      const pct   = total>0 ? Math.round((paid/total)*100) : 0
       return {
         id: c.id,
         name: c.contract_name,
