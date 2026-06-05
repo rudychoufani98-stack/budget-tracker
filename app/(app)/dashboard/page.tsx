@@ -870,7 +870,8 @@ export default async function DashboardPage({
               <p className="text-sm text-center py-10" style={{ color:'#94A3B8' }}>No contracts yet</p>
             )}
             {d.contractAdvancement.slice(0,8).map((c:any) => {
-              const catC = d.linkGroupColor[c.id] || ESG_COLOR[c.category] || ESG_COLOR.Other
+              const linkColor = d.linkGroupColor[c.id]
+              const catC = linkColor || ESG_COLOR[c.category] || ESG_COLOR.Other
               const deadlineColor = c.daysToNext === null ? '#94A3B8'
                 : c.daysToNext < 0 ? '#EF4444'
                 : c.daysToNext <= 14 ? '#F59E0B'
@@ -878,11 +879,18 @@ export default async function DashboardPage({
               const pctColor = c.pct === 100 ? '#059669' : c.pct >= 80 ? '#10B981' : c.pct >= 65 ? '#34D399' : c.pct >= 50 ? '#FBBF24' : c.pct >= 35 ? '#F59E0B' : c.pct >= 20 ? '#F97316' : c.pct > 0 ? '#EF4444' : '#CBD5E1'
               return (
                 <Link key={c.id} href={`/contracts/${c.id}`}
-                  className="flex items-center gap-3 px-5 py-3.5 hover:bg-slate-50 transition-colors"
+                  className="flex items-center gap-3 py-3.5 hover:bg-slate-50 transition-colors"
+                  style={{ paddingLeft: linkColor ? 0 : 20, paddingRight: 20 }}
                 >
+                  {/* Linked contracts get a colored left bar */}
+                  {linkColor && (
+                    <div className="w-1 self-stretch rounded-r shrink-0" style={{ background: linkColor, minHeight: 36 }}/>
+                  )}
+                  <div style={{ paddingLeft: linkColor ? 12 : 0 }} className="flex-1 min-w-0 flex items-center gap-3">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="text-xs px-1.5 py-0.5 rounded font-semibold" style={{ background:`${catC}18`, color:catC }}>{c.category}</span>
+                      {linkColor && <span title="Linked contract" style={{ fontSize:10, color:linkColor }}>🔗</span>}
                       <p className="text-sm font-semibold truncate" style={{ color:'#0F172A' }}>{c.name}</p>
                     </div>
                     <div className="flex items-center gap-2">
@@ -905,8 +913,9 @@ export default async function DashboardPage({
                       <span className="text-xs" style={{ color:'#94A3B8' }}>{formatCurrency(c.paid, c.ccy)}</span>
                     </div>
                     <div className="h-1.5 rounded-full overflow-hidden" style={{ background:'#F1F5F9' }}>
-                      <div style={{ width:`${c.pct}%`, height:'100%', background:pctColor, borderRadius:4 }}/>
+                      <div style={{ width:`${c.pct}%`, height:'100%', background: linkColor || pctColor, borderRadius:4 }}/>
                     </div>
+                  </div>
                   </div>
                 </Link>
               )
