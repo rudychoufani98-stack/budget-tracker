@@ -33,7 +33,7 @@ async function getData(projectId?: string, sectionId?: string, baseCcy: string =
     supabaseAdmin.from('project_sections').select('id, project_id, name'),
     supabaseAdmin.from('exchange_rates').select('currency, rate, fetched_at').eq('base', 'USD'),
     supabaseAdmin.from('contract_links').select('contract_id_1, contract_id_2'),
-    supabaseAdmin.from('expenses').select('id, amount, currency, status, project_id').eq('status', 'pending'),
+    supabaseAdmin.from('expenses').select('id, amount, currency, status, project_id, type'),
   ])
 
   const allTranches  = tranchesRes.data  || []
@@ -43,9 +43,13 @@ async function getData(projectId?: string, sectionId?: string, baseCcy: string =
   const providers    = providersRes.data || []
   const rawProjects  = projectsRes.data  || []
   const allSections  = sectionsCountRes.data || []
-  const pendingExpenses = expensesRes.data || []
-  const pendingExpensesNGN = pendingExpenses.filter((e:any) => e.currency === 'NGN').reduce((s:number,e:any) => s + (e.amount||0), 0)
-  const pendingExpensesUSD = pendingExpenses.filter((e:any) => e.currency === 'USD').reduce((s:number,e:any) => s + (e.amount||0), 0)
+  const allExpenses = expensesRes.data || []
+  const pendingStaff = allExpenses.filter((e:any) => (e.type||'staff') === 'staff' && e.status === 'pending')
+  const pendingESG   = allExpenses.filter((e:any) => e.type === 'esg' && e.status === 'pending')
+  const pendingExpensesNGN = pendingStaff.filter((e:any) => e.currency === 'NGN').reduce((s:number,e:any) => s + (e.amount||0), 0)
+  const pendingExpensesUSD = pendingStaff.filter((e:any) => e.currency === 'USD').reduce((s:number,e:any) => s + (e.amount||0), 0)
+  const pendingESGNGN = pendingESG.filter((e:any) => e.currency === 'NGN').reduce((s:number,e:any) => s + (e.amount||0), 0)
+  const pendingESGUSD = pendingESG.filter((e:any) => e.currency === 'USD').reduce((s:number,e:any) => s + (e.amount||0), 0)
 
   // Build link group colors
   const LINK_PALETTE = ['#F59E0B','#8B5CF6','#EC4899','#06B6D4','#F97316','#6366F1','#14B8A6','#EF4444']
@@ -496,7 +500,8 @@ async function getData(projectId?: string, sectionId?: string, baseCcy: string =
   return {
     totalCommitted, totalPaid, pipeline30, overdueAmount,
     overdueCount: overdueTranches.length,
-    pendingExpensesNGN, pendingExpensesUSD, pendingExpensesCount: pendingExpenses.length,
+    pendingExpensesNGN, pendingExpensesUSD, pendingExpensesCount: pendingStaff.length,
+    pendingESGNGN, pendingESGUSD, pendingESGCount: pendingESG.length,
     pendingPaymentTranches, pendingPaymentAmount,
     contractAdvancement,
     timeline,
@@ -780,11 +785,46 @@ export default async function DashboardPage({
         </Link>
 
         <Link href="/expenses" className="rounded-2xl px-5 py-5 block hover:shadow-md transition-shadow" style={{ background: d.pendingExpensesCount > 0 ? '#FFFBEB' : '#FFFFFF', border: d.pendingExpensesCount > 0 ? '1px solid rgba(245,158,11,0.3)' : '1px solid #E2E8F0' }}>
-          <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: d.pendingExpensesCount > 0 ? '#D97706' : '#94A3B8' }}>Notes de Frais</p>
+          <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: d.pendingExpensesCount > 0 ? '#D97706' : '#94A3B8' }}>Staff Expenses</p>
           <p className="text-lg font-bold mb-0.5" style={{ color:'#F59E0B' }}>{formatCurrency(d.pendingExpensesNGN, 'NGN')}</p>
           {d.pendingExpensesUSD > 0 && <p className="text-sm font-semibold mb-0.5" style={{ color:'#F59E0B' }}>{formatCurrency(d.pendingExpensesUSD, 'USD')}</p>}
           <p className="text-xs" style={{ color:'#D97706' }}>{d.pendingExpensesCount} pending approval</p>
         </Link>
+      </div>
+
+      {/* ESG Activities expenses row */}
+      <div className="rounded-2xl overflow-hidden" style={{ background:'#FFFFFF', border:'1px solid #D1FAE5' }}>
+        <div style={{ height:3, background:'linear-gradient(90deg,#10B981,#059669)' }}/>
+        <div className="px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center text-base" style={{ background:'rgba(16,185,129,0.1)' }}>🌍</div>
+            <div>
+              <p className="text-sm font-bold" style={{ color:'#059669' }}>ESG Activities Expenses</p>
+              <p className="text-xs mt-0.5" style={{ color:'#64748B' }}>Community, environmental &amp; social spending pending approval</p>
+            </div>
+          </div>
+          <Link href="/expenses" className="text-xs font-semibold px-3 py-1.5 rounded-lg" style={{ background:'rgba(16,185,129,0.1)', color:'#059669' }}>View all</Link>
+        </div>
+        {d.pendingESGCount === 0 ? (
+          <div className="px-6 pb-5 text-sm" style={{ color:'#94A3B8' }}>No pending ESG activity expenses</div>
+        ) : (
+          <div className="grid grid-cols-3 gap-4 px-6 pb-5">
+            <div className="rounded-xl px-4 py-3" style={{ background:'#F0FDF4' }}>
+              <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color:'#94A3B8' }}>Pending (NGN)</p>
+              <p className="text-xl font-bold" style={{ color:'#10B981' }}>{formatCurrency(d.pendingESGNGN, 'NGN')}</p>
+            </div>
+            {d.pendingESGUSD > 0 && (
+              <div className="rounded-xl px-4 py-3" style={{ background:'#F0FDF4' }}>
+                <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color:'#94A3B8' }}>Pending (USD)</p>
+                <p className="text-xl font-bold" style={{ color:'#10B981' }}>{formatCurrency(d.pendingESGUSD, 'USD')}</p>
+              </div>
+            )}
+            <div className="rounded-xl px-4 py-3" style={{ background:'#ECFDF5' }}>
+              <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color:'#94A3B8' }}>Items</p>
+              <p className="text-xl font-bold" style={{ color:'#059669' }}>{d.pendingESGCount} activit{d.pendingESGCount !== 1 ? 'ies' : 'y'}</p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Accounting Queue — only shown when there are pending_payment tranches */}

@@ -30,6 +30,7 @@ export async function POST(req: NextRequest) {
     description:  body.description  || null,
     project_id:   body.project_id   || null,
     receipt_url:  body.receipt_url  || null,
+    type:         body.type === 'esg' ? 'esg' : 'staff',
     status:       'pending',
   }
   const { data, error } = await supabaseAdmin.from('expenses').insert(safe).select().single()
