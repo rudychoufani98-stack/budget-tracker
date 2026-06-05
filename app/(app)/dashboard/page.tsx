@@ -444,7 +444,10 @@ async function getData(projectId?: string, sectionId?: string, baseCcy: string =
       ].filter(Boolean).map((d:string) => new Date(d).getTime())
       const minDate = datesWithData.length ? Math.min(...datesWithData) : today - 30*86400000
       const maxDate = datesWithData.length ? Math.max(...datesWithData) : today + 90*86400000
-      const total = c.contract_amount || c.total_budget || ts.reduce((s:number,t:any)=>s+(t.amount||0),0)
+      const cCcy  = c.currency || 'NGN'
+      const cRate = c.fx_rate_at_signing || null
+      // Both total and paid must be in the same currency (baseCcy)
+      const total = contractToBase(c.contract_amount || c.total_budget || ts.reduce((s:number,t:any)=>s+(t.amount||0),0), cCcy, cRate)
       const paid  = approvedInvByContract[c.id] || 0
       const pct   = total>0 ? Math.min(100, Math.round((paid/total)*100)) : 0
       return {
