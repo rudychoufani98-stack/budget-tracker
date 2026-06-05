@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth-guard'
+import Anthropic from '@anthropic-ai/sdk'
 
 const PROMPT = `Extract all data from this invoice and return ONLY a valid JSON object with no markdown, no explanation, just raw JSON.
 
@@ -38,9 +39,10 @@ Rules:
 export async function POST(request: NextRequest) {
   const deny = await requireAuth(request)
   if (deny) return deny
-  const apiKey = process.env.GROQ_API_KEY
+
+  const apiKey = process.env.ANTHROPIC_API_KEY
   if (!apiKey) {
-    return NextResponse.json({ error: 'GROQ_API_KEY is not configured in environment variables' }, { status: 500 })
+    return NextResponse.json({ error: 'ANTHROPIC_API_KEY is not configured' }, { status: 500 })
   }
 
   try {
@@ -50,53 +52,38 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 })
     }
 
-    // Extract text from PDF using unpdf (serverless-compatible)
     const bytes = await file.arrayBuffer()
-    const { extractText } = await import('unpdf')
-    const { text: pdfText } = await extractText(new Uint8Array(bytes), { mergePages: true })
+    const base64 = Buffer.from(bytes).toString('base64')
 
-    if (!pdfText?.trim()) {
-      return NextResponse.json(
-        { error: 'Could not extract text from this PDF. It may be a scanned image — please try a text-based PDF.' },
-        { status: 400 }
-      )
-    }
+    const client = new Anthropic({ apiKey })
 
-    // Send extracted text to Groq
-    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
-        messages: [
-          {
-            role: 'system',
-            content: 'You are an invoice data extraction specialist. Extract invoice data and return ONLY valid JSON with no markdown formatting.',
-          },
-          {
-            role: 'user',
-            content: `${PROMPT}\n\nInvoice text:\n${pdfText}`,
-          },
-        ],
-        temperature: 0.1,
-        max_tokens: 2048,
-      }),
+    const response = await client.messages.create({
+      model: 'claude-opus-4-5',
+      max_tokens: 2048,
+      messages: [
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'document',
+              source: {
+                type: 'base64',
+                media_type: 'application/pdf',
+                data: base64,
+              },
+            },
+            {
+              type: 'text',
+              text: PROMPT,
+            },
+          ],
+        },
+      ],
     })
 
-    const groqResponse = await res.json()
-
-    if (!res.ok) {
-      const errMsg = groqResponse?.error?.message || JSON.stringify(groqResponse)
-      console.error('Groq API error:', errMsg)
-      return NextResponse.json({ error: `Groq error: ${errMsg}` }, { status: 500 })
-    }
-
-    const raw = groqResponse?.choices?.[0]?.message?.content ?? ''
+    const raw = response.content[0]?.type === 'text' ? response.content[0].text : ''
     if (!raw) {
-      return NextResponse.json({ error: 'Groq returned empty response' }, { status: 500 })
+      return NextResponse.json({ error: 'No response from AI' }, { status: 500 })
     }
 
     const cleaned = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
