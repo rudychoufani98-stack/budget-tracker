@@ -152,7 +152,18 @@ export default function UploadPage() {
     const fd = new FormData(); fd.append('file',file)
     const res  = await fetch('/api/invoices/scan',{method:'POST',body:fd})
     const data = await res.json()
-    if (!res.ok||data.error) { setScanError(data.error||'Scan failed'); setScanning(false); return }
+    if (!res.ok || data.error) {
+      // Scan failed (scanned/image PDF) — go to manual entry with blank form
+      const prov = providers.find((p:any) => p.id === selectedProvider)
+      const empty = {
+        subcontractor_name: prov?.name || '',
+        invoice_number: '', invoice_date: '', currency: selectedCurrency,
+        amount_ht: null, amount_tva: null, amount_ttc: null, vat_rate: null,
+        category: '', description: '', line_items: [],
+      }
+      setScanned(empty); setScanning(false); setScanError(''); setStep(2)
+      return
+    }
     // Pre-fill consultant name from the selected provider
     if (selectedProvider) {
       const prov = providers.find((p:any) => p.id === selectedProvider)
