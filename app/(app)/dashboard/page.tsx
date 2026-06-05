@@ -968,6 +968,9 @@ export default async function DashboardPage({
         </div>
       </div>
 
+      {/* Contract Timeline (Gantt) — right after advancement */}
+      <ContractTimeline contracts={d.contractTimeline} now={now} linkGroupColor={d.linkGroupColor} />
+
       {/* ROW 3 - New charts */}
       <div className="grid grid-cols-2 gap-5">
 
@@ -1124,8 +1127,6 @@ export default async function DashboardPage({
         </div>
       </div>
 
-      {/* ROW 4 — Contract Timeline (Gantt) */}
-      <ContractTimeline contracts={d.contractTimeline} now={now} linkGroupColor={d.linkGroupColor} />
 
     </div>
   )
