@@ -752,8 +752,8 @@ export default async function DashboardPage({
         currentSection={d.currentSection}
       />
 
-      {/* ROW 1 - 6 metric cards */}
-      <div className="grid grid-cols-6 gap-4">
+      {/* ROW 1 - 7 metric cards */}
+      <div className="grid grid-cols-7 gap-4">
         <Link href="/contracts" className="rounded-2xl px-5 py-5 block hover:shadow-md transition-shadow" style={{ background:'#FFFFFF', border:'1px solid #E2E8F0' }}>
           <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color:'#94A3B8' }}>Total Committed</p>
           <p className="text-2xl font-bold mb-1" style={{ color:'#3B82F6' }}>{formatCurrency(d.totalCommitted, baseCcy)}</p>
@@ -788,43 +788,18 @@ export default async function DashboardPage({
           <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: d.pendingExpensesCount > 0 ? '#D97706' : '#94A3B8' }}>Staff Expenses</p>
           <p className="text-lg font-bold mb-0.5" style={{ color:'#F59E0B' }}>{formatCurrency(d.pendingExpensesNGN, 'NGN')}</p>
           {d.pendingExpensesUSD > 0 && <p className="text-sm font-semibold mb-0.5" style={{ color:'#F59E0B' }}>{formatCurrency(d.pendingExpensesUSD, 'USD')}</p>}
-          <p className="text-xs" style={{ color:'#D97706' }}>{d.pendingExpensesCount} pending approval</p>
+          <p className="text-xs" style={{ color:'#D97706' }}>{d.pendingExpensesCount} pending</p>
         </Link>
-      </div>
 
-      {/* ESG Activities expenses row */}
-      <div className="rounded-2xl overflow-hidden" style={{ background:'#FFFFFF', border:'1px solid #D1FAE5' }}>
-        <div style={{ height:3, background:'linear-gradient(90deg,#10B981,#059669)' }}/>
-        <div className="px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl flex items-center justify-center text-base" style={{ background:'rgba(16,185,129,0.1)' }}>🌍</div>
-            <div>
-              <p className="text-sm font-bold" style={{ color:'#059669' }}>ESG Activities Expenses</p>
-              <p className="text-xs mt-0.5" style={{ color:'#64748B' }}>Community, environmental &amp; social spending pending approval</p>
-            </div>
+        <Link href="/expenses" className="rounded-2xl px-5 py-5 block hover:shadow-md transition-shadow" style={{ background: d.pendingESGCount > 0 ? '#F0FDF4' : '#FFFFFF', border: d.pendingESGCount > 0 ? '1px solid rgba(16,185,129,0.35)' : '1px solid #E2E8F0' }}>
+          <div className="flex items-center gap-1.5 mb-3">
+            <span style={{ fontSize:13 }}>🌍</span>
+            <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: d.pendingESGCount > 0 ? '#059669' : '#94A3B8' }}>ESG Activities</p>
           </div>
-          <Link href="/expenses" className="text-xs font-semibold px-3 py-1.5 rounded-lg" style={{ background:'rgba(16,185,129,0.1)', color:'#059669' }}>View all</Link>
-        </div>
-        {d.pendingESGCount === 0 ? (
-          <div className="px-6 pb-5 text-sm" style={{ color:'#94A3B8' }}>No pending ESG activity expenses</div>
-        ) : (
-          <div className="grid grid-cols-3 gap-4 px-6 pb-5">
-            <div className="rounded-xl px-4 py-3" style={{ background:'#F0FDF4' }}>
-              <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color:'#94A3B8' }}>Pending (NGN)</p>
-              <p className="text-xl font-bold" style={{ color:'#10B981' }}>{formatCurrency(d.pendingESGNGN, 'NGN')}</p>
-            </div>
-            {d.pendingESGUSD > 0 && (
-              <div className="rounded-xl px-4 py-3" style={{ background:'#F0FDF4' }}>
-                <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color:'#94A3B8' }}>Pending (USD)</p>
-                <p className="text-xl font-bold" style={{ color:'#10B981' }}>{formatCurrency(d.pendingESGUSD, 'USD')}</p>
-              </div>
-            )}
-            <div className="rounded-xl px-4 py-3" style={{ background:'#ECFDF5' }}>
-              <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color:'#94A3B8' }}>Items</p>
-              <p className="text-xl font-bold" style={{ color:'#059669' }}>{d.pendingESGCount} activit{d.pendingESGCount !== 1 ? 'ies' : 'y'}</p>
-            </div>
-          </div>
-        )}
+          <p className="text-lg font-bold mb-0.5" style={{ color:'#10B981' }}>{formatCurrency(d.pendingESGNGN, 'NGN')}</p>
+          {d.pendingESGUSD > 0 && <p className="text-sm font-semibold mb-0.5" style={{ color:'#10B981' }}>{formatCurrency(d.pendingESGUSD, 'USD')}</p>}
+          <p className="text-xs" style={{ color:'#059669' }}>{d.pendingESGCount} pending</p>
+        </Link>
       </div>
 
       {/* Accounting Queue — only shown when there are pending_payment tranches */}
