@@ -909,7 +909,7 @@ export default async function DashboardPage({
                   </div>
                   <div className="w-28 shrink-0">
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs font-bold" style={{ color:pctColor }}>{c.pct}%</span>
+                      <span className="text-xs font-bold" style={{ color: linkColor || pctColor }}>{c.pct}%</span>
                       <span className="text-xs" style={{ color:'#94A3B8' }}>{formatCurrency(c.paid, c.ccy)}</span>
                     </div>
                     <div className="h-1.5 rounded-full overflow-hidden" style={{ background:'#F1F5F9' }}>
