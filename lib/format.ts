@@ -16,11 +16,20 @@ export function formatCurrency(amount: number | null, currency = 'NGN'): string 
     }
     return `${sign}₦${new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(abs)}`
   }
-  return new Intl.NumberFormat('fr-FR', {
-    style: 'currency',
-    currency,
-    minimumFractionDigits: 2,
-  }).format(amount)
+  const abs = Math.abs(amount)
+  const sign = amount < 0 ? '-' : ''
+  const symbol = currency === 'USD' ? '$' : currency === 'EUR' ? '€' : currency === 'GBP' ? '£' : currency
+  if (abs >= 1_000_000) {
+    const m = abs / 1_000_000
+    const formatted = new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(m)
+    return `${sign}${formatted}M ${symbol}`
+  }
+  if (abs >= 1_000) {
+    const k = abs / 1_000
+    const formatted = new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(k)
+    return `${sign}${formatted}K ${symbol}`
+  }
+  return `${sign}${new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(abs)} ${symbol}`
 }
 
 export function formatDate(dateStr: string | null): string {
