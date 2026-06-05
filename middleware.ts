@@ -4,6 +4,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 const ROLE_ACCESS: Record<string, string[]> = {
   admin:    ['*'],
   placide:  ['/dashboard', '/projects', '/contracts', '/payment-register', '/invoices', '/upload', '/validations', '/providers', '/vault', '/reports', '/settings'],
+  carlos:   ['/dashboard', '/projects', '/contracts', '/payment-register', '/invoices', '/upload', '/providers', '/vault', '/reports', '/settings', '/expenses'],
   uploader: ['/dashboard', '/invoices', '/upload', '/expenses'],
   dani:     ['/dashboard', '/invoices', '/validations', '/expenses'],
   fares:    ['/dashboard', '/invoices', '/validations', '/expenses'],

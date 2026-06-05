@@ -625,7 +625,7 @@ function ContractTimeline({ contracts, now, linkGroupColor = {} }: { contracts: 
             const barW     = Math.max(1, barR - barL)
 
             return (
-              <div key={c.id} className="flex items-center gap-3" style={{ minHeight:36 }}>
+              <div key={c.id} className="flex items-center gap-3" style={{ minHeight:40 }}>
                 {/* Label */}
                 <div className="shrink-0 flex items-center gap-2" style={{ width:184 }}>
                   <span className="text-xs px-1.5 py-0.5 rounded font-semibold shrink-0" style={{ background:`${catC}18`, color:catC }}>{c.category}</span>
@@ -638,38 +638,44 @@ function ContractTimeline({ contracts, now, linkGroupColor = {} }: { contracts: 
                 </div>
 
                 {/* Bar */}
-                <div className="relative flex-1 h-8 rounded" style={{ background:'#F8FAFC' }}>
-                  {/* Duration bar background */}
-                  <div className="absolute h-full rounded overflow-hidden" style={{ left:`${barL}%`, width:`${Math.max(2, barW)}%`, background:`${catC}20`, border:`1px solid ${catC}40` }}>
+                <div className="relative flex-1 rounded-lg" style={{ height:36, background:'#F1F5F9' }}>
+                  {/* Duration bar */}
+                  <div className="absolute top-0 bottom-0 rounded-lg overflow-hidden" style={{ left:`${barL}%`, width:`${Math.max(2,barW)}%`, background:`${catC}18`, border:`1px solid ${catC}30` }}>
                     {/* Progress fill */}
-                    <div className="h-full" style={{ width:`${c.pct}%`, background:`${catC}60` }}/>
+                    <div className="h-full rounded-lg transition-all" style={{ width:`${c.pct}%`, background:`linear-gradient(90deg,${catC}90,${catC})` }}/>
+                    {/* % label inside bar — always shown */}
+                    {barW >= 8 && (
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <span className="text-xs font-bold px-1.5 py-0.5 rounded" style={{ color: c.pct > 45 ? '#fff' : catC, fontSize:11, textShadow: c.pct > 45 ? '0 1px 2px rgba(0,0,0,0.3)' : 'none' }}>
+                          {c.pct}%
+                        </span>
+                      </div>
+                    )}
                   </div>
 
-                  {/* % label */}
-                  {barW > 5 && (
-                    <div className="absolute inset-y-0 flex items-center text-xs font-bold" style={{ left:`${barL + Math.max(2,barW) / 2}%`, transform:'translateX(-50%)', color:catC, pointerEvents:'none', fontSize:11 }}>
-                      {c.pct}%
+                  {/* % label outside bar for narrow bars */}
+                  {barW < 8 && (
+                    <div className="absolute inset-y-0 flex items-center pointer-events-none" style={{ left:`${Math.min(barL + Math.max(2,barW) + 1, 90)}%` }}>
+                      <span className="text-xs font-bold" style={{ color:catC, fontSize:11 }}>{c.pct}%</span>
                     </div>
                   )}
 
                   {/* Today line */}
-                  <div className="absolute top-0 bottom-0 w-px" style={{ left:`${todayPct}%`, background:'rgba(239,68,68,0.6)', zIndex:10 }}/>
+                  <div className="absolute top-0 bottom-0 w-0.5 rounded" style={{ left:`${todayPct}%`, background:'rgba(239,68,68,0.7)', zIndex:10 }}/>
 
                   {/* Tranche dots */}
                   {c.tranches.map((t:any) => (
-                    <div
-                      key={t.id}
-                      title={`${t.name} - ${t.status} - ${fmtDate(t.date)}`}
-                      className="absolute rounded-full border-2 border-white"
-                      style={{ width:13, height:13, left:`${pos(t.ts)}%`, top:'50%', transform:'translate(-50%,-50%)', background:dotColor(t.status, t.ts), zIndex:20, cursor:'default' }}
+                    <div key={t.id} title={`${t.name} — ${t.status} — ${fmtDate(t.date)}`}
+                      className="absolute rounded-full border-2 border-white shadow"
+                      style={{ width:12, height:12, left:`${pos(t.ts)}%`, top:'50%', transform:'translate(-50%,-50%)', background:dotColor(t.status, t.ts), zIndex:20 }}
                     />
                   ))}
                 </div>
 
                 {/* Right stats */}
-                <div className="shrink-0 text-right" style={{ width:80 }}>
+                <div className="shrink-0 text-right" style={{ width:96 }}>
                   <p className="text-xs font-bold" style={{ color:pctColor }}>{c.pct}% paid</p>
-                  <p className="text-xs" style={{ color:'#94A3B8' }}>{formatCurrency(c.paid, c.ccy)}</p>
+                  <p className="text-xs mt-0.5" style={{ color:'#94A3B8' }}>{formatCurrency(c.paid, c.ccy)}</p>
                 </div>
               </div>
             )
