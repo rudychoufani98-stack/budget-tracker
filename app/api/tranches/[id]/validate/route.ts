@@ -13,12 +13,12 @@ const NEXT_STATUS: Record<string, string> = {
 const allowedRoles: Record<string, string[]> = {
   pending_review:  ['rudy', 'admin'],
   pending_placide: ['placide', 'admin'],
-  pending_dani:    ['hitech', 'admin'],
+  pending_dani:    ['hitech', 'dani', 'admin'],
   pending_fares:   ['fares', 'admin'],
 }
 
 const roleDisplayName: Record<string, string> = {
-  rudy: 'Rudy', admin: 'Rudy', placide: 'Placide', hitech: 'Dany', fares: 'Accountant',
+  rudy: 'Rudy', admin: 'Rudy', placide: 'Placide', hitech: 'Dany', dani: 'Dany', fares: 'Accountant',
 }
 
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {

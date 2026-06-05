@@ -15,13 +15,13 @@ const nextStatusOnApproval: Record<string, InvoiceStatus> = {
 const allowedRoles: Record<string, string[]> = {
   pending_review:  ['rudy', 'admin'],
   pending_placide: ['placide', 'admin'],
-  pending_dani:    ['hitech', 'admin'],
+  pending_dani:    ['hitech', 'dani', 'admin'],
   pending_fares:   ['fares', 'admin'],
 }
 
 // Display name for audit log (derived from session, not request body)
 const roleDisplayName: Record<string, string> = {
-  rudy: 'Rudy', admin: 'Rudy', placide: 'Placide', hitech: 'Dany', fares: 'Accountant',
+  rudy: 'Rudy', admin: 'Rudy', placide: 'Placide', hitech: 'Dany', dani: 'Dany', fares: 'Accountant',
 }
 
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
