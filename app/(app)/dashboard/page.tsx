@@ -43,13 +43,9 @@ async function getData(projectId?: string, sectionId?: string, baseCcy: string =
   const providers    = providersRes.data || []
   const rawProjects  = projectsRes.data  || []
   const allSections  = sectionsCountRes.data || []
-  const allExpenses = expensesRes.data || []
+  const allExpenses   = expensesRes.data || []
   const approvedStaff = allExpenses.filter((e:any) => (e.type||'staff') === 'staff' && ['approved','reimbursed'].includes(e.status))
   const approvedESG   = allExpenses.filter((e:any) => e.type === 'esg' && ['approved','reimbursed'].includes(e.status))
-  const pendingExpensesNGN = approvedStaff.filter((e:any) => e.currency === 'NGN').reduce((s:number,e:any) => s + (e.amount||0), 0)
-  const pendingExpensesUSD = approvedStaff.filter((e:any) => e.currency === 'USD').reduce((s:number,e:any) => s + (e.amount||0), 0)
-  const pendingESGNGN = approvedESG.filter((e:any) => e.currency === 'NGN').reduce((s:number,e:any) => s + (e.amount||0), 0)
-  const pendingESGUSD = approvedESG.filter((e:any) => e.currency === 'USD').reduce((s:number,e:any) => s + (e.amount||0), 0)
 
   // Build link group colors
   const LINK_PALETTE = ['#F59E0B','#8B5CF6','#EC4899','#06B6D4','#F97316','#6366F1','#14B8A6','#EF4444']
@@ -93,6 +89,12 @@ async function getData(projectId?: string, sectionId?: string, baseCcy: string =
     const to   = fxRates[baseCcy] || 1
     return (amount / from) * to
   }
+
+  // Expense totals converted to baseCcy
+  const pendingExpensesNGN = approvedStaff.reduce((s:number,e:any) => s + toBase(e.amount||0, e.currency||'NGN'), 0)
+  const pendingExpensesUSD = 0
+  const pendingESGNGN      = approvedESG.reduce((s:number,e:any) => s + toBase(e.amount||0, e.currency||'NGN'), 0)
+  const pendingESGUSD      = 0
 
   const currencyMap: Record<string,string> = {}
   for (const c of currencyRes.data || []) currencyMap[c.invoice_id] = c.currency
@@ -796,8 +798,7 @@ export default async function DashboardPage({
 
         <Link href="/expenses" className="rounded-2xl px-5 py-5 block hover:shadow-md transition-shadow" style={{ background: d.pendingExpensesCount > 0 ? '#FFFBEB' : '#FFFFFF', border: d.pendingExpensesCount > 0 ? '1px solid rgba(245,158,11,0.3)' : '1px solid #E2E8F0' }}>
           <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color:'#94A3B8' }}>Staff Expenses</p>
-          <p className="text-lg font-bold mb-0.5" style={{ color:'#F59E0B' }}>{formatCurrency(d.pendingExpensesNGN, 'NGN')}</p>
-          {d.pendingExpensesUSD > 0 && <p className="text-sm font-semibold mb-0.5" style={{ color:'#F59E0B' }}>{formatCurrency(d.pendingExpensesUSD, 'USD')}</p>}
+          <p className="text-lg font-bold mb-0.5" style={{ color:'#F59E0B' }}>{formatCurrency(d.pendingExpensesNGN, baseCcy)}</p>
           <p className="text-xs" style={{ color:'#94A3B8' }}>confirmed payments</p>
         </Link>
 
@@ -806,8 +807,7 @@ export default async function DashboardPage({
             <span style={{ fontSize:13 }}>🌍</span>
             <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: d.pendingESGCount > 0 ? '#059669' : '#94A3B8' }}>ESG Activities</p>
           </div>
-          <p className="text-lg font-bold mb-0.5" style={{ color:'#10B981' }}>{formatCurrency(d.pendingESGNGN, 'NGN')}</p>
-          {d.pendingESGUSD > 0 && <p className="text-sm font-semibold mb-0.5" style={{ color:'#10B981' }}>{formatCurrency(d.pendingESGUSD, 'USD')}</p>}
+          <p className="text-lg font-bold mb-0.5" style={{ color:'#10B981' }}>{formatCurrency(d.pendingESGNGN, baseCcy)}</p>
           <p className="text-xs" style={{ color:'#94A3B8' }}>confirmed payments</p>
         </Link>
       </div>
