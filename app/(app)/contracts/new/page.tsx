@@ -22,7 +22,7 @@ export default function NewContractPage() {
   })
 
   // Payment type
-  const [paymentType, setPaymentType] = useState<'date_based'|'milestone_based'>('date_based')
+  const [paymentType, setPaymentType] = useState<'date_based'|'milestone_based'|'balance'>('date_based')
 
   // Payment at signature
   const [sigMode,   setSigMode]   = useState<'amount'|'percent'>('percent')
@@ -338,8 +338,9 @@ export default function NewContractPage() {
               </div>
             )}
 
-            {/* ── PAYMENT AT SIGNATURE ── */}
+            {/* ── PAYMENT AT SIGNATURE + FUTURE PAYMENTS ── */}
             {paymentType !== 'balance' && (
+            <>
             <div className="rounded-2xl overflow-hidden" style={{ border:'1px solid #E2E8F0' }}>
               <div className="px-4 py-3 flex items-center gap-2" style={{ background:'linear-gradient(90deg,rgba(16,185,129,0.08),rgba(16,185,129,0.03))', borderBottom:'1px solid #E2E8F0' }}>
                 <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background:'rgba(16,185,129,0.15)' }}>
@@ -506,6 +507,7 @@ export default function NewContractPage() {
                 </div>
               )}
             </div>
+            </>
             )}
 
             {error && (
