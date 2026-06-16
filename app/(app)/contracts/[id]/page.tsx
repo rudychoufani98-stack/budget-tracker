@@ -53,6 +53,8 @@ export default function ContractDetailPage() {
   const [showLinkModal,      setShowLinkModal]      = useState(false)
   const [linkSearch,         setLinkSearch]         = useState('')
   const [savingLink,         setSavingLink]         = useState(false)
+  const [addingPeriod,       setAddingPeriod]       = useState(false)
+  const [periodForm,         setPeriodForm]         = useState({ label: '', amount: '', date: '' })
 
   async function uploadContractPdf(file: File) {
     setUploadingDoc(true)
@@ -203,6 +205,25 @@ export default function ContractDetailPage() {
     setDeleting(true)
     await fetch(`/api/contracts/${id}`, { method:'DELETE' })
     router.push('/contracts')
+  }
+
+  async function addPeriod() {
+    if (!periodForm.amount) return
+    const label = periodForm.label || (() => {
+      const d = periodForm.date ? new Date(periodForm.date) : new Date()
+      return d.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })
+    })()
+    await fetch('/api/tranches', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contract_id: id, tranche_name: label,
+        amount: Number(periodForm.amount),
+        scheduled_date: periodForm.date || null,
+      })
+    })
+    setPeriodForm({ label: '', amount: '', date: '' })
+    setAddingPeriod(false)
+    await load()
   }
 
   if (loading) return (
@@ -721,20 +742,60 @@ export default function ContractDetailPage() {
       <div className="rounded-2xl overflow-hidden" style={{ background:C.card, border:`1px solid ${C.border}` }}>
         <div className="px-6 py-4 flex items-center justify-between" style={{ borderBottom:`1px solid #F1F5F9` }}>
           <div>
-            <h2 className="text-sm font-bold" style={{ color:C.text }}>Payment Milestones</h2>
+            <h2 className="text-sm font-bold" style={{ color:C.text }}>
+              {contract.payment_type === 'balance' ? 'Balance — Payment Periods' : 'Payment Milestones'}
+            </h2>
             <p className="text-xs mt-0.5" style={{ color:C.muted }}>
-            {contract.payment_type === 'milestone_based' ? '🎯 Milestone-based' : '📅 Date-based'} · {tranchePct}% paid · {fc(tranchePaid)} of {fc(trancheTotal)}
-          </p>
+              {contract.payment_type === 'balance'
+                ? `📒 Balance · ${tranches.length} period${tranches.length !== 1 ? 's' : ''} · ${fc(tranchePaid)} paid`
+                : `${contract.payment_type === 'milestone_based' ? '🎯 Milestone-based' : '📅 Date-based'} · ${tranchePct}% paid · ${fc(tranchePaid)} of ${fc(trancheTotal)}`}
+            </p>
           </div>
-          {tranches.length > 0 && (
-            <button onClick={openScheduleEditor}
-              className="text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1.5"
-              style={{ background:'rgba(59,130,246,0.08)', color:'#3B82F6', border:'1px solid rgba(59,130,246,0.2)' }}>
-              <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-              Edit Schedule
-            </button>
-          )}
+          <div className="flex items-center gap-2">
+            {contract.payment_type === 'balance' && (
+              <button onClick={() => setAddingPeriod(true)}
+                className="text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1.5"
+                style={{ background:'rgba(99,102,241,0.08)', color:'#6366F1', border:'1px solid rgba(99,102,241,0.2)' }}>
+                <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Add Period
+              </button>
+            )}
+            {contract.payment_type !== 'balance' && tranches.length > 0 && (
+              <button onClick={openScheduleEditor}
+                className="text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1.5"
+                style={{ background:'rgba(59,130,246,0.08)', color:'#3B82F6', border:'1px solid rgba(59,130,246,0.2)' }}>
+                <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                Edit Schedule
+              </button>
+            )}
+          </div>
         </div>
+
+        {/* Add Period form */}
+        {contract.payment_type === 'balance' && addingPeriod && (
+          <div className="px-6 py-4 flex flex-wrap items-end gap-3" style={{ borderBottom:'1px solid #F1F5F9', background:'rgba(99,102,241,0.03)' }}>
+            <div>
+              <label className="text-xs font-semibold uppercase tracking-widest mb-1 block" style={{ color:'#6366F1' }}>Period Label</label>
+              <input className="px-3 py-2 text-sm rounded-xl outline-none" style={{ background:'#F8FAFC', border:'1.5px solid #E2E8F0', color:'#0F172A', width:160 }}
+                placeholder="e.g. June 2026" value={periodForm.label} onChange={e=>setPeriodForm(p=>({...p,label:e.target.value}))} />
+            </div>
+            <div>
+              <label className="text-xs font-semibold uppercase tracking-widest mb-1 block" style={{ color:'#6366F1' }}>Amount ({nativeCcy})</label>
+              <input type="number" className="px-3 py-2 text-sm rounded-xl outline-none" style={{ background:'#F8FAFC', border:'1.5px solid #E2E8F0', color:'#0F172A', width:140 }}
+                placeholder="0" step="0.01" value={periodForm.amount} onChange={e=>setPeriodForm(p=>({...p,amount:e.target.value}))} />
+            </div>
+            <div>
+              <label className="text-xs font-semibold uppercase tracking-widest mb-1 block" style={{ color:'#6366F1' }}>Date</label>
+              <input type="date" className="px-3 py-2 text-sm rounded-xl outline-none" style={{ background:'#F8FAFC', border:'1.5px solid #E2E8F0', color:'#0F172A', width:150 }}
+                value={periodForm.date} onChange={e=>setPeriodForm(p=>({...p,date:e.target.value}))} />
+            </div>
+            <div className="flex gap-2">
+              <button onClick={addPeriod} className="px-4 py-2 rounded-xl text-xs font-bold" style={{ background:'#6366F1', color:'#fff' }}>Save</button>
+              <button onClick={()=>{ setAddingPeriod(false); setPeriodForm({label:'',amount:'',date:''}) }}
+                className="px-4 py-2 rounded-xl text-xs font-bold" style={{ background:'#F1F5F9', color:'#64748B' }}>Cancel</button>
+            </div>
+          </div>
+        )}
 
         {tranches.length === 0 ? (
           <p className="text-sm text-center py-10" style={{ color:C.muted }}>No payment milestones set.</p>

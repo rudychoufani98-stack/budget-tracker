@@ -161,10 +161,11 @@ export default function NewContractPage() {
               {/* Payment type toggle */}
               <div className="col-span-2">
                 <label className="text-xs font-semibold uppercase tracking-widest mb-3 block" style={{ color: C.muted }}>Payment Schedule Type</label>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-3 gap-3">
                   {[
                     { value:'date_based',      icon:'📅', title:'Date-based',      desc:'Fixed payment dates (e.g. 30% on Jan 1, 40% on March 15)' },
                     { value:'milestone_based', icon:'🎯', title:'Milestone-based', desc:'Payments triggered by deliverable completion' },
+                    { value:'balance',         icon:'📒', title:'Balance',         desc:'Variable amounts each period — no fixed total required' },
                   ].map(opt => (
                     <button key={opt.value} type="button" onClick={() => setPaymentType(opt.value as any)}
                       className="flex items-start gap-3 px-4 py-3.5 rounded-xl text-left transition-all"
@@ -281,11 +282,15 @@ export default function NewContractPage() {
               </div>
 
               <div>
-                <label className="text-xs font-semibold uppercase tracking-widest mb-2 block" style={{ color: C.muted }}>Total Contract Amount *</label>
+                <label className="text-xs font-semibold uppercase tracking-widest mb-2 block" style={{ color: C.muted }}>
+                  Total Contract Amount{paymentType !== 'balance' ? ' *' : ''}
+                  {paymentType === 'balance' && <span className="ml-1.5 text-xs font-normal" style={{ color:'#94A3B8' }}>(optional for Balance contracts)</span>}
+                </label>
                 <input type="number" className={inp} style={inpStyle}
                   value={form.contract_amount}
                   onChange={e=>setForm(p=>({...p,contract_amount:e.target.value}))}
-                  placeholder="e.g. 50000000" step="0.01" required />
+                  placeholder={form.currency==='USD' ? 'e.g. 50000' : 'e.g. 50000000'} step="0.01"
+                  required={paymentType !== 'balance'} />
                 {contractAmount > 0 && (
                   <p className="text-xs mt-1 font-medium" style={{ color:'#3B82F6' }}>
                     {contractAmount.toLocaleString()} {form.currency}
@@ -322,8 +327,19 @@ export default function NewContractPage() {
               </div>
             </div>
 
+            {/* ── BALANCE INFO ── */}
+            {paymentType === 'balance' && (
+              <div className="rounded-xl px-4 py-3 flex items-start gap-3" style={{ background:'rgba(99,102,241,0.06)', border:'1px solid rgba(99,102,241,0.2)' }}>
+                <span className="text-lg mt-0.5">📒</span>
+                <div>
+                  <p className="text-sm font-semibold" style={{ color:'#4338CA' }}>Balance contract</p>
+                  <p className="text-xs mt-0.5" style={{ color:'#6366F1' }}>After creating this contract, use the <strong>Add Period</strong> button on the contract page to log each month&apos;s payment. No advance or fixed schedule needed.</p>
+                </div>
+              </div>
+            )}
+
             {/* ── PAYMENT AT SIGNATURE ── */}
-            <div className="rounded-2xl overflow-hidden" style={{ border:'1px solid #E2E8F0' }}>
+            {paymentType !== 'balance' && <div className="rounded-2xl overflow-hidden" style={{ border:'1px solid #E2E8F0' }}>
               <div className="px-4 py-3 flex items-center gap-2" style={{ background:'linear-gradient(90deg,rgba(16,185,129,0.08),rgba(16,185,129,0.03))', borderBottom:'1px solid #E2E8F0' }}>
                 <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background:'rgba(16,185,129,0.15)' }}>
                   <svg width="13" height="13" fill="none" stroke="#10B981" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
@@ -488,7 +504,7 @@ export default function NewContractPage() {
                   )}
                 </div>
               )}
-            </div>
+            </div>}
 
             {error && (
               <p className="text-sm px-4 py-3 rounded-xl" style={{ background:'rgba(239,68,68,0.08)', color:'#EF4444', border:'1px solid rgba(239,68,68,0.2)' }}>
