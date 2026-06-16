@@ -65,6 +65,9 @@ export default function UploadPage() {
   const [selectedContract, setSelectedContract] = useState(searchParams?.get('contract') || '')
   const [selectedProvider, setSelectedProvider] = useState('')
   const [selectedTranche,  setSelectedTranche]  = useState(searchParams?.get('tranche') || '')
+  const [newPeriodForm,    setNewPeriodForm]    = useState({ label: '', amount: '', date: '' })
+  const [addingPeriod,     setAddingPeriod]     = useState(false)
+  const [savingPeriod,     setSavingPeriod]     = useState(false)
   const [selectedCurrency, setSelectedCurrency] = useState<'NGN'|'USD'>('USD')
 
   useEffect(() => {
@@ -146,6 +149,31 @@ export default function UploadPage() {
 
   // Tranche is now mandatory — it links the invoice to the specific payment
   const allLinked = !!selectedContract && !!selectedProvider && !!selectedTranche
+
+  const selectedContractObj = contracts.find((x:any) => x.id === selectedContract)
+  const isBalanceContract = selectedContractObj?.payment_type === 'balance'
+
+  async function createPeriodAndSelect() {
+    if (!newPeriodForm.amount || !selectedContract) return
+    setSavingPeriod(true)
+    const label = newPeriodForm.label || (() => {
+      const d = newPeriodForm.date ? new Date(newPeriodForm.date) : new Date()
+      return d.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })
+    })()
+    const res = await fetch('/api/tranches', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contract_id: selectedContract, tranche_name: label, amount: Number(newPeriodForm.amount), scheduled_date: newPeriodForm.date || null })
+    })
+    const newTranche = await res.json()
+    // Reload tranches for this contract
+    const updated = await fetch('/api/contracts').then(r=>r.json())
+    const found = updated.find((x:any) => x.id === selectedContract)
+    if (found) setTranches(found.contract_tranches || [])
+    setSelectedTranche(newTranche.id)
+    setNewPeriodForm({ label: '', amount: '', date: '' })
+    setAddingPeriod(false)
+    setSavingPeriod(false)
+  }
 
   async function handleScan() {
     if (!file) return
@@ -404,6 +432,30 @@ export default function UploadPage() {
                     <span style={{ width:6,height:6,borderRadius:'50%',background:'#F59E0B',display:'inline-block' }}/>
                     Payment Tranche *
                   </label>
+                  {selectedContract && isBalanceContract && tranches.length === 0 && !addingPeriod && (
+                    <div className="rounded-xl px-4 py-3" style={{ background:'rgba(99,102,241,0.06)', border:'1px solid rgba(99,102,241,0.2)' }}>
+                      <p className="text-xs mb-2" style={{ color:'#6366F1' }}>📒 Balance contract — no periods yet. Create one to link this invoice.</p>
+                      <button type="button" onClick={()=>setAddingPeriod(true)} className="text-xs font-semibold px-3 py-1.5 rounded-lg" style={{ background:'#6366F1', color:'#fff' }}>
+                        + Add Period
+                      </button>
+                    </div>
+                  )}
+                  {selectedContract && isBalanceContract && addingPeriod && (
+                    <div className="rounded-xl p-3 space-y-2" style={{ background:'rgba(99,102,241,0.06)', border:'1px solid rgba(99,102,241,0.2)' }}>
+                      <p className="text-xs font-semibold" style={{ color:'#6366F1' }}>New Period</p>
+                      <div className="grid grid-cols-3 gap-2">
+                        <input className={inp} style={inpSt} placeholder="Label (e.g. June 2026)" value={newPeriodForm.label} onChange={e=>setNewPeriodForm(p=>({...p,label:e.target.value}))} />
+                        <input type="number" className={inp} style={inpSt} placeholder={`Amount (${selectedContractObj?.currency||'USD'})`} value={newPeriodForm.amount} onChange={e=>setNewPeriodForm(p=>({...p,amount:e.target.value}))} />
+                        <input type="date" className={inp} style={inpSt} value={newPeriodForm.date} onChange={e=>setNewPeriodForm(p=>({...p,date:e.target.value}))} />
+                      </div>
+                      <div className="flex gap-2">
+                        <button type="button" onClick={createPeriodAndSelect} disabled={savingPeriod||!newPeriodForm.amount} className="text-xs font-bold px-3 py-1.5 rounded-lg disabled:opacity-50" style={{ background:'#6366F1', color:'#fff' }}>
+                          {savingPeriod ? 'Saving...' : 'Save & Select'}
+                        </button>
+                        <button type="button" onClick={()=>setAddingPeriod(false)} className="text-xs px-3 py-1.5 rounded-lg" style={{ background:'#F1F5F9', color:'#64748B' }}>Cancel</button>
+                      </div>
+                    </div>
+                  )}
                   {selectedContract && tranches.length > 0 ? (
                     <>
                       <select className={inp} style={inpSt} value={selectedTranche} onChange={e=>setSelectedTranche(e.target.value)}>
@@ -418,13 +470,10 @@ export default function UploadPage() {
                           )
                         })}
                       </select>
-                      {/* Show milestone description if tranche is milestone-based */}
                       {selectedTrancheData?.notes && (
                         <div className="mt-2 px-3 py-2 rounded-lg flex items-start gap-2" style={{ background:'rgba(139,92,246,0.08)', border:'1px solid rgba(139,92,246,0.2)' }}>
                           <span className="text-sm shrink-0">🎯</span>
-                          <p className="text-xs" style={{ color:'#8B5CF6' }}>
-                            <strong>Milestone:</strong> {selectedTrancheData.notes}
-                          </p>
+                          <p className="text-xs" style={{ color:'#8B5CF6' }}><strong>Milestone:</strong> {selectedTrancheData.notes}</p>
                         </div>
                       )}
                       {selectedTrancheData?.scheduled_date && (
@@ -432,8 +481,29 @@ export default function UploadPage() {
                           📅 Due: {new Date(selectedTrancheData.scheduled_date).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}
                         </p>
                       )}
+                      {isBalanceContract && !addingPeriod && (
+                        <button type="button" onClick={()=>setAddingPeriod(true)} className="mt-2 text-xs font-semibold px-3 py-1 rounded-lg" style={{ background:'rgba(99,102,241,0.08)', color:'#6366F1', border:'1px solid rgba(99,102,241,0.2)' }}>
+                          + Add new period
+                        </button>
+                      )}
+                      {isBalanceContract && addingPeriod && (
+                        <div className="mt-2 rounded-xl p-3 space-y-2" style={{ background:'rgba(99,102,241,0.06)', border:'1px solid rgba(99,102,241,0.2)' }}>
+                          <p className="text-xs font-semibold" style={{ color:'#6366F1' }}>New Period</p>
+                          <div className="grid grid-cols-3 gap-2">
+                            <input className={inp} style={inpSt} placeholder="Label (e.g. June 2026)" value={newPeriodForm.label} onChange={e=>setNewPeriodForm(p=>({...p,label:e.target.value}))} />
+                            <input type="number" className={inp} style={inpSt} placeholder={`Amount (${selectedContractObj?.currency||'USD'})`} value={newPeriodForm.amount} onChange={e=>setNewPeriodForm(p=>({...p,amount:e.target.value}))} />
+                            <input type="date" className={inp} style={inpSt} value={newPeriodForm.date} onChange={e=>setNewPeriodForm(p=>({...p,date:e.target.value}))} />
+                          </div>
+                          <div className="flex gap-2">
+                            <button type="button" onClick={createPeriodAndSelect} disabled={savingPeriod||!newPeriodForm.amount} className="text-xs font-bold px-3 py-1.5 rounded-lg disabled:opacity-50" style={{ background:'#6366F1', color:'#fff' }}>
+                              {savingPeriod ? 'Saving...' : 'Save & Select'}
+                            </button>
+                            <button type="button" onClick={()=>setAddingPeriod(false)} className="text-xs px-3 py-1.5 rounded-lg" style={{ background:'#F1F5F9', color:'#64748B' }}>Cancel</button>
+                          </div>
+                        </div>
+                      )}
                     </>
-                  ) : selectedContract ? (
+                  ) : selectedContract && !isBalanceContract ? (
                     <p className="text-xs px-3 py-2 rounded-lg" style={{ background:'#FEF2F2', color:'#EF4444' }}>
                       No payment tranches found on this contract. Add them in the contract page first.
                     </p>
