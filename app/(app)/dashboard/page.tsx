@@ -272,7 +272,7 @@ async function getData(projectId?: string, sectionId?: string, baseCcy: string =
     const ts: any[] = c.contract_tranches || []
     const signingRate = c.fx_rate_at_signing || null
     const ccy = c.currency || 'NGN'
-    const isBalance = c.payment_type === 'balance'
+    const isBalance = c.payment_type === 'balance' || (!c.contract_amount && !c.total_budget)
 
     // For balance contracts: total = sum of all period amounts; paid = sum of paid periods
     const trancheTotal = ts.reduce((s:number,t:any) => s + contractToBase(t.amount||0, ccy, signingRate), 0)
@@ -881,7 +881,7 @@ export default async function DashboardPage({
             {d.contractAdvancement.length === 0 && (
               <p className="text-sm text-center py-10" style={{ color:'#94A3B8' }}>No contracts yet</p>
             )}
-            {d.contractAdvancement.slice(0,8).map((c:any) => {
+            {[...d.contractAdvancement].sort((a:any,b:any) => (b.isBalance?1:0)-(a.isBalance?1:0)).slice(0,12).map((c:any) => {
               const linkColor = d.linkGroupColor[c.id]
               const catC = linkColor || ESG_COLOR[c.category] || ESG_COLOR.Other
               const deadlineColor = c.daysToNext === null ? '#94A3B8'
