@@ -272,8 +272,18 @@ async function getData(projectId?: string, sectionId?: string, baseCcy: string =
     const ts: any[] = c.contract_tranches || []
     const signingRate = c.fx_rate_at_signing || null
     const ccy = c.currency || 'NGN'
-    const total = contractToBase(c.contract_amount || c.total_budget || 0, ccy, signingRate)
-    const paid  = approvedInvByContract[c.id] || 0
+    const isBalance = c.payment_type === 'balance'
+
+    // For balance contracts: total = sum of all period amounts; paid = sum of paid periods
+    const trancheTotal = ts.reduce((s:number,t:any) => s + contractToBase(t.amount||0, ccy, signingRate), 0)
+    const tranchePaid  = ts.filter((t:any) => t.status === 'paid').reduce((s:number,t:any) => s + contractToBase(t.amount||0, ccy, signingRate), 0)
+
+    const total = isBalance
+      ? trancheTotal
+      : contractToBase(c.contract_amount || c.total_budget || 0, ccy, signingRate)
+    const paid  = isBalance
+      ? tranchePaid
+      : (approvedInvByContract[c.id] || 0)
     const pct   = total > 0 ? Math.min(100, Math.round((paid/total)*100)) : 0
 
     const upcoming = ts
@@ -285,10 +295,11 @@ async function getData(projectId?: string, sectionId?: string, baseCcy: string =
     const currentTranche = upcoming[0] || ts[ts.length - 1] || null
 
     return { id:c.id, name:c.contract_name, provider:c.service_providers?.name||'',
-             category:c.category||'Other', total, paid, pct, ccy: baseCcy,
+             category:c.category||'Other', total, paid, pct, ccy: baseCcy, isBalance,
+             periodCount: isBalance ? ts.length : null,
              nextDeadline:nextDeadline?.scheduled_date||null, daysToNext,
              trancheStatus:currentTranche?.status||'unpaid' }
-  }).filter((c:any) => c.total > 0)
+  }).filter((c:any) => c.total > 0 || c.isBalance)
 
   // Timeline (filtered)
   const timeline = tranches
@@ -909,13 +920,25 @@ export default async function DashboardPage({
                     </div>
                   </div>
                   <div className="w-28 shrink-0">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs font-bold" style={{ color: linkColor || pctColor }}>{c.pct}%</span>
-                      <span className="text-xs" style={{ color:'#94A3B8' }}>{formatCurrency(c.paid, c.ccy)}</span>
-                    </div>
-                    <div className="h-1.5 rounded-full overflow-hidden" style={{ background:'#F1F5F9' }}>
-                      <div style={{ width:`${c.pct}%`, height:'100%', background: linkColor || pctColor, borderRadius:4 }}/>
-                    </div>
+                    {c.isBalance ? (
+                      <div className="text-right">
+                        <div className="flex items-center justify-end gap-1 mb-1">
+                          <span className="text-xs px-1.5 py-0.5 rounded font-semibold" style={{ background:'rgba(99,102,241,0.1)', color:'#6366F1' }}>📒 Balance</span>
+                        </div>
+                        <span className="text-xs font-bold" style={{ color:'#6366F1' }}>{formatCurrency(c.paid, c.ccy)} paid</span>
+                        {c.periodCount > 0 && <p className="text-xs" style={{ color:'#94A3B8' }}>{c.periodCount} period{c.periodCount !== 1 ? 's' : ''}</p>}
+                      </div>
+                    ) : (
+                      <>
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-xs font-bold" style={{ color: linkColor || pctColor }}>{c.pct}%</span>
+                          <span className="text-xs" style={{ color:'#94A3B8' }}>{formatCurrency(c.paid, c.ccy)}</span>
+                        </div>
+                        <div className="h-1.5 rounded-full overflow-hidden" style={{ background:'#F1F5F9' }}>
+                          <div style={{ width:`${c.pct}%`, height:'100%', background: linkColor || pctColor, borderRadius:4 }}/>
+                        </div>
+                      </>
+                    )}
                   </div>
                   </div>
                 </Link>
