@@ -55,6 +55,8 @@ export default function ContractDetailPage() {
   const [savingLink,         setSavingLink]         = useState(false)
   const [addingPeriod,       setAddingPeriod]       = useState(false)
   const [periodForm,         setPeriodForm]         = useState({ label: '', amount: '', date: '' })
+  const [allProjects,        setAllProjects]        = useState<any[]>([])
+  const [allSections,        setAllSections]        = useState<any[]>([])
 
   async function uploadContractPdf(file: File) {
     setUploadingDoc(true)
@@ -90,6 +92,8 @@ export default function ContractDetailPage() {
         start_date:       editData.start_date || null,
         end_date:         editData.end_date || null,
         description:      editData.description || null,
+        project_id:       editData.project_id || null,
+        section_id:       editData.section_id || null,
       })
     })
     await load()
@@ -143,7 +147,10 @@ export default function ContractDetailPage() {
     await loadLinkedContracts()
   }
 
-  useEffect(() => { load(); loadContractDoc() }, [id])
+  useEffect(() => {
+    load(); loadContractDoc()
+    fetch('/api/projects').then(r=>r.json()).then(d=>setAllProjects(Array.isArray(d)?d:[]))
+  }, [id])
 
   async function sendToAccounting(trancheId: string) {
     setMarking(trancheId)
@@ -385,6 +392,24 @@ export default function ContractDetailPage() {
                     <textarea rows={2} className="w-full px-3 py-2 text-sm rounded-xl outline-none resize-none" style={{ background:'#F8FAFC', border:'1.5px solid #E2E8F0', color:C.text }}
                       value={editData.description||''} onChange={e=>setEditData((p:any)=>({...p,description:e.target.value}))} />
                   </div>
+                  <div>
+                    <label className="text-xs font-semibold uppercase tracking-widest mb-1 block" style={{ color:C.muted }}>Project</label>
+                    <select className="w-full px-3 py-2 text-sm rounded-xl outline-none" style={{ background:'#F8FAFC', border:'1.5px solid #E2E8F0', color:C.text }}
+                      value={editData.project_id||''}
+                      onChange={e=>{ const pid=e.target.value; setEditData((p:any)=>({...p,project_id:pid,section_id:''})); setAllSections([]); if(pid) fetch(`/api/sections?project_id=${pid}`).then(r=>r.json()).then(d=>setAllSections(Array.isArray(d)?d:[])) }}>
+                      <option value="">— No project (Global) —</option>
+                      {allProjects.map((p:any)=><option key={p.id} value={p.id}>{p.name}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold uppercase tracking-widest mb-1 block" style={{ color:C.muted }}>Section</label>
+                    <select className="w-full px-3 py-2 text-sm rounded-xl outline-none" style={{ background:'#F8FAFC', border:'1.5px solid #E2E8F0', color:C.text }}
+                      value={editData.section_id||''} onChange={e=>setEditData((p:any)=>({...p,section_id:e.target.value}))}
+                      disabled={!editData.project_id || allSections.length===0}>
+                      <option value="">— No section —</option>
+                      {allSections.map((s:any)=><option key={s.id} value={s.id}>{s.name}</option>)}
+                    </select>
+                  </div>
                 </div>
                 <div className="flex gap-2">
                   <button onClick={saveEdit} disabled={savingEdit} className="text-xs font-semibold px-4 py-2 rounded-xl disabled:opacity-50" style={{ background:'#3B82F6', color:'#fff' }}>
@@ -426,7 +451,7 @@ export default function ContractDetailPage() {
           </div>
           <div className="flex items-center gap-2">
             {!editing && (
-              <button onClick={()=>{ setEditData({ contract_name:contract.contract_name, contract_amount:contract.contract_amount||'', currency:contract.currency||'NGN', category:contract.category||'E', status:contract.status||'active', start_date:contract.start_date||'', end_date:contract.end_date||'', description:contract.description||'' }); setEditing(true) }}
+              <button onClick={()=>{ setEditData({ contract_name:contract.contract_name, contract_amount:contract.contract_amount||'', currency:contract.currency||'NGN', category:contract.category||'E', status:contract.status||'active', start_date:contract.start_date||'', end_date:contract.end_date||'', description:contract.description||'', project_id:contract.project_id||'', section_id:contract.section_id||'' }); if(contract.project_id) fetch(`/api/sections?project_id=${contract.project_id}`).then(r=>r.json()).then(d=>setAllSections(Array.isArray(d)?d:[])); setEditing(true) }}
                 className="text-xs font-medium px-3 py-2 rounded-xl" style={{ background:'#F1F5F9', color:'#475569' }}>
                 Edit
               </button>
