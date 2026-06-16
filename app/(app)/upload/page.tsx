@@ -125,6 +125,7 @@ export default function UploadPage() {
       c.section_id === selectedSection ||
       (c.contract_sections || []).some((cs:any) => cs.section_id === selectedSection)
     )
+    if (selectedProject === '__global__') return contracts.filter((c:any) => !c.project_id)
     if (selectedProject) return contracts.filter((c:any) => c.project_id === selectedProject)
     return contracts
   })()
@@ -144,7 +145,7 @@ export default function UploadPage() {
   const selectedTrancheData = tranches.find((t:any) => t.id === selectedTranche)
 
   // Tranche is now mandatory — it links the invoice to the specific payment
-  const allLinked = !!selectedProject && !!selectedContract && !!selectedProvider && !!selectedTranche
+  const allLinked = !!selectedContract && !!selectedProvider && !!selectedTranche
 
   async function handleScan() {
     if (!file) return
@@ -295,6 +296,7 @@ export default function UploadPage() {
                   </label>
                   <select className={inp} style={inpSt} value={selectedProject} onChange={e=>handleProjectChange(e.target.value)}>
                     <option value="">Select project...</option>
+                    <option value="__global__">🌐 Hitech Global (No Project)</option>
                     {projects.map((p:any)=><option key={p.id} value={p.id}>{p.name}</option>)}
                   </select>
                   {projects.length===0 && contracts.length>0 && (
