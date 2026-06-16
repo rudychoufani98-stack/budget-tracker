@@ -92,6 +92,7 @@ export default function ContractDetailPage() {
         start_date:       editData.start_date || null,
         end_date:         editData.end_date || null,
         description:      editData.description || null,
+        payment_type:     editData.payment_type || 'date_based',
         project_id:       editData.project_id || null,
         section_id:       editData.section_id || null,
       })
@@ -378,6 +379,15 @@ export default function ContractDetailPage() {
                     </select>
                   </div>
                   <div>
+                    <label className="text-xs font-semibold uppercase tracking-widest mb-1 block" style={{ color:C.muted }}>Payment Type</label>
+                    <select className="w-full px-3 py-2 text-sm rounded-xl outline-none" style={{ background:'#F8FAFC', border:'1.5px solid #E2E8F0', color:C.text }}
+                      value={editData.payment_type||'date_based'} onChange={e=>setEditData((p:any)=>({...p,payment_type:e.target.value}))}>
+                      <option value="date_based">📅 Date-based</option>
+                      <option value="milestone_based">🎯 Milestone-based</option>
+                      <option value="balance">📒 Balance</option>
+                    </select>
+                  </div>
+                  <div>
                     <label className="text-xs font-semibold uppercase tracking-widest mb-1 block" style={{ color:C.muted }}>Start Date</label>
                     <input type="date" className="w-full px-3 py-2 text-sm rounded-xl outline-none" style={{ background:'#F8FAFC', border:'1.5px solid #E2E8F0', color:C.text }}
                       value={editData.start_date||''} onChange={e=>setEditData((p:any)=>({...p,start_date:e.target.value}))} />
@@ -451,7 +461,7 @@ export default function ContractDetailPage() {
           </div>
           <div className="flex items-center gap-2">
             {!editing && (
-              <button onClick={()=>{ setEditData({ contract_name:contract.contract_name, contract_amount:contract.contract_amount||'', currency:contract.currency||'NGN', category:contract.category||'E', status:contract.status||'active', start_date:contract.start_date||'', end_date:contract.end_date||'', description:contract.description||'', project_id:contract.project_id||'', section_id:contract.section_id||'' }); if(contract.project_id) fetch(`/api/sections?project_id=${contract.project_id}`).then(r=>r.json()).then(d=>setAllSections(Array.isArray(d)?d:[])); setEditing(true) }}
+              <button onClick={()=>{ setEditData({ contract_name:contract.contract_name, contract_amount:contract.contract_amount||'', currency:contract.currency||'NGN', category:contract.category||'E', status:contract.status||'active', payment_type:contract.payment_type||'date_based', start_date:contract.start_date||'', end_date:contract.end_date||'', description:contract.description||'', project_id:contract.project_id||'', section_id:contract.section_id||'' }); if(contract.project_id) fetch(`/api/sections?project_id=${contract.project_id}`).then(r=>r.json()).then(d=>setAllSections(Array.isArray(d)?d:[])); setEditing(true) }}
                 className="text-xs font-medium px-3 py-2 rounded-xl" style={{ background:'#F1F5F9', color:'#475569' }}>
                 Edit
               </button>

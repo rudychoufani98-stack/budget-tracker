@@ -432,15 +432,15 @@ export default function UploadPage() {
                     <span style={{ width:6,height:6,borderRadius:'50%',background:'#F59E0B',display:'inline-block' }}/>
                     Payment Tranche *
                   </label>
-                  {selectedContract && isBalanceContract && tranches.length === 0 && !addingPeriod && (
+                  {selectedContract && tranches.length === 0 && !addingPeriod && (
                     <div className="rounded-xl px-4 py-3" style={{ background:'rgba(99,102,241,0.06)', border:'1px solid rgba(99,102,241,0.2)' }}>
-                      <p className="text-xs mb-2" style={{ color:'#6366F1' }}>📒 Balance contract — no periods yet. Create one to link this invoice.</p>
+                      <p className="text-xs mb-2" style={{ color:'#6366F1' }}>No payment periods on this contract yet. Create one to link this invoice.</p>
                       <button type="button" onClick={()=>setAddingPeriod(true)} className="text-xs font-semibold px-3 py-1.5 rounded-lg" style={{ background:'#6366F1', color:'#fff' }}>
                         + Add Period
                       </button>
                     </div>
                   )}
-                  {selectedContract && isBalanceContract && addingPeriod && (
+                  {selectedContract && tranches.length === 0 && addingPeriod && (
                     <div className="rounded-xl p-3 space-y-2" style={{ background:'rgba(99,102,241,0.06)', border:'1px solid rgba(99,102,241,0.2)' }}>
                       <p className="text-xs font-semibold" style={{ color:'#6366F1' }}>New Period</p>
                       <div className="grid grid-cols-3 gap-2">
@@ -503,9 +503,9 @@ export default function UploadPage() {
                         </div>
                       )}
                     </>
-                  ) : selectedContract && !isBalanceContract ? (
-                    <p className="text-xs px-3 py-2 rounded-lg" style={{ background:'#FEF2F2', color:'#EF4444' }}>
-                      No payment tranches found on this contract. Add them in the contract page first.
+                  ) : selectedContract ? (
+                    <p className="text-xs px-3 py-2 rounded-lg" style={{ background:'#F8FAFC', color:'#94A3B8', border:'1px solid #E2E8F0' }}>
+                      Loading periods...
                     </p>
                   ) : (
                     <p className="text-xs px-3 py-2 rounded-lg" style={{ background:'#F8FAFC', color:'#94A3B8', border:'1px solid #E2E8F0' }}>
