@@ -343,7 +343,7 @@ export default function NewContractPage() {
                       type="number" className={inp} style={inpStyle}
                       value={sigValue}
                       onChange={e=>setSigValue(e.target.value)}
-                      placeholder={sigMode==='percent' ? 'e.g. 30' : 'e.g. 15000000'}
+                      placeholder={sigMode==='percent' ? 'e.g. 30' : form.currency==='USD' ? 'e.g. 50000' : 'e.g. 15000000'}
                       step={sigMode==='percent' ? '1' : '0.01'}
                       min="0" max={sigMode==='percent' ? '100' : undefined}
                     />
@@ -419,7 +419,7 @@ export default function NewContractPage() {
                         <div>
                           <label className="text-xs mb-1 block" style={{ color:'#94A3B8' }}>{p.mode==='percent' ? 'Percentage (%)' : 'Amount'}</label>
                           <input type="number" className={inp} style={inpStyle}
-                            placeholder={p.mode==='percent' ? 'e.g. 40' : 'e.g. 20000000'}
+                            placeholder={p.mode==='percent' ? 'e.g. 40' : form.currency==='USD' ? 'e.g. 20000' : 'e.g. 20000000'}
                             value={p.mode==='percent' ? p.pct : p.amount}
                             onChange={e=>setPayments(prev=>prev.map((x,j)=>j===i ? (p.mode==='percent'?{...x,pct:e.target.value}:{...x,amount:e.target.value}) : x))} />
                         </div>

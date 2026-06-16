@@ -406,11 +406,15 @@ export default function UploadPage() {
                     <>
                       <select className={inp} style={inpSt} value={selectedTranche} onChange={e=>setSelectedTranche(e.target.value)}>
                         <option value="">Select the payment this invoice covers...</option>
-                        {tranches.map((t:any) => (
-                          <option key={t.id} value={t.id} disabled={t.status==='paid'}>
-                            {t.tranche_name} — {t.amount?.toLocaleString()} {t.status==='paid'?' (already paid)':''}
-                          </option>
-                        ))}
+                        {tranches.map((t:any) => {
+                          const cCcy = contracts.find((x:any)=>x.id===selectedContract)?.currency || 'NGN'
+                          const cSymbol = cCcy === 'USD' ? '$' : cCcy === 'EUR' ? '€' : cCcy === 'GBP' ? '£' : '₦'
+                          return (
+                            <option key={t.id} value={t.id} disabled={t.status==='paid'}>
+                              {t.tranche_name} — {cSymbol}{t.amount?.toLocaleString()} {cCcy}{t.status==='paid'?' (already paid)':''}
+                            </option>
+                          )
+                        })}
                       </select>
                       {/* Show milestone description if tranche is milestone-based */}
                       {selectedTrancheData?.notes && (
