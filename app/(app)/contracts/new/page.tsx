@@ -339,7 +339,8 @@ export default function NewContractPage() {
             )}
 
             {/* ── PAYMENT AT SIGNATURE ── */}
-            {paymentType !== 'balance' && <div className="rounded-2xl overflow-hidden" style={{ border:'1px solid #E2E8F0' }}>
+            {paymentType !== 'balance' && (
+            <div className="rounded-2xl overflow-hidden" style={{ border:'1px solid #E2E8F0' }}>
               <div className="px-4 py-3 flex items-center gap-2" style={{ background:'linear-gradient(90deg,rgba(16,185,129,0.08),rgba(16,185,129,0.03))', borderBottom:'1px solid #E2E8F0' }}>
                 <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background:'rgba(16,185,129,0.15)' }}>
                   <svg width="13" height="13" fill="none" stroke="#10B981" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
@@ -504,7 +505,8 @@ export default function NewContractPage() {
                   )}
                 </div>
               )}
-            </div>}
+            </div>
+            )}
 
             {error && (
               <p className="text-sm px-4 py-3 rounded-xl" style={{ background:'rgba(239,68,68,0.08)', color:'#EF4444', border:'1px solid rgba(239,68,68,0.2)' }}>
