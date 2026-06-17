@@ -145,7 +145,7 @@ export default function ProjectDetailPage({ params }: { params: { name: string }
   const allContracts   = project.allContracts || []
   const global         = stats(allContracts)
   const ps             = PROJ_STATUS[project.status] || PROJ_STATUS.active
-  const ccy            = project.currency || 'NGN'
+  const ccy            = global.dominantCcy || 'NGN'
   const inp            = 'w-full px-3.5 py-2.5 text-sm rounded-xl outline-none'
   const inpSt          = { background:'#F8FAFC', border:'1.5px solid #E2E8F0', color:'#0F172A' }
 
