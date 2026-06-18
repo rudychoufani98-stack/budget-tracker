@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import Image from 'next/image'
+
 import { usePathname, useRouter } from 'next/navigation'
 import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/utils/supabase/client'
@@ -97,8 +97,11 @@ export function Sidebar() {
   return (
     <aside className="w-56 min-h-screen flex flex-col shrink-0" style={{ background: BG, borderRight: '1px solid #323D5E' }}>
       <div className="px-4 pt-5 pb-4" style={{ borderBottom: '1px solid #323D5E' }}>
-        <Link href="/dashboard" className="rounded-xl px-3 py-2.5 flex items-center justify-center" style={{ background: '#fff' }}>
-          <Image src="/logo.png" alt="Skykapital" width={130} height={38} priority style={{ objectFit: 'contain' }} />
+        <Link href="/dashboard" className="rounded-xl px-3 py-2.5 flex items-center justify-center gap-2" style={{ background: '#fff' }}>
+          <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" width="28" height="28" aria-hidden="true" style={{ display: 'block', flexShrink: 0 }}>
+            <path d="M50 3 Q50 50 97 50 Q50 50 50 97 Q50 50 3 50 Q50 50 50 3 Z" fill="#1a3c5e" />
+          </svg>
+          <span style={{ color: '#1a3c5e', fontSize: 15, fontWeight: 700, letterSpacing: '-0.03em' }}>Skykapital</span>
         </Link>
       </div>
 
