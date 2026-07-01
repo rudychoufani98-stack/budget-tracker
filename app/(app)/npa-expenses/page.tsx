@@ -4,13 +4,13 @@ import { formatCurrency } from '@/lib/format'
 
 const CATEGORIES = [
   'Travel', 'Accommodation', 'Meals', 'Fuel & Transport',
-  'Communication', 'Equipment', 'Training', 'Medical & Health', 'Other',
+  'Communication', 'Equipment', 'Training', 'Medical & Health', 'E&S Activity', 'Other',
 ]
 
 const CAT_ICON: Record<string, string> = {
   'Travel': '✈', 'Accommodation': '🏨', 'Meals': '🍽',
   'Fuel & Transport': '⛽', 'Communication': '📡', 'Equipment': '🔧',
-  'Training': '📚', 'Medical & Health': '🏥', 'Other': '📋',
+  'Training': '📚', 'Medical & Health': '🏥', 'E&S Activity': '🌿', 'Other': '📋',
 }
 
 const CAT_COLOR: Record<string, string> = {
