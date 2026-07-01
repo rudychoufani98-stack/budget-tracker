@@ -36,7 +36,6 @@ const EMPTY = {
 
 export default function NpaExpensesPage() {
   const [expenses,   setExpenses]   = useState<any[]>([])
-  const [npaId,      setNpaId]      = useState<string | null>(null)
   const [loading,    setLoading]    = useState(true)
   const [showForm,   setShowForm]   = useState(false)
   const [form,       setForm]       = useState<any>({ ...EMPTY })
@@ -48,17 +47,8 @@ export default function NpaExpensesPage() {
   const fileRef = useRef<HTMLInputElement>(null)
 
   async function load() {
-    const projRes = await fetch('/api/projects').then(r => r.json())
-    const npa = (Array.isArray(projRes) ? projRes : []).find(
-      (p: any) => p.name?.toLowerCase().includes('npa')
-    )
-    if (npa) {
-      setNpaId(npa.id)
-      const expRes = await fetch(`/api/expenses?project_id=${npa.id}`).then(r => r.json())
-      setExpenses(Array.isArray(expRes) ? expRes : [])
-    } else {
-      setExpenses([])
-    }
+    const expRes = await fetch('/api/expenses?type=npa').then(r => r.json())
+    setExpenses(Array.isArray(expRes) ? expRes : [])
     setLoading(false)
   }
 
@@ -122,11 +112,10 @@ export default function NpaExpensesPage() {
     if (!form.title || !form.submitted_by || !form.amount || !form.expense_date) {
       setError('Please fill in: title, name, amount, date'); return
     }
-    if (!npaId) { setError('NPA project not found in database'); return }
     setSaving(true); setError('')
     const res = await fetch('/api/expenses', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...form, amount: parseFloat(form.amount), project_id: npaId, type: 'staff' }),
+      body: JSON.stringify({ ...form, amount: parseFloat(form.amount), type: 'npa' }),
     })
     const data = await res.json()
     if (!res.ok) { setError(data.error || 'Failed to save'); setSaving(false); return }
@@ -173,12 +162,6 @@ export default function NpaExpensesPage() {
           Add Expense
         </button>
       </div>
-
-      {!npaId && (
-        <div className="mb-6 px-4 py-3 rounded-xl text-sm" style={{ background: 'rgba(239,68,68,0.08)', color: '#EF4444', border: '1px solid rgba(239,68,68,0.2)' }}>
-          No project named "NPA" found. Please create it first in Projects.
-        </div>
-      )}
 
       {/* ── Mini Dashboard ─────────────────────────────────────────────────── */}
       {/* KPI row */}

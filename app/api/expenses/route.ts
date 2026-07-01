@@ -6,11 +6,13 @@ export async function GET(req: NextRequest) {
   const deny = await requireAuth(req)
   if (deny) return deny
   const projectId = req.nextUrl.searchParams.get('project_id')
+  const type      = req.nextUrl.searchParams.get('type')
   let query = supabaseAdmin
     .from('expenses')
     .select('*, projects(id, name)')
     .order('expense_date', { ascending: false })
   if (projectId) query = query.eq('project_id', projectId)
+  if (type)      query = query.eq('type', type)
   const { data, error } = await query
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json(data || [])
@@ -30,7 +32,7 @@ export async function POST(req: NextRequest) {
     description:  body.description  || null,
     project_id:   body.project_id   || null,
     receipt_url:  body.receipt_url  || null,
-    type:         body.type === 'esg' ? 'esg' : 'staff',
+    type:         ['esg','npa'].includes(body.type) ? body.type : 'staff',
     status:       'pending',
   }
   const { data, error } = await supabaseAdmin.from('expenses').insert(safe).select().single()
