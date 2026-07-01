@@ -23,6 +23,8 @@ const ALL_NAV = [
       icon:<svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="9" x2="9" y2="21"/></svg> },
     { href:'/expenses', label:'Expenses', roles:['admin','placide','carlos','uploader','dani','fares'],
       icon:<svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><line x1="6" y1="15" x2="10" y2="15"/></svg> },
+    { href:'/npa-expenses', label:'NPA Expenses', roles:['admin','placide','carlos','uploader','dani','fares'],
+      icon:<svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> },
   ]},
   { group:'Invoices', items:[
     { href:'/invoices',    label:'All Invoices',    roles:['admin','placide','carlos','uploader','dani','fares'],
