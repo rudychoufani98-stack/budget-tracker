@@ -100,7 +100,7 @@ export function Sidebar() {
     <aside className="w-56 min-h-screen flex flex-col shrink-0" style={{ background: BG, borderRight: '1px solid #323D5E' }}>
       <div className="px-4 pt-5 pb-4" style={{ borderBottom: '1px solid #323D5E' }}>
         <Link href="/dashboard" className="rounded-xl px-3 py-2.5 flex items-center justify-center" style={{ background: '#fff' }}>
-          <img src="/logo.png" alt="Skykapital" style={{ height: 38, width: 'auto', objectFit: 'contain', display: 'block', mixBlendMode: 'multiply' }} />
+          <img src="/logo.png" alt="Skykapital" style={{ height: 56, width: 'auto', objectFit: 'contain', display: 'block', mixBlendMode: 'multiply' }} />
         </Link>
       </div>
 
