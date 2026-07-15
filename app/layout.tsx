@@ -5,9 +5,6 @@ export const metadata: Metadata = {
   title: 'SkyKapital ESG Budget Tracker',
   description: 'ESG contract budget management and invoice validation platform — SkyKapital Europe',
   robots: 'noindex, nofollow',
-  icons: {
-    icon: '/logo.png',
-  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
