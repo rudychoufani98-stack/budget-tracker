@@ -18,11 +18,8 @@ export function TopNav() {
     <header className="sticky top-0 z-50" style={{ background: '#0C1F52' }}>
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between gap-8">
         {/* Logo */}
-        <Link href="/dashboard" className="shrink-0 flex items-center gap-2">
-          <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" width="28" height="28" aria-hidden="true" style={{ display: 'block', flexShrink: 0 }}>
-            <path d="M50 3 Q50 50 97 50 Q50 50 50 97 Q50 50 3 50 Q50 50 50 3 Z" fill="white" />
-          </svg>
-          <span style={{ color: 'white', fontSize: 16, fontWeight: 700, letterSpacing: '-0.03em' }}>Skykapital</span>
+        <Link href="/dashboard" className="shrink-0">
+          <img src="/logo.png" alt="Skykapital" style={{ height: 36, width: 'auto', objectFit: 'contain', display: 'block', filter: 'brightness(0) invert(1)' }} />
         </Link>
 
         {/* Nav links */}

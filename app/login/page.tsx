@@ -44,11 +44,8 @@ export default function LoginPage() {
 
         {/* Logo on white pill */}
         <div className="flex justify-center mb-8">
-          <div className="rounded-2xl px-6 py-3.5 shadow-xl flex items-center gap-2.5" style={{ background: '#FFFFFF' }}>
-            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" width="32" height="32" aria-hidden="true" style={{ display: 'block', flexShrink: 0 }}>
-              <path d="M50 3 Q50 50 97 50 Q50 50 50 97 Q50 50 3 50 Q50 50 50 3 Z" fill="#1a3c5e" />
-            </svg>
-            <span style={{ color: '#1a3c5e', fontSize: 20, fontWeight: 700, letterSpacing: '-0.03em' }}>Skykapital</span>
+          <div className="rounded-2xl px-6 py-3.5 shadow-xl" style={{ background: '#FFFFFF' }}>
+            <img src="/logo.png" alt="Skykapital" style={{ height: 48, width: 'auto', objectFit: 'contain', display: 'block', mixBlendMode: 'multiply' }} />
           </div>
         </div>
 
