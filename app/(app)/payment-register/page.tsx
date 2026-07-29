@@ -1,6 +1,7 @@
 'use client'
-import { useState, useEffect, useMemo } from 'react'
+import { Fragment, useState, useEffect, useMemo } from 'react'
 import { formatCurrency } from '@/lib/format'
+import { convertBySigningRate } from '@/lib/fx'
 import Link from 'next/link'
 
 const TRANCHES = ['T1','T2','T3','T4','One-Shot']
@@ -32,18 +33,7 @@ export default function PaymentRegisterPage() {
   const displayCcy = view === 'ngn' ? 'NGN' : 'USD'
 
   function convert(amount: number, fromCcy: string, signingRate: number | null): number {
-    if (!amount) return 0
-    const rate = signingRate || 0
-    if (view === 'ngn') {
-      if (fromCcy === 'NGN') return amount
-      if (fromCcy === 'USD') return amount * rate
-      const toUsd = amount / (fxRates[fromCcy] || 1)
-      return toUsd * rate
-    } else {
-      if (fromCcy === 'USD') return amount
-      if (fromCcy === 'NGN') return amount / rate
-      return amount / (fxRates[fromCcy] || 1)
-    }
+    return convertBySigningRate(amount, fromCcy, displayCcy, signingRate, fxRates)
   }
 
   async function load() {
@@ -194,9 +184,9 @@ export default function PaymentRegisterPage() {
               </thead>
               <tbody>
                 {grouped.map(({ projectName, contracts: pContracts }) => (
-                  <>
+                  <Fragment key={projectName}>
                     {!selectedProject && (
-                      <tr key={`proj-${projectName}`} style={{ background:'#F8FAFC', borderTop:'2px solid #E2E8F0' }}>
+                      <tr style={{ background:'#F8FAFC', borderTop:'2px solid #E2E8F0' }}>
                         <td colSpan={11} className="px-4 py-2">
                           <span className="text-xs font-bold uppercase tracking-widest" style={{ color:'#64748B' }}>{projectName}</span>
                         </td>
@@ -256,7 +246,7 @@ export default function PaymentRegisterPage() {
                         </tr>
                       )
                     })}
-                  </>
+                  </Fragment>
                 ))}
                 {/* Totals row */}
                 <tr style={{ background:'#F8FAFC', borderTop:'2px solid #E2E8F0' }}>

@@ -2,6 +2,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import { formatCurrency } from '@/lib/format'
+import { convertBySigningRate } from '@/lib/fx'
 import type { ContractTranche } from '@/lib/types'
 
 const ESG_COLORS: Record<string,{ color:string; bg:string }> = {
@@ -60,17 +61,7 @@ export function ContractsClient({ contracts, projects, initialProject, initialSe
 
   // Convert a contract amount using its signing rate
   function convert(amount: number, ccy: string, signingRate: number | null): number {
-    if (!amount) return 0
-    const rate = signingRate || 0
-    if (view === 'ngn') {
-      if (ccy === 'NGN') return amount
-      if (ccy === 'USD') return amount * rate
-      return amount * rate // approximate for other ccy
-    } else {
-      if (ccy === 'USD') return amount
-      if (ccy === 'NGN') return amount / rate
-      return amount / rate
-    }
+    return convertBySigningRate(amount, ccy, view === 'ngn' ? 'NGN' : 'USD', signingRate)
   }
 
   const baseCcy = view === 'ngn' ? 'NGN' : 'USD'

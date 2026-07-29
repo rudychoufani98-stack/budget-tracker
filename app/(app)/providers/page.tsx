@@ -1,21 +1,31 @@
-﻿import { supabaseAdmin } from '@/lib/supabase'
+import { supabaseAdmin } from '@/lib/supabase'
 import { formatCurrency } from '@/lib/format'
+import { convertBySigningRate } from '@/lib/fx'
 import Link from 'next/link'
 
 export const revalidate = 0
 const C = { card:'#FFFFFF', border:'#E2E8F0', green:'#10B981', amber:'#F59E0B', red:'#EF4444', blue:'#3B82F6', muted:'#6B7280' }
 
 export default async function ProvidersPage() {
-  const { data: providers } = await supabaseAdmin.from('service_providers').select('*').order('name')
-  const { data: tranches }  = await supabaseAdmin.from('contract_tranches').select('amount, status, contracts(service_provider_id)')
+  const [{ data: providers }, { data: tranches }, { data: fxRows }] = await Promise.all([
+    supabaseAdmin.from('service_providers').select('*').order('name'),
+    supabaseAdmin.from('contract_tranches').select('amount, status, contracts(service_provider_id, currency, fx_rate_at_signing)'),
+    supabaseAdmin.from('exchange_rates').select('currency, rate').eq('base', 'USD'),
+  ])
 
-  const stats: Record<string,{ contracted:number; paid:number; contracts:Set<string> }> = {}
+  const fxRates: Record<string, number> = { USD: 1 }
+  for (const row of fxRows || []) fxRates[row.currency] = row.rate
+
+  // Totals shown in NGN — convert each tranche via its contract's signing rate
+  const stats: Record<string,{ contracted:number; paid:number }> = {}
   for (const t of (tranches||[])) {
-    const spid = (t.contracts as any)?.service_provider_id
+    const c = t.contracts as any
+    const spid = c?.service_provider_id
     if (!spid) continue
-    if (!stats[spid]) stats[spid] = { contracted:0, paid:0, contracts:new Set() }
-    stats[spid].contracted += t.amount||0
-    if (t.status==='paid') stats[spid].paid += t.amount||0
+    if (!stats[spid]) stats[spid] = { contracted:0, paid:0 }
+    const amt = convertBySigningRate(t.amount||0, c?.currency||'NGN', 'NGN', c?.fx_rate_at_signing||null, fxRates)
+    stats[spid].contracted += amt
+    if (t.status==='paid') stats[spid].paid += amt
   }
 
   return (
@@ -29,7 +39,7 @@ export default async function ProvidersPage() {
       </div>
       <div className="rounded-2xl overflow-hidden" style={{ background:C.card, border:`1px solid ${C.border}` }}>
         <div className="grid px-6 py-3 text-xs font-medium uppercase tracking-widest" style={{ color:C.muted, borderBottom:`1px solid ${C.border}`, gridTemplateColumns:'2fr 1fr 1fr 1fr 1fr 1fr' }}>
-          <div>Provider</div><div>Country</div><div>Category</div><div>Contracted</div><div>Paid</div><div>Balance</div>
+          <div>Provider</div><div>Country</div><div>Category</div><div>Contracted (NGN)</div><div>Paid (NGN)</div><div>Balance (NGN)</div>
         </div>
         {(providers||[]).length === 0 ? (
           <p className="text-sm text-center py-12" style={{ color:C.muted }}>No service providers yet.</p>

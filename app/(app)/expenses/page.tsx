@@ -82,6 +82,7 @@ export default function ExpensesPage() {
 
   const totalNGN = shown.reduce((s, e) => s + (e.currency === 'NGN' ? e.amount : 0), 0)
   const totalUSD = shown.reduce((s, e) => s + (e.currency === 'USD' ? e.amount : 0), 0)
+  const totalEUR = shown.reduce((s, e) => s + (e.currency === 'EUR' ? e.amount : 0), 0)
   const pendingCount = shown.filter(e => e.status === 'pending').length
 
   async function uploadReceipt(file: File) {
@@ -178,11 +179,12 @@ export default function ExpensesPage() {
         </button>
       </div>
 
-      {/* KPIs */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
+      {/* KPIs — EUR card only appears when EUR expenses exist */}
+      <div className={`grid ${totalEUR > 0 ? 'grid-cols-4' : 'grid-cols-3'} gap-4 mb-6`}>
         {[
           { label: isESG ? 'Total ESG (NGN)' : 'Total NGN', value: formatCurrency(totalNGN, 'NGN'), color: isESG ? '#10B981' : '#10B981', bg: '#F0FDF4', icon: isESG ? '🌍' : '🧾' },
           { label: isESG ? 'Total ESG (USD)' : 'Total USD', value: formatCurrency(totalUSD, 'USD'), color: '#3B82F6', bg: '#EFF6FF', icon: '💵' },
+          ...(totalEUR > 0 ? [{ label: isESG ? 'Total ESG (EUR)' : 'Total EUR', value: formatCurrency(totalEUR, 'EUR'), color: '#8B5CF6', bg: '#F5F3FF', icon: '💶' }] : []),
           { label: 'Pending approval', value: `${pendingCount} item${pendingCount !== 1 ? 's' : ''}`, color: '#F59E0B', bg: '#FFFBEB', icon: '⏳' },
         ].map(k => (
           <div key={k.label} className="rounded-2xl px-5 py-4" style={{ background: k.bg, border: `1px solid ${C.border}` }}>

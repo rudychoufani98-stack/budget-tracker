@@ -44,11 +44,17 @@ export default function SettingsPage() {
 
   async function loadUsers() {
     setLoading(true)
-    const res = await fetch('/api/users')
-    setUsers(await res.json())
+    try {
+      const res = await fetch('/api/users')
+      const data = await res.json()
+      setUsers(Array.isArray(data) ? data : [])
+    } catch {
+      setUsers([])
+    }
     setLoading(false)
   }
-  useEffect(() => { loadUsers() }, [])
+  // Only admins can list users — the API rejects everyone else anyway
+  useEffect(() => { if (currentRole === 'admin') loadUsers() }, [currentRole])
 
   async function createUser(e: React.FormEvent) {
     e.preventDefault(); setSaving(true); setError(''); setSuccess('')
@@ -73,8 +79,15 @@ export default function SettingsPage() {
   async function changePassword(id: string, name: string) {
     if (pwInput.length < 6) return
     setSavingPw(true)
+    setError('')
     const u = users.find((u:any) => u.id === id)
-    await fetch('/api/users', { method:'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id, name: u?.name, role: u?.role, password: pwInput }) })
+    try {
+      const res  = await fetch('/api/users', { method:'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id, name: u?.name, role: u?.role, password: pwInput }) })
+      const data = await res.json()
+      if (!res.ok || data.error) { setError(data.error || 'Failed to update password'); setSavingPw(false); return }
+    } catch {
+      setError('Failed to update password'); setSavingPw(false); return
+    }
     setSavingPw(false)
     setChangingPw(null)
     setPwInput('')
@@ -116,6 +129,7 @@ export default function SettingsPage() {
           </div>
           {success && <div className="mb-4 text-sm px-4 py-3 rounded-xl" style={{ background:'rgba(16,185,129,0.1)', color:C.green, border:'1px solid rgba(16,185,129,0.2)' }}>{success}</div>}
           {pwSuccess && <div className="mb-4 text-sm px-4 py-3 rounded-xl" style={{ background:'rgba(16,185,129,0.1)', color:C.green, border:'1px solid rgba(16,185,129,0.2)' }}>Password updated for {pwSuccess}</div>}
+          {error && !showForm && <div className="mb-4 text-sm px-4 py-3 rounded-xl" style={{ background:'rgba(239,68,68,0.1)', color:C.red, border:'1px solid rgba(239,68,68,0.2)' }}>{error}</div>}
           {showForm && (
             <div className="rounded-2xl p-5 mb-4" style={{ background:C.card, border:`1px solid ${C.border}` }}>
               <h2 className="text-sm font-medium mb-4" style={{ color:'#0F172A' }}>New Account</h2>

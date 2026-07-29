@@ -120,7 +120,8 @@ export default function ValidationsPage() {
       _date: t.scheduled_date || t.created_at,
     }))
     setItems([...invoices, ...tranches].sort((a,b) => new Date(a._date||0).getTime() - new Date(b._date||0).getTime()))
-    setHistory(valRes.data || [])
+    // Attach the invoice's real currency to each history entry (was hardcoded NGN before)
+    setHistory((valRes.data || []).map((v:any) => ({ ...v, _ccy: cmap[v.invoice_id] || 'NGN' })))
     setLoading(false)
   }
 
@@ -475,15 +476,20 @@ export default function ValidationsPage() {
                 return Object.entries(byInvoice).map(([invId, steps]) => {
                   const firstStep = steps[steps.length - 1] // oldest first
                   const inv = firstStep.invoices
+                  const hasInvoice = invId !== 'unknown'
                   return (
                     <div key={invId} className="px-5 py-4" style={{ borderBottom:'1px solid #F8FAFC' }}>
                       {/* Invoice header */}
                       <div className="flex items-start justify-between mb-3">
                         <div>
                           <div className="flex items-center gap-2 flex-wrap">
-                            <Link href={`/invoices/${invId}`} className="text-sm font-bold hover:underline" style={{ color:'#0F172A' }}>
-                              {inv?.subcontractor_name || 'Invoice'}
-                            </Link>
+                            {hasInvoice ? (
+                              <Link href={`/invoices/${invId}`} className="text-sm font-bold hover:underline" style={{ color:'#0F172A' }}>
+                                {inv?.subcontractor_name || 'Invoice'}
+                              </Link>
+                            ) : (
+                              <span className="text-sm font-bold" style={{ color:'#0F172A' }}>Payment validation</span>
+                            )}
                             {inv?.invoice_number && (
                               <span className="text-xs font-mono px-2 py-0.5 rounded-lg" style={{ background:'#F1F5F9', color:'#64748B' }}>
                                 #{inv.invoice_number}
@@ -496,7 +502,7 @@ export default function ValidationsPage() {
                         </div>
                         {inv?.amount_ttc && (
                           <p className="text-sm font-bold shrink-0" style={{ color:'#0F172A' }}>
-                            {formatCurrency(inv.amount_ttc, 'NGN')}
+                            {formatCurrency(inv.amount_ttc, firstStep._ccy || 'NGN')}
                           </p>
                         )}
                       </div>

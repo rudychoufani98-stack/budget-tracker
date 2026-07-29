@@ -23,7 +23,7 @@ async function getData(projectId?: string, sectionId?: string, baseCcy: string =
   const in14 = new Date(now.getTime() + 14*86400000)
 
   const [tranchesRes, contractsRes, invoicesRes, allInvRes, currencyRes, providersRes, projectsRes, sectionsCountRes, fxRes, linksRes, expensesRes] = await Promise.all([
-    supabaseAdmin.from('contract_tranches').select('*, contracts(id, contract_name, category, currency, fx_rate_at_signing, project_id, section_id, service_providers(id, name))').order('scheduled_date', { ascending: true }).select('id, tranche_name, amount, status, scheduled_date, paid_date, contract_id, contracts(id, contract_name, category, currency, fx_rate_at_signing, project_id, section_id, service_providers(id, name))'),
+    supabaseAdmin.from('contract_tranches').select('id, tranche_name, amount, status, scheduled_date, paid_date, contract_id, contracts(id, contract_name, category, currency, fx_rate_at_signing, project_id, section_id, service_providers(id, name))').order('scheduled_date', { ascending: true }),
     supabaseAdmin.from('contracts').select('id, contract_name, category, currency, fx_rate_at_signing, contract_amount, payment_type, start_date, end_date, project_id, section_id, service_providers(id, name), contract_tranches(id, tranche_name, amount, status, scheduled_date, paid_date), invoices(id, status, submitted_at, amount_ttc)').order('created_at', { ascending: false }),
     supabaseAdmin.from('invoices').select('id, status, subcontractor_name, submitted_at, amount_ttc, contract_id, tranche_id').order('submitted_at', { ascending: false }),
     supabaseAdmin.from('invoices').select('id, status, subcontractor_name, submitted_at, amount_ttc, contract_id'),
@@ -129,20 +129,25 @@ async function getData(projectId?: string, sectionId?: string, baseCcy: string =
     sectionCountByProject[s.project_id] = (sectionCountByProject[s.project_id] || 0) + 1
   }
 
+  // Convert any amount to baseCcy using the contract's signing rate when
+  // available, falling back to live fx rates. Never divides by zero.
+  function contractToBase(amount: number, ccy: string, signingRate: number | null): number {
+    if (!amount) return 0
+    if (ccy === baseCcy) return amount
+    const rate = signingRate || 0
+    if (baseCcy === 'NGN') {
+      if (ccy === 'USD') return rate > 0 ? amount * rate : toBase(amount, ccy)
+      return rate > 0 ? (amount / (fxRates[ccy] || 1)) * rate : toBase(amount, ccy)
+    }
+    // USD view
+    if (ccy === 'NGN') return rate > 0 ? amount / rate : toBase(amount, ccy)
+    return toBase(amount, ccy)
+  }
+
   // trancheBaseForProject: convert tranche amount to baseCcy using contract's signing rate
   function trancheBaseForProject(t: any): number {
-    const amount = t.amount || 0
-    const ccy    = (t.contracts as any)?.currency || 'NGN'
-    const rate   = (t.contracts as any)?.fx_rate_at_signing || null
-    if (baseCcy === 'NGN') {
-      if (ccy === 'NGN') return amount
-      if (ccy === 'USD') return rate ? amount * rate : amount
-      return rate ? (amount / (fxRates[ccy] || 1)) * rate : amount
-    } else {
-      if (ccy === 'USD') return amount
-      if (ccy === 'NGN') return rate ? amount / rate : amount
-      return amount / (fxRates[ccy] || 1)
-    }
+    const c = t.contracts as any
+    return contractToBase(t.amount || 0, c?.currency || 'NGN', c?.fx_rate_at_signing || null)
   }
 
   const projectsWithStats = rawProjects.map((p: any) => {
@@ -165,38 +170,14 @@ async function getData(projectId?: string, sectionId?: string, baseCcy: string =
   })
 
   // Row 1 metrics — convert using fx_rate_at_signing when available
-  // baseCcy='NGN': NGN stays, USD*signingRate; baseCcy='USD': NGN/signingRate, USD stays
   function trancheBase(t: any): number {
-    const amount = t.amount || 0
-    const ccy    = (t.contracts as any)?.currency || 'NGN'
-    const signingRate = (t.contracts as any)?.fx_rate_at_signing || 0
-
-    if (baseCcy === 'NGN') {
-      if (ccy === 'NGN') return amount
-      if (ccy === 'USD') return amount * signingRate
-      return toBase(amount, ccy) * signingRate  // other ccy -> USD -> NGN
-    } else {
-      // USD view
-      if (ccy === 'USD') return amount
-      if (ccy === 'NGN') return amount / signingRate
-      return toBase(amount, ccy)  // already in USD via fxRates
-    }
+    const c = t.contracts as any
+    return contractToBase(t.amount || 0, c?.currency || 'NGN', c?.fx_rate_at_signing || null)
   }
 
   // Use contract_amount as committed (not just sum of tranches - avoids missing unscheduled balance)
   function contractBase(c: any): number {
-    const amount = c.contract_amount || c.total_budget || 0
-    const ccy    = c.currency || 'NGN'
-    const rate   = c.fx_rate_at_signing || 0
-    if (baseCcy === 'NGN') {
-      if (ccy === 'NGN') return amount
-      if (ccy === 'USD') return amount * rate
-      return toBase(amount, ccy) * rate
-    } else {
-      if (ccy === 'USD') return amount
-      if (ccy === 'NGN') return amount / rate
-      return toBase(amount, ccy)
-    }
+    return contractToBase(c.contract_amount || c.total_budget || 0, c.currency || 'NGN', c.fx_rate_at_signing || null)
   }
 
   const totalCommitted = contracts.reduce((s:number,c:any) => s + contractBase(c), 0)
@@ -210,8 +191,10 @@ async function getData(projectId?: string, sectionId?: string, baseCcy: string =
   }).reduce((s:number,t:any) => s + trancheBase(t), 0)
 
   const VALIDATION_STATUSES = ['pending_review','pending_placide','pending_dani','pending_fares']
-  const pendingPaymentTranches = tranches.filter((t:any) => VALIDATION_STATUSES.includes(t.status))
-  const pendingPaymentAmount   = pendingPaymentTranches.reduce((s:number,t:any) => s + trancheBase(t), 0)
+  const pendingPaymentTranches = tranches
+    .filter((t:any) => VALIDATION_STATUSES.includes(t.status))
+    .map((t:any) => ({ ...t, amountBase: trancheBase(t) }))
+  const pendingPaymentAmount   = pendingPaymentTranches.reduce((s:number,t:any) => s + (t.amountBase || 0), 0)
 
   const overdueTranches = tranches.filter((t:any) => {
     if (t.status === 'paid') return false
@@ -229,22 +212,6 @@ async function getData(projectId?: string, sectionId?: string, baseCcy: string =
     if (cid) {
       if (!invoiceByContract[cid]) invoiceByContract[cid] = []
       invoiceByContract[cid].push(inv)
-    }
-  }
-
-  // Helper: convert a contract amount to baseCcy using its signing rate
-  function contractToBase(amount: number, ccy: string, signingRate: number | null): number {
-    if (!amount) return 0
-    const rate = signingRate || null
-    if (baseCcy === 'NGN') {
-      if (ccy === 'NGN') return amount
-      // If no rate, show USD amount as-is (no conversion possible)
-      if (ccy === 'USD') return rate ? amount * rate : amount
-      return rate ? toBase(amount, ccy) * rate : toBase(amount, ccy)
-    } else {
-      if (ccy === 'USD') return amount
-      if (ccy === 'NGN') return rate ? amount / rate : amount
-      return toBase(amount, ccy)
     }
   }
 
@@ -855,7 +822,7 @@ export default async function DashboardPage({
                     <p className="text-xs" style={{ color:'#64748B' }}>{c?.service_providers?.name || ''}</p>
                   </div>
                   <div className="text-right shrink-0">
-                    <p className="text-sm font-bold" style={{ color:'#0F172A' }}>{formatCurrency(t.amount, c?.currency || baseCcy)}</p>
+                    <p className="text-sm font-bold" style={{ color:'#0F172A' }}>{formatCurrency(t.amountBase ?? t.amount, baseCcy)}</p>
                     {t.scheduled_date && <p className="text-xs mt-0.5" style={{ color:'#64748B' }}>Due {new Date(t.scheduled_date).toLocaleDateString('en-GB',{day:'2-digit',month:'short'})}</p>}
                   </div>
                 </div>

@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect, useMemo } from 'react'
 import { formatCurrency } from '@/lib/format'
+import { convertBySigningRate } from '@/lib/fx'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 
 const C = { card:'#FFFFFF', border:'#E2E8F0', green:'#10B981', amber:'#F59E0B', red:'#EF4444', blue:'#3B82F6', muted:'#6B7280' }
@@ -10,7 +11,9 @@ export default function ReportsPage() {
   const [projects, setProjects] = useState<any[]>([])
   const [loading, setLoading]   = useState(true)
   const [tab, setTab]           = useState<'provider'|'category'|'monthly'|'project'|'project-section'|'vat'|'audit'>('provider')
-  const [chartProject, setChartProject] = useState('')
+  const [view, setView]         = useState<'ngn'|'usd'>('ngn')
+
+  const displayCcy = view === 'ngn' ? 'NGN' : 'USD'
 
   useEffect(() => {
     Promise.all([
@@ -40,6 +43,12 @@ export default function ReportsPage() {
     { key:'audit',           label:'Audit Log' },
   ]
 
+  // Convert a tranche amount to the selected display currency using its
+  // contract's currency + signing rate (same convention as the other tabs)
+  function toView(amount: number, contract: any): number {
+    return convertBySigningRate(amount || 0, contract?.currency || 'NGN', displayCcy, contract?.fx_rate_at_signing || null)
+  }
+
   // Per-project stats derived from project.contracts
   const projectStats = useMemo(() => {
     return projects.map((p: any) => {
@@ -47,27 +56,22 @@ export default function ReportsPage() {
       const contractCount = contracts.length
       const totalCommitted = contracts.reduce((s: number, c: any) => {
         const ts: any[] = c.contract_tranches || []
-        return s + ts.reduce((ss: number, t: any) => ss + (t.amount || 0), 0)
+        return s + ts.reduce((ss: number, t: any) => ss + toView(t.amount, c), 0)
       }, 0)
       const totalPaid = contracts.reduce((s: number, c: any) => {
         const ts: any[] = c.contract_tranches || []
-        return s + ts.filter((t: any) => t.status === 'paid').reduce((ss: number, t: any) => ss + (t.amount || 0), 0)
+        return s + ts.filter((t: any) => t.status === 'paid').reduce((ss: number, t: any) => ss + toView(t.amount, c), 0)
       }, 0)
       const balance = totalCommitted - totalPaid
       const pct = totalCommitted > 0 ? Math.round((totalPaid / totalCommitted) * 100) : 0
       const invoiceCount = contracts.reduce((s: number, c: any) => s + (c.invoices?.length || 0), 0)
       return { id: p.id, name: p.name, status: p.status || 'active', contractCount, totalCommitted, totalPaid, balance, pct, invoiceCount }
     })
-  }, [projects])
+  }, [projects, view])
 
-  // Filtered monthly data by project
   const monthlyData = useMemo(() => {
-    if (!data?.monthlyData) return []
-    if (!chartProject) return data.monthlyData
-    // monthlyData is pre-aggregated — if project filter is selected we can't filter it server-side
-    // Show note instead; for now return all data since monthlyData lacks project_id
-    return data.monthlyData
-  }, [data, chartProject])
+    return (data?.monthlyData || []).map((m: any) => ({ month: m.month, amount: view === 'ngn' ? m.amount_ngn : m.amount_usd }))
+  }, [data, view])
 
   if (loading) return <div className="flex items-center justify-center h-screen" style={{ color:C.muted }}>Loading...</div>
 
@@ -78,7 +82,19 @@ export default function ReportsPage() {
           <p className="text-xs font-medium uppercase tracking-widest mb-1" style={{ color:C.muted }}>Analytics</p>
           <h1 className="text-2xl font-medium" style={{ color:'#0F172A' }}>Reports</h1>
         </div>
-        <button onClick={()=>window.print()} className="text-sm font-medium px-4 py-2 rounded-xl" style={{ background:'#E2E8F0', border:'1px solid #CBD5E1', color:'#0F172A' }}>Print / PDF</button>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center rounded-xl overflow-hidden" style={{ border:'1px solid #E2E8F0' }}>
+            <button onClick={()=>setView('ngn')} className="px-4 py-2 text-sm font-bold transition-colors"
+              style={view==='ngn'?{background:'#0F172A',color:'#fff'}:{background:'#FFFFFF',color:'#64748B'}}>
+              &#8358; NGN
+            </button>
+            <button onClick={()=>setView('usd')} className="px-4 py-2 text-sm font-bold transition-colors"
+              style={view==='usd'?{background:'#0F172A',color:'#fff'}:{background:'#FFFFFF',color:'#64748B'}}>
+              $ USD
+            </button>
+          </div>
+          <button onClick={()=>window.print()} className="text-sm font-medium px-4 py-2 rounded-xl" style={{ background:'#E2E8F0', border:'1px solid #CBD5E1', color:'#0F172A' }}>Print / PDF</button>
+        </div>
       </div>
 
       <div className="flex gap-1 mb-6 p-1 rounded-xl overflow-x-auto" style={{ background:'#FFFFFF', border:'1px solid #E2E8F0' }}>
@@ -92,21 +108,23 @@ export default function ReportsPage() {
       {tab === 'provider' && (
         <div>
           <div className="flex justify-between mb-4">
-            <p className="text-sm font-medium" style={{ color:'#0F172A' }}>Payment Summary by Provider</p>
-            <button onClick={()=>exportCSV([['Provider','Contracted','Paid','Balance'],...(data.byProvider||[]).map((p:any)=>[p.name,p.total_contracted,p.total_paid,p.total_contracted-p.total_paid])],'providers.csv')} className="text-xs px-3 py-1.5 rounded-lg" style={{ background:'#E2E8F0', color:C.blue }}>Export CSV</button>
+            <p className="text-sm font-medium" style={{ color:'#0F172A' }}>Payment Summary by Provider ({displayCcy})</p>
+            <button onClick={()=>exportCSV([['Provider',`Contracted (${displayCcy})`,`Paid (${displayCcy})`,`Balance (${displayCcy})`],...(data.byProvider||[]).map((p:any)=>{ const ct=view==='ngn'?p.contracted_ngn:p.contracted_usd; const pd=view==='ngn'?p.paid_ngn:p.paid_usd; return [p.name,Math.round(ct),Math.round(pd),Math.round(ct-pd)] })],'providers.csv')} className="text-xs px-3 py-1.5 rounded-lg" style={{ background:'#E2E8F0', color:C.blue }}>Export CSV</button>
           </div>
           <div className="rounded-2xl overflow-hidden" style={{ background:C.card, border:`1px solid ${C.border}` }}>
             <div className="grid px-6 py-3 text-xs font-medium uppercase tracking-widest" style={{ color:C.muted, borderBottom:`1px solid ${C.border}`, gridTemplateColumns:'2fr 1fr 1fr 1fr 1fr' }}>
               <div>Provider</div><div>Contracted</div><div>Paid</div><div>Balance</div><div>Rate</div>
             </div>
             {(data.byProvider||[]).map((p:any) => {
-              const rate = p.total_contracted>0?Math.round((p.total_paid/p.total_contracted)*100):0
+              const contracted = view==='ngn' ? p.contracted_ngn : p.contracted_usd
+              const paid       = view==='ngn' ? p.paid_ngn       : p.paid_usd
+              const rate = contracted>0?Math.round((paid/contracted)*100):0
               return (
                 <div key={p.name} className="grid px-6 py-3 items-center" style={{ borderBottom:`1px solid ${C.border}`, gridTemplateColumns:'2fr 1fr 1fr 1fr 1fr' }}>
                   <p className="text-sm" style={{ color:'#0F172A' }}>{p.name}</p>
-                  <p className="text-sm" style={{ color:'#0F172A' }}>{formatCurrency(p.total_contracted)}</p>
-                  <p className="text-sm" style={{ color:C.green }}>{formatCurrency(p.total_paid)}</p>
-                  <p className="text-sm" style={{ color:C.amber }}>{formatCurrency(p.total_contracted-p.total_paid)}</p>
+                  <p className="text-sm" style={{ color:'#0F172A' }}>{formatCurrency(contracted, displayCcy)}</p>
+                  <p className="text-sm" style={{ color:C.green }}>{formatCurrency(paid, displayCcy)}</p>
+                  <p className="text-sm" style={{ color:C.amber }}>{formatCurrency(contracted-paid, displayCcy)}</p>
                   <div className="flex items-center gap-2">
                     <div className="flex-1 h-1.5 rounded-full" style={{ background:'#E2E8F0' }}>
                       <div className="h-1.5 rounded-full" style={{ width:`${rate}%`, background:rate>=80?C.green:rate>=40?C.amber:C.blue }} />
@@ -122,19 +140,23 @@ export default function ReportsPage() {
 
       {tab === 'category' && (
         <div>
-          <p className="text-sm font-medium mb-4" style={{ color:'#0F172A' }}>Payment Summary by ESG Category</p>
+          <p className="text-sm font-medium mb-4" style={{ color:'#0F172A' }}>Payment Summary by ESG Category ({displayCcy})</p>
           <div className="rounded-2xl overflow-hidden" style={{ background:C.card, border:`1px solid ${C.border}` }}>
             <div className="grid px-6 py-3 text-xs font-medium uppercase tracking-widest" style={{ color:C.muted, borderBottom:`1px solid ${C.border}`, gridTemplateColumns:'1fr 1fr 1fr 1fr' }}>
               <div>Category</div><div>Total</div><div>Paid</div><div>Balance</div>
             </div>
-            {(data.byCategory||[]).map((c:any) => (
-              <div key={c.category} className="grid px-6 py-3" style={{ borderBottom:`1px solid ${C.border}`, gridTemplateColumns:'1fr 1fr 1fr 1fr' }}>
-                <span className="text-sm font-medium" style={{ color:'#0F172A' }}>{c.category}</span>
-                <span className="text-sm" style={{ color:'#0F172A' }}>{formatCurrency(c.total)}</span>
-                <span className="text-sm" style={{ color:C.green }}>{formatCurrency(c.paid)}</span>
-                <span className="text-sm" style={{ color:C.amber }}>{formatCurrency(c.total-c.paid)}</span>
-              </div>
-            ))}
+            {(data.byCategory||[]).map((c:any) => {
+              const total = view==='ngn' ? c.total_ngn : c.total_usd
+              const paid  = view==='ngn' ? c.paid_ngn  : c.paid_usd
+              return (
+                <div key={c.category} className="grid px-6 py-3" style={{ borderBottom:`1px solid ${C.border}`, gridTemplateColumns:'1fr 1fr 1fr 1fr' }}>
+                  <span className="text-sm font-medium" style={{ color:'#0F172A' }}>{c.category}</span>
+                  <span className="text-sm" style={{ color:'#0F172A' }}>{formatCurrency(total, displayCcy)}</span>
+                  <span className="text-sm" style={{ color:C.green }}>{formatCurrency(paid, displayCcy)}</span>
+                  <span className="text-sm" style={{ color:C.amber }}>{formatCurrency(total-paid, displayCcy)}</span>
+                </div>
+              )
+            })}
           </div>
         </div>
       )}
@@ -142,8 +164,8 @@ export default function ReportsPage() {
       {tab === 'project' && (
         <div>
           <div className="flex justify-between mb-4">
-            <p className="text-sm font-medium" style={{ color:'#0F172A' }}>Payment Summary by Project</p>
-            <button onClick={()=>exportCSV([['Project','Status','Contracts','Committed','Paid','Balance','%','Invoices'],...projectStats.map(p=>[p.name,p.status,p.contractCount,p.totalCommitted,p.totalPaid,p.balance,p.pct+'%',p.invoiceCount])],'projects.csv')} className="text-xs px-3 py-1.5 rounded-lg" style={{ background:'#E2E8F0', color:C.blue }}>Export CSV</button>
+            <p className="text-sm font-medium" style={{ color:'#0F172A' }}>Payment Summary by Project ({displayCcy})</p>
+            <button onClick={()=>exportCSV([['Project','Status','Contracts',`Committed (${displayCcy})`,`Paid (${displayCcy})`,`Balance (${displayCcy})`,'%','Invoices'],...projectStats.map(p=>[p.name,p.status,p.contractCount,Math.round(p.totalCommitted),Math.round(p.totalPaid),Math.round(p.balance),p.pct+'%',p.invoiceCount])],'projects.csv')} className="text-xs px-3 py-1.5 rounded-lg" style={{ background:'#E2E8F0', color:C.blue }}>Export CSV</button>
           </div>
           <div className="rounded-2xl overflow-hidden" style={{ background:C.card, border:`1px solid ${C.border}` }}>
             <div className="grid px-6 py-3 text-xs font-medium uppercase tracking-widest" style={{ color:C.muted, borderBottom:`1px solid ${C.border}`, gridTemplateColumns:'2fr 0.8fr 0.8fr 1fr 1fr 1fr 0.8fr 0.8fr' }}>
@@ -157,9 +179,9 @@ export default function ReportsPage() {
                 <p className="text-sm font-medium" style={{ color:'#0F172A' }}>{p.name}</p>
                 <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: p.status==='active'?'rgba(16,185,129,0.1)':'rgba(59,130,246,0.1)', color: p.status==='active'?C.green:C.blue }}>{p.status}</span>
                 <p className="text-sm" style={{ color:C.muted }}>{p.contractCount}</p>
-                <p className="text-sm" style={{ color:'#0F172A' }}>{formatCurrency(p.totalCommitted)}</p>
-                <p className="text-sm" style={{ color:C.green }}>{formatCurrency(p.totalPaid)}</p>
-                <p className="text-sm" style={{ color:C.amber }}>{formatCurrency(p.balance)}</p>
+                <p className="text-sm" style={{ color:'#0F172A' }}>{formatCurrency(p.totalCommitted, displayCcy)}</p>
+                <p className="text-sm" style={{ color:C.green }}>{formatCurrency(p.totalPaid, displayCcy)}</p>
+                <p className="text-sm" style={{ color:C.amber }}>{formatCurrency(p.balance, displayCcy)}</p>
                 <p className="text-sm font-medium" style={{ color:p.pct>=80?C.green:p.pct>=40?C.amber:C.muted }}>{p.pct}%</p>
                 <p className="text-sm" style={{ color:C.muted }}>{p.invoiceCount}</p>
               </div>
@@ -170,7 +192,7 @@ export default function ReportsPage() {
 
       {tab === 'project-section' && (
         <div>
-          <p className="text-sm font-medium mb-4" style={{ color:'#0F172A' }}>Payment Summary by Project and Section</p>
+          <p className="text-sm font-medium mb-4" style={{ color:'#0F172A' }}>Payment Summary by Project and Section ({displayCcy})</p>
           {projects.length === 0 && (
             <p className="text-sm text-center py-8" style={{ color:C.muted }}>No projects found.</p>
           )}
@@ -201,11 +223,11 @@ export default function ReportsPage() {
                   {sections.map(sec => {
                     const secCommitted = sec.contracts.reduce((s: number, c: any) => {
                       const ts: any[] = c.contract_tranches || []
-                      return s + ts.reduce((ss: number, t: any) => ss + (t.amount || 0), 0)
+                      return s + ts.reduce((ss: number, t: any) => ss + toView(t.amount, c), 0)
                     }, 0)
                     const secPaid = sec.contracts.reduce((s: number, c: any) => {
                       const ts: any[] = c.contract_tranches || []
-                      return s + ts.filter((t: any) => t.status === 'paid').reduce((ss: number, t: any) => ss + (t.amount || 0), 0)
+                      return s + ts.filter((t: any) => t.status === 'paid').reduce((ss: number, t: any) => ss + toView(t.amount, c), 0)
                     }, 0)
                     const secBal = secCommitted - secPaid
                     const secPct = secCommitted > 0 ? Math.round((secPaid / secCommitted) * 100) : 0
@@ -213,9 +235,9 @@ export default function ReportsPage() {
                       <div key={sec.secName} className="grid px-6 py-3 items-center" style={{ borderBottom:`1px solid ${C.border}`, gridTemplateColumns:'2fr 0.8fr 1fr 1fr 1fr 0.8fr' }}>
                         <p className="text-sm font-medium" style={{ color:'#0F172A' }}>{sec.secName}</p>
                         <p className="text-sm" style={{ color:C.muted }}>{sec.contracts.length}</p>
-                        <p className="text-sm" style={{ color:'#0F172A' }}>{formatCurrency(secCommitted)}</p>
-                        <p className="text-sm" style={{ color:C.green }}>{formatCurrency(secPaid)}</p>
-                        <p className="text-sm" style={{ color:C.amber }}>{formatCurrency(secBal)}</p>
+                        <p className="text-sm" style={{ color:'#0F172A' }}>{formatCurrency(secCommitted, displayCcy)}</p>
+                        <p className="text-sm" style={{ color:C.green }}>{formatCurrency(secPaid, displayCcy)}</p>
+                        <p className="text-sm" style={{ color:C.amber }}>{formatCurrency(secBal, displayCcy)}</p>
                         <p className="text-sm font-medium" style={{ color:secPct>=80?C.green:secPct>=40?C.amber:C.muted }}>{secPct}%</p>
                       </div>
                     )
@@ -229,25 +251,7 @@ export default function ReportsPage() {
 
       {tab === 'monthly' && (
         <div>
-          <div className="flex items-center gap-4 mb-4">
-            <p className="text-sm font-medium" style={{ color:'#0F172A' }}>Monthly Payment Flow (approved invoices)</p>
-            {projects.length > 0 && (
-              <select
-                value={chartProject}
-                onChange={e => setChartProject(e.target.value)}
-                className="text-sm px-3 py-2 rounded-lg ml-auto"
-                style={{ background:'#FFFFFF', border:'1px solid #E2E8F0', color:'#0F172A', outline:'none' }}
-              >
-                <option value="">All Projects</option>
-                {projects.map((p: any) => (
-                  <option key={p.id} value={p.id}>{p.name}</option>
-                ))}
-              </select>
-            )}
-          </div>
-          {chartProject && (
-            <p className="text-xs mb-3" style={{ color:'#94A3B8' }}>Note: monthly chart shows all projects. Per-project monthly breakdown requires server-side aggregation.</p>
-          )}
+          <p className="text-sm font-medium mb-4" style={{ color:'#0F172A' }}>Monthly Payment Flow (approved invoices, {displayCcy})</p>
           <div className="rounded-2xl p-6" style={{ background:C.card, border:`1px solid ${C.border}`, height:320 }}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={monthlyData} margin={{ top:4, right:4, bottom:4, left:4 }}>
@@ -263,12 +267,12 @@ export default function ReportsPage() {
 
       {tab === 'vat' && (
         <div>
-          <p className="text-sm font-medium mb-4" style={{ color:'#0F172A' }}>VAT Summary (all approved invoices)</p>
+          <p className="text-sm font-medium mb-4" style={{ color:'#0F172A' }}>VAT Summary (all approved invoices, {displayCcy})</p>
           <div className="grid grid-cols-3 gap-4">
             {[
-              { label:'Total HT',          value: formatCurrency(data.vatSummary?.totalHT),  color:C.blue },
-              { label:'TVA Recoverable',   value: formatCurrency(data.vatSummary?.totalTVA), color:C.amber },
-              { label:'Total TTC',         value: formatCurrency(data.vatSummary?.totalTTC), color:C.green },
+              { label:'Total HT',          value: formatCurrency(view==='ngn'?data.vatSummary?.ht_ngn:data.vatSummary?.ht_usd, displayCcy),   color:C.blue },
+              { label:'TVA Recoverable',   value: formatCurrency(view==='ngn'?data.vatSummary?.tva_ngn:data.vatSummary?.tva_usd, displayCcy), color:C.amber },
+              { label:'Total TTC',         value: formatCurrency(view==='ngn'?data.vatSummary?.ttc_ngn:data.vatSummary?.ttc_usd, displayCcy), color:C.green },
             ].map(s=>(
               <div key={s.label} className="rounded-2xl p-5" style={{ background:C.card, border:`1px solid ${C.border}` }}>
                 <p className="text-xs mb-2" style={{ color:C.muted }}>{s.label}</p>
@@ -291,7 +295,7 @@ export default function ReportsPage() {
               <div key={a.id} className="grid px-6 py-2.5 items-center text-sm" style={{ borderBottom:`1px solid ${C.border}`, gridTemplateColumns:'2fr 1fr 1fr 2fr' }}>
                 <span style={{ color:'#0F172A' }}>{a.action}</span>
                 <span style={{ color:C.muted }}>{a.entity_type}</span>
-                <span style={{ color:C.muted }}>{new Date(a.created_at).toLocaleDateString('fr-FR')}</span>
+                <span style={{ color:C.muted }}>{new Date(a.created_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}</span>
                 <span className="text-xs font-mono truncate" style={{ color:'#94A3B8' }}>{a.details ? JSON.stringify(a.details).slice(0,60) : '--'}</span>
               </div>
             ))}

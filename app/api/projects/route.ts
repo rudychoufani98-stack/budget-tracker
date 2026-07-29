@@ -11,6 +11,10 @@ export async function GET(req: NextRequest) {
       id, name, description, budget, currency, start_date, end_date, status, created_at,
       contracts(
         id,
+        currency,
+        fx_rate_at_signing,
+        section_id,
+        project_sections(name),
         contract_tranches(amount, status),
         invoices(id, status)
       )

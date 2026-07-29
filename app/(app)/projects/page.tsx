@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { formatCurrency } from '@/lib/format'
+import { convertBySigningRate } from '@/lib/fx'
 
 const PALETTE = ['#3B82F6','#8B5CF6','#F59E0B','#EF4444','#10B981','#06B6D4','#F97316','#EC4899']
 const STATUS_META: Record<string,{ label:string; color:string; bg:string }> = {
@@ -26,18 +27,7 @@ export default function ProjectsPage() {
       const fxRates: Record<string,number> = { USD: 1, ...(fxRes?.rates || fxRes || {}) }
 
       function convert(amount: number, fromCcy: string, signingRate: number | null, toCcy: string): number {
-        if (!amount) return 0
-        if (fromCcy === toCcy) return amount
-        const rate = signingRate || 0
-        if (toCcy === 'NGN') {
-          if (fromCcy === 'USD') return amount * rate
-          // other -> USD -> NGN
-          const toUsd = amount / (fxRates[fromCcy] || 1)
-          return toUsd * rate
-        }
-        // toCcy === 'USD'
-        if (fromCcy === 'NGN') return amount / rate
-        return amount / (fxRates[fromCcy] || 1)
+        return convertBySigningRate(amount, fromCcy, toCcy, signingRate, fxRates)
       }
 
       const enriched = projs.map((p: any, i: number) => {
