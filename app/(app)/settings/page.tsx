@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 import { useState, useEffect } from 'react'
 import { createClient } from '@/utils/supabase/client'
 
@@ -26,6 +26,10 @@ export default function SettingsPage() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [deleting, setDeleting] = useState<string|null>(null)
+  const [changingPw, setChangingPw] = useState<string|null>(null)
+  const [pwInput, setPwInput] = useState('')
+  const [savingPw, setSavingPw] = useState(false)
+  const [pwSuccess, setPwSuccess] = useState<string|null>(null)
 
   useEffect(() => {
     // Fetch current user role
@@ -66,6 +70,18 @@ export default function SettingsPage() {
     setDeleting(null)
   }
 
+  async function changePassword(id: string, name: string) {
+    if (pwInput.length < 6) return
+    setSavingPw(true)
+    const u = users.find((u:any) => u.id === id)
+    await fetch('/api/users', { method:'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id, name: u?.name, role: u?.role, password: pwInput }) })
+    setSavingPw(false)
+    setChangingPw(null)
+    setPwInput('')
+    setPwSuccess(name)
+    setTimeout(() => setPwSuccess(null), 3000)
+  }
+
   const inp = "w-full px-3 py-2.5 text-sm rounded-xl"
   const inpStyle = { background:'#E2E8F0', border:'1px solid #CBD5E1', color:'#0F172A' }
 
@@ -99,6 +115,7 @@ export default function SettingsPage() {
             <button onClick={()=>{ setShowForm(true); setError(''); setSuccess('') }} className="text-sm font-medium px-4 py-2 rounded-xl" style={{ background:C.blue, color:'#fff' }}>+ Add User</button>
           </div>
           {success && <div className="mb-4 text-sm px-4 py-3 rounded-xl" style={{ background:'rgba(16,185,129,0.1)', color:C.green, border:'1px solid rgba(16,185,129,0.2)' }}>{success}</div>}
+          {pwSuccess && <div className="mb-4 text-sm px-4 py-3 rounded-xl" style={{ background:'rgba(16,185,129,0.1)', color:C.green, border:'1px solid rgba(16,185,129,0.2)' }}>Password updated for {pwSuccess}</div>}
           {showForm && (
             <div className="rounded-2xl p-5 mb-4" style={{ background:C.card, border:`1px solid ${C.border}` }}>
               <h2 className="text-sm font-medium mb-4" style={{ color:'#0F172A' }}>New Account</h2>
@@ -123,20 +140,42 @@ export default function SettingsPage() {
             {loading ? <p className="text-sm text-center py-8" style={{ color:C.muted }}>Loading...</p> :
               users.map(u => {
                 const rc = ROLE_COLORS[u.role] || C.muted
-                const initials = u.name.split(' ').map((n:string)=>n[0]).join('').toUpperCase().slice(0,2)
+                const initials = (u.name||'?').split(' ').map((n:string)=>n[0]).join('').toUpperCase().slice(0,2)
+                const isPwOpen = changingPw === u.id
                 return (
-                  <div key={u.id} className="flex items-center justify-between px-5 py-3" style={{ borderBottom:`1px solid ${C.border}` }}>
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium" style={{ background:'#E2E8F0', color:'#0F172A' }}>{initials||'?'}</div>
-                      <div>
-                        <p className="text-sm font-medium" style={{ color:'#0F172A' }}>{u.name||'—'}</p>
-                        <p className="text-xs" style={{ color:C.muted }}>{u.email}</p>
+                  <div key={u.id} style={{ borderBottom:`1px solid ${C.border}` }}>
+                    <div className="flex items-center justify-between px-5 py-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium" style={{ background:'#E2E8F0', color:'#0F172A' }}>{initials}</div>
+                        <div>
+                          <p className="text-sm font-medium" style={{ color:'#0F172A' }}>{u.name||'—'}</p>
+                          <p className="text-xs" style={{ color:C.muted }}>{u.email}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs px-2.5 py-1 rounded-full font-medium" style={{ background:`${rc}20`, color:rc }}>{ROLE_LABELS[u.role] || u.role}</span>
+                        <button onClick={()=>{ setChangingPw(isPwOpen ? null : u.id); setPwInput('') }} className="text-xs px-3 py-1.5 rounded-lg" style={{ color:'#3B82F6', border:'1px solid rgba(59,130,246,0.2)' }}>
+                          {isPwOpen ? 'Cancel' : '🔑 Password'}
+                        </button>
+                        <button onClick={()=>deleteUser(u.id,u.name)} disabled={deleting===u.id} className="text-xs px-3 py-1.5 rounded-lg disabled:opacity-50" style={{ color:C.red, border:'1px solid rgba(239,68,68,0.2)' }}>Delete</button>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <span className="text-xs px-2.5 py-1 rounded-full font-medium" style={{ background:`${rc}20`, color:rc }}>{ROLE_LABELS[u.role] || u.role}</span>
-                      <button onClick={()=>deleteUser(u.id,u.name)} disabled={deleting===u.id} className="text-xs px-3 py-1.5 rounded-lg disabled:opacity-50" style={{ color:C.red, border:'1px solid rgba(239,68,68,0.2)' }}>Delete</button>
-                    </div>
+                    {isPwOpen && (
+                      <div className="px-5 pb-3 flex items-center gap-2">
+                        <input
+                          type="text"
+                          className="flex-1 px-3 py-2 text-sm rounded-xl"
+                          style={{ background:'#F8FAFC', border:'1.5px solid #3B82F6', color:'#0F172A' }}
+                          placeholder="New password (min 6 chars)"
+                          value={pwInput}
+                          onChange={e=>setPwInput(e.target.value)}
+                          onKeyDown={e=>{ if(e.key==='Enter') changePassword(u.id, u.name) }}
+                        />
+                        <button onClick={()=>changePassword(u.id, u.name)} disabled={savingPw||pwInput.length<6} className="text-xs font-bold px-4 py-2 rounded-xl disabled:opacity-40" style={{ background:'#3B82F6', color:'#fff' }}>
+                          {savingPw ? 'Saving...' : 'Save'}
+                        </button>
+                      </div>
+                    )}
                   </div>
                 )
               })

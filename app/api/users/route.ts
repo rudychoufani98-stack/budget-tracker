@@ -39,11 +39,14 @@ export async function POST(req: NextRequest) {
 export async function PATCH(req: NextRequest) {
   const deny = await assertAdmin(req)
   if (deny) return deny
-  const { id, name, role } = await req.json()
+  const { id, name, role, password } = await req.json()
   if (!id) return NextResponse.json({ error: 'User ID required' }, { status: 400 })
-  const { error } = await supabaseAdmin.auth.admin.updateUserById(id, {
-    user_metadata: { name, role },
-  })
+  const update: any = { user_metadata: { name, role } }
+  if (password) {
+    if (password.length < 6) return NextResponse.json({ error: 'Password must be at least 6 characters' }, { status: 400 })
+    update.password = password
+  }
+  const { error } = await supabaseAdmin.auth.admin.updateUserById(id, update)
   if (error) return NextResponse.json({ error: 'Failed to update user' }, { status: 500 })
   return NextResponse.json({ success: true })
 }
