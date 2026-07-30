@@ -170,7 +170,7 @@ export function Sidebar() {
             </div>
             {role === 'admin' && (
               <Link
-                href="/users"
+                href="/settings"
                 onClick={() => setDropdownOpen(false)}
                 className="flex items-center gap-2 px-3 py-2.5 text-xs transition-colors"
                 style={{ color: '#9CA3AF' }}

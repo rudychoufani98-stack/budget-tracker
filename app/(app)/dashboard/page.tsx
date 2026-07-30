@@ -7,7 +7,6 @@ import { ConsultantChart, MonthlyPaymentsChart, ProjectCompletionChart } from '.
 export const revalidate = 0
 
 const ESG_COLOR: Record<string,string> = { E:'#10B981', S:'#3B82F6', G:'#8B5CF6', Other:'#6B7280' }
-const TRANCHE_ORDER = ['T1','T2','T3','T4','One-Shot']
 
 const INV_STATUS: Record<string,{label:string;color:string;bg:string}> = {
   pending_review:  { label:'Awaiting Rudy',    color:'#F97316', bg:'rgba(249,115,22,0.1)'  },
@@ -92,9 +91,7 @@ async function getData(projectId?: string, sectionId?: string, baseCcy: string =
 
   // Expense totals converted to baseCcy
   const pendingExpensesNGN = approvedStaff.reduce((s:number,e:any) => s + toBase(e.amount||0, e.currency||'NGN'), 0)
-  const pendingExpensesUSD = 0
   const pendingESGNGN      = approvedESG.reduce((s:number,e:any) => s + toBase(e.amount||0, e.currency||'NGN'), 0)
-  const pendingESGUSD      = 0
 
   const currencyMap: Record<string,string> = {}
   for (const c of currencyRes.data || []) currencyMap[c.invoice_id] = c.currency
@@ -483,8 +480,8 @@ async function getData(projectId?: string, sectionId?: string, baseCcy: string =
   return {
     totalCommitted, totalPaid, pipeline30, overdueAmount,
     overdueCount: overdueTranches.length,
-    pendingExpensesNGN, pendingExpensesUSD, pendingExpensesCount: approvedStaff.length,
-    pendingESGNGN, pendingESGUSD, pendingESGCount: approvedESG.length,
+    pendingExpensesNGN, pendingExpensesCount: approvedStaff.length,
+    pendingESGNGN, pendingESGCount: approvedESG.length,
     pendingPaymentTranches, pendingPaymentAmount,
     contractAdvancement,
     timeline,
@@ -506,21 +503,6 @@ async function getData(projectId?: string, sectionId?: string, baseCcy: string =
 function fmtDate(d: string | null) {
   if (!d) return ''
   return new Date(d).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' })
-}
-
-function trancheColor(t: any, now: Date) {
-  if (!t) return '#E2E8F0'
-  if (t.status === 'paid') return '#10B981'
-  if (t.status === 'scheduled' || t.status === 'unpaid') {
-    if (t.scheduled_date && new Date(t.scheduled_date) < now) return '#EF4444'
-    if (t.scheduled_date) {
-      const days = Math.floor((new Date(t.scheduled_date).getTime() - now.getTime()) / 86400000)
-      if (days <= 14) return '#F59E0B'
-      return '#3B82F6'
-    }
-    return '#94A3B8'
-  }
-  return '#94A3B8'
 }
 
 function invStatusLabel(status: string) {

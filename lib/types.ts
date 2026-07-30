@@ -1,7 +1,7 @@
 // ─── Enums ───────────────────────────────────────────────────────────────────
 
 export type ContractStatus  = 'active' | 'completed' | 'cancelled'
-export type TrancheStatus   = 'unpaid' | 'scheduled' | 'paid'
+export type TrancheStatus   = 'unpaid' | 'scheduled' | 'pending_review' | 'pending_placide' | 'pending_dani' | 'pending_fares' | 'paid'
 export type InvoiceStatus   = 'pending_review' | 'pending_placide' | 'pending_dani' | 'pending_fares' | 'approved' | 'rejected'
 export type InvoiceCategory =
   | 'Subcontracting'

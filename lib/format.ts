@@ -40,13 +40,3 @@ export function formatDate(dateStr: string | null): string {
     year: 'numeric',
   })
 }
-
-export function formatPercent(value: number, total: number): string {
-  if (!total) return '0%'
-  return `${Math.min(Math.round((value / total) * 100), 100)}%`
-}
-
-export function calcPercent(value: number, total: number): number {
-  if (!total) return 0
-  return Math.min(Math.round((value / total) * 100), 100)
-}
