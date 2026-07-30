@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { LoadError } from '@/components/LoadError'
 
 const TYPE_META: Record<string,{label:string;color:string;bg:string;icon:string}> = {
   invoice:          { label:'Invoice',          color:'#3B82F6', bg:'#EFF6FF', icon:'INV' },
@@ -19,29 +20,49 @@ export default function VaultPage() {
   const [contracts,  setContracts]  = useState<any[]>([])
   const [typeFilter, setTypeFilter] = useState('ALL')
   const [uploadForm, setUploadForm] = useState({ file_type:'invoice', contract_id:'' })
+  const [loadError,  setLoadError]  = useState(false)
+  const [uploadError, setUploadError] = useState('')
 
   async function load() {
-    const url = `/api/documents${search ? `?search=${encodeURIComponent(search)}` : ''}`
-    const [docsRes, cRes] = await Promise.all([fetch(url), fetch('/api/contracts')])
-    const d = await docsRes.json(); const c = await cRes.json()
-    setDocs(Array.isArray(d) ? d : [])
-    setContracts(Array.isArray(c) ? c : [])
+    setLoadError(false)
+    try {
+      const url = `/api/documents${search ? `?search=${encodeURIComponent(search)}` : ''}`
+      const [docsRes, cRes] = await Promise.all([fetch(url), fetch('/api/contracts')])
+      const d = await docsRes.json(); const c = await cRes.json()
+      setDocs(Array.isArray(d) ? d : [])
+      setContracts(Array.isArray(c) ? c : [])
+    } catch {
+      setLoadError(true)
+    }
     setLoading(false)
   }
 
-  useEffect(() => { load() }, [search])
+  // Debounce: only search 300ms after the user stops typing
+  useEffect(() => {
+    const t = setTimeout(load, search ? 300 : 0)
+    return () => clearTimeout(t)
+  }, [search])
 
   async function uploadDoc(e: React.FormEvent) {
-    e.preventDefault(); setUploading(true)
+    e.preventDefault(); setUploading(true); setUploadError('')
     const fileInput = document.getElementById('vault-file') as HTMLInputElement
     if (!fileInput?.files?.[0]) { setUploading(false); return }
-    const fd = new FormData(); fd.append('file', fileInput.files[0])
-    const uploadRes = await fetch('/api/storage/upload', { method:'POST', body:fd })
-    const { signedUrl } = await uploadRes.json()
-    await fetch('/api/documents', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ filename:fileInput.files[0].name, file_url:signedUrl, file_type:uploadForm.file_type, contract_id:uploadForm.contract_id||null }),
-    })
+    try {
+      const fd = new FormData(); fd.append('file', fileInput.files[0])
+      const uploadRes = await fetch('/api/storage/upload', { method:'POST', body:fd })
+      const upData = await uploadRes.json()
+      if (!uploadRes.ok || !upData.signedUrl) throw new Error(upData.error || 'Upload failed')
+      const docRes = await fetch('/api/documents', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ filename:fileInput.files[0].name, file_url:upData.signedUrl, file_type:uploadForm.file_type, contract_id:uploadForm.contract_id||null }),
+      })
+      const docData = await docRes.json()
+      if (!docRes.ok || docData.error) throw new Error(docData.error || 'Could not save document')
+    } catch (err: any) {
+      setUploadError(err?.message || 'Upload failed. Please try again.')
+      setUploading(false)
+      return
+    }
     setShowUpload(false); setUploading(false); await load()
   }
 
@@ -85,6 +106,7 @@ export default function VaultPage() {
           <div style={{ height:3, background:'linear-gradient(90deg,#3B82F6,#8B5CF6)' }}/>
           <div className="p-5">
             <h2 className="text-sm font-bold mb-4" style={{ color:'#0F172A' }}>Upload Document</h2>
+            {uploadError && <div className="mb-4 text-sm px-4 py-3 rounded-xl" style={{ background:'rgba(239,68,68,0.1)', color:'#EF4444', border:'1px solid rgba(239,68,68,0.2)' }}>{uploadError}</div>}
             <form onSubmit={uploadDoc} className="grid grid-cols-3 gap-4">
               <div className="col-span-3">
                 <label className="text-xs font-semibold uppercase tracking-widest mb-2 block" style={{ color:'#64748B' }}>File</label>
@@ -143,6 +165,8 @@ export default function VaultPage() {
       {/* Content */}
       {loading ? (
         <div className="flex items-center justify-center py-20"><div className="w-8 h-8 rounded-full border-2 border-blue-500 border-t-transparent animate-spin"/></div>
+      ) : loadError ? (
+        <LoadError onRetry={load} />
       ) : filtered.length === 0 ? (
         <div className="rounded-2xl p-16 text-center" style={{ background:'#FFFFFF', border:'1px solid #E2E8F0' }}>
           <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5" style={{ background:'#F1F5F9' }}>

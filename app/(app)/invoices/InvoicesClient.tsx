@@ -2,6 +2,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
 import { formatCurrency, formatDate } from '@/lib/format'
+import { CsvExportButton } from '@/components/CsvExportButton'
 
 function getFX(inv: any): number {
   return inv.contracts?.fx_rate_at_signing || 0
@@ -29,11 +30,19 @@ export function InvoicesClient({ invoices }: { invoices: any[] }) {
 
   async function fixCurrency(invId: string, newCcy: string) {
     setFixingCcy(invId)
-    await fetch(`/api/invoices/${invId}/fix-currency`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ currency: newCcy }),
-    })
+    try {
+      const res = await fetch(`/api/invoices/${invId}/fix-currency`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ currency: newCcy }),
+      })
+      const data = await res.json()
+      if (!res.ok || data.error) throw new Error(data.error || 'Failed')
+    } catch {
+      alert('Could not update the currency. Please try again.')
+      setFixingCcy(null)
+      return
+    }
     window.location.reload()
   }
 
@@ -386,6 +395,25 @@ export function InvoicesClient({ invoices }: { invoices: any[] }) {
           {filtered.length} invoice{filtered.length!==1?'s':''}
           {hasFilter ? ' (filtered)' : ''}
         </p>
+        <CsvExportButton
+          filename="invoices.csv"
+          rows={() => [
+            ['Invoice #','Consultant','Project','Contract','Category','Currency','Amount HT','TVA','Total TTC','Status','Invoice Date'],
+            ...filtered.map((i:any) => [
+              i.invoice_number || '',
+              i.subcontractor_name || i.service_providers?.name || '',
+              i.contracts?.projects?.name || '',
+              i.contracts?.contract_name || '',
+              i.category || '',
+              i.currency || 'NGN',
+              i.amount_ht ?? '',
+              i.amount_tva ?? '',
+              i.amount_ttc ?? '',
+              i.status || '',
+              i.invoice_date || '',
+            ]),
+          ]}
+        />
       </div>
 
       {/* Table */}

@@ -2,6 +2,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { formatCurrency } from '@/lib/format'
 import { convertBySigningRate } from '@/lib/fx'
+import { LoadError, PageSpinner } from '@/components/LoadError'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 
 const C = { card:'#FFFFFF', border:'#E2E8F0', green:'#10B981', amber:'#F59E0B', red:'#EF4444', blue:'#3B82F6', muted:'#6B7280' }
@@ -10,22 +11,30 @@ export default function ReportsPage() {
   const [data, setData]         = useState<any>(null)
   const [projects, setProjects] = useState<any[]>([])
   const [loading, setLoading]   = useState(true)
+  const [loadError, setLoadError] = useState(false)
   const [tab, setTab]           = useState<'provider'|'category'|'monthly'|'project'|'project-section'|'vat'|'audit'>('provider')
   const [view, setView]         = useState<'ngn'|'usd'>('ngn')
 
   const displayCcy = view === 'ngn' ? 'NGN' : 'USD'
 
-  useEffect(() => {
+  useEffect(() => { load() }, [])
+
+  function load() {
+    setLoadError(false)
+    setLoading(true)
     Promise.all([
       fetch('/api/reports').then(r=>r.json()),
       fetch('/api/projects').then(r=>r.json()),
     ]).then(([d, p]) => {
-      setData(d)
+      setData(d && typeof d === 'object' ? d : {})
       const pList = Array.isArray(p) ? p : (Array.isArray(p?.projects) ? p.projects : [])
       setProjects(pList)
       setLoading(false)
+    }).catch(() => {
+      setLoadError(true)
+      setLoading(false)
     })
-  }, [])
+  }
 
   function exportCSV(rows: any[][], filename: string) {
     const csv = rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n')
@@ -73,7 +82,8 @@ export default function ReportsPage() {
     return (data?.monthlyData || []).map((m: any) => ({ month: m.month, amount: view === 'ngn' ? m.amount_ngn : m.amount_usd }))
   }, [data, view])
 
-  if (loading) return <div className="flex items-center justify-center h-screen" style={{ color:C.muted }}>Loading...</div>
+  if (loading) return <PageSpinner />
+  if (loadError || !data) return <div className="px-6 py-8 max-w-7xl mx-auto"><LoadError onRetry={load} /></div>
 
   return (
     <div className="px-6 py-8 max-w-7xl mx-auto">

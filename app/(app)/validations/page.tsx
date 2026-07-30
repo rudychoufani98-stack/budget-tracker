@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase-browser'
 import { createClient } from '@/utils/supabase/client'
 import Link from 'next/link'
 import { formatCurrency } from '@/lib/format'
+import { LoadError, PageSpinner } from '@/components/LoadError'
 
 const STEPS = [
   { status:'pending_review',  label:'Rudy',        role:'rudy',    action:'Forward to Placide',    color:'#60A5FA', step:1 },
@@ -84,6 +85,7 @@ export default function ValidationsPage() {
   const [userRole,   setUserRole]   = useState('')
   const [history,    setHistory]    = useState<any[]>([])
   const [loading,    setLoading]    = useState(true)
+  const [loadError,  setLoadError]  = useState(false)
   const [submitting,   setSubmitting]   = useState<string|null>(null)
   const [comments,     setComments]     = useState<Record<string,string>>({})
   const [reject,       setReject]       = useState<string|null>(null)
@@ -92,6 +94,8 @@ export default function ValidationsPage() {
   const [proofRef,     setProofRef]     = useState<Record<string,string>>({})
 
   async function load() {
+    setLoadError(false)
+    try {
     const all = ['pending_review','pending_placide','pending_dani','pending_fares']
     const [invRes, curRes, valRes, trancheRes] = await Promise.all([
       supabase.from('invoices').select('*, contracts(contract_name), service_providers(name)').in('status', all).order('submitted_at'),
@@ -122,6 +126,9 @@ export default function ValidationsPage() {
     setItems([...invoices, ...tranches].sort((a,b) => new Date(a._date||0).getTime() - new Date(b._date||0).getTime()))
     // Attach the invoice's real currency to each history entry (was hardcoded NGN before)
     setHistory((valRes.data || []).map((v:any) => ({ ...v, _ccy: cmap[v.invoice_id] || 'NGN' })))
+    } catch {
+      setLoadError(true)
+    }
     setLoading(false)
   }
 
@@ -206,11 +213,8 @@ export default function ValidationsPage() {
     await load()
   }
 
-  if (loading) return (
-    <div className="flex items-center justify-center h-screen">
-      <div className="w-8 h-8 rounded-full border-2 border-blue-500 border-t-transparent animate-spin"/>
-    </div>
-  )
+  if (loading) return <PageSpinner />
+  if (loadError) return <div className="px-6 py-8 max-w-5xl mx-auto"><LoadError onRetry={load} /></div>
 
   const myStepNum = ROLE_TO_STEP[userRole] || 0
   const myStep    = STEPS.find(s => s.step === myStepNum)

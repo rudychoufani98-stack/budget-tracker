@@ -1,34 +1,26 @@
 'use client'
 
-import type { Invoice } from '@/lib/types'
-
+// Generic CSV export button used by list pages.
+// rows: first row is the header, remaining rows are data.
 export function CsvExportButton({
-  invoices,
-  contractName,
+  rows,
+  filename,
+  label = 'Export CSV',
 }: {
-  invoices: Invoice[]
-  contractName: string
+  rows: () => (string | number)[][]
+  filename: string
+  label?: string
 }) {
   function handleExport() {
-    const rows = [
-      ['Sous-traitant', 'N° Facture', 'Date', 'Catégorie', 'Montant HT', 'TVA', 'Montant TTC', 'Statut'],
-      ...invoices.map((i) => [
-        i.subcontractor_name || '',
-        i.invoice_number || '',
-        i.invoice_date || '',
-        i.category || '',
-        i.amount_ht?.toString() || '',
-        i.amount_tva?.toString() || '',
-        i.amount_ttc?.toString() || '',
-        i.status,
-      ]),
-    ]
-    const csv = rows.map((r) => r.join(',')).join('\n')
+    const csv = rows()
+      .map(r => r.map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(','))
+      .join('\n')
+    // BOM so Excel opens UTF-8 correctly
     const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `${contractName.replace(/\s+/g, '_')}_factures.csv`
+    a.download = filename
     a.click()
     URL.revokeObjectURL(url)
   }
@@ -36,9 +28,10 @@ export function CsvExportButton({
   return (
     <button
       onClick={handleExport}
-      className="shrink-0 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+      className="text-sm font-medium px-4 py-2 rounded-xl"
+      style={{ background: '#F1F5F9', border: '1px solid #E2E8F0', color: '#0F172A' }}
     >
-      Exporter CSV
+      {label}
     </button>
   )
 }

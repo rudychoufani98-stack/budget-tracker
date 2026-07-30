@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
 import { formatCurrency } from '@/lib/format'
+import { LoadError, PageSpinner } from '@/components/LoadError'
 
 const STAFF_CATEGORIES = [
   'Travel', 'Accommodation', 'Meals', 'Fuel & Transport',
@@ -57,6 +58,7 @@ export default function ExpensesPage() {
   const [expenses,  setExpenses]  = useState<any[]>([])
   const [projects,  setProjects]  = useState<any[]>([])
   const [loading,   setLoading]   = useState(true)
+  const [loadError, setLoadError] = useState(false)
   const [showForm,  setShowForm]  = useState(false)
   const [form,      setForm]      = useState<any>({ ...EMPTY_STAFF })
   const [saving,    setSaving]    = useState(false)
@@ -65,12 +67,18 @@ export default function ExpensesPage() {
   const fileRef = useRef<HTMLInputElement>(null)
 
   async function load() {
-    const [expRes, projRes] = await Promise.all([
-      fetch('/api/expenses').then(r => r.json()),
-      fetch('/api/projects').then(r => r.json()),
-    ])
-    setExpenses(Array.isArray(expRes) ? expRes : [])
-    setProjects(Array.isArray(projRes) ? projRes : [])
+    setLoadError(false)
+    setLoading(true)
+    try {
+      const [expRes, projRes] = await Promise.all([
+        fetch('/api/expenses').then(r => r.json()),
+        fetch('/api/projects').then(r => r.json()),
+      ])
+      setExpenses(Array.isArray(expRes) ? expRes : [])
+      setProjects(Array.isArray(projRes) ? projRes : [])
+    } catch {
+      setLoadError(true)
+    }
     setLoading(false)
   }
 
@@ -135,11 +143,8 @@ export default function ExpensesPage() {
   const categories = tab === 'staff' ? STAFF_CATEGORIES : ESG_CATEGORIES
   const isESG      = tab === 'esg'
 
-  if (loading) return (
-    <div className="flex items-center justify-center h-screen">
-      <div className="w-8 h-8 rounded-full border-2 border-blue-500 border-t-transparent animate-spin"/>
-    </div>
-  )
+  if (loading) return <PageSpinner />
+  if (loadError) return <div className="px-6 py-8 max-w-5xl mx-auto"><LoadError onRetry={load} /></div>
 
   return (
     <div className="px-6 py-8 max-w-5xl mx-auto">

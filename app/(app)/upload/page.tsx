@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import { LoadError } from '@/components/LoadError'
 
 interface ScannedData {
   subcontractor_name: string
@@ -44,7 +45,6 @@ function cs(v:number|null, currency:string) {
 export default function UploadPage() {
   const router = useRouter()
   const fileRef = useRef<HTMLInputElement>(null)
-  const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null
 
   const [step, setStep]         = useState<1|2|3>(1)
   const [file, setFile]         = useState<File|null>(null)
@@ -60,17 +60,27 @@ export default function UploadPage() {
   const [sections,        setSections]        = useState<any[]>([])
   const [tranches,        setTranches]        = useState<any[]>([])
 
-  const [selectedProject,  setSelectedProject]  = useState(searchParams?.get('project') || '')
-  const [selectedSection,  setSelectedSection]  = useState(searchParams?.get('section') || '')
-  const [selectedContract, setSelectedContract] = useState(searchParams?.get('contract') || '')
+  const [selectedProject,  setSelectedProject]  = useState('')
+  const [selectedSection,  setSelectedSection]  = useState('')
+  const [selectedContract, setSelectedContract] = useState('')
   const [selectedProvider, setSelectedProvider] = useState('')
-  const [selectedTranche,  setSelectedTranche]  = useState(searchParams?.get('tranche') || '')
+  const [selectedTranche,  setSelectedTranche]  = useState('')
+  const [loadError,        setLoadError]        = useState(false)
   const [newPeriodForm,    setNewPeriodForm]    = useState({ label: '', amount: '', date: '' })
   const [addingPeriod,     setAddingPeriod]     = useState(false)
   const [savingPeriod,     setSavingPeriod]     = useState(false)
   const [selectedCurrency, setSelectedCurrency] = useState<'NGN'|'USD'>('USD')
 
-  useEffect(() => {
+  useEffect(() => { load() }, [])
+
+  function load() {
+    setLoadError(false)
+    // Read URL params on the client only (avoids hydration mismatch)
+    const sp = new URLSearchParams(window.location.search)
+    if (sp.get('project'))  setSelectedProject(sp.get('project') || '')
+    if (sp.get('section'))  setSelectedSection(sp.get('section') || '')
+    if (sp.get('contract')) setSelectedContract(sp.get('contract') || '')
+    if (sp.get('tranche'))  setSelectedTranche(sp.get('tranche') || '')
     Promise.all([
       fetch('/api/providers').then(r=>r.json()),
       fetch('/api/contracts').then(r=>r.json()),
@@ -90,17 +100,17 @@ export default function UploadPage() {
         setProjects(derived)
       }
       // Auto-fill provider from pre-filled contract
-      const preContract = searchParams?.get('contract')
+      const preContract = sp.get('contract')
       if (preContract) {
         const found = (c||[]).find((x:any) => x.id === preContract)
         if (found) {
           setTranches(found.contract_tranches || [])
           if (found.service_provider_id) setSelectedProvider(found.service_provider_id)
-          if (found.project_id && !searchParams?.get('project')) setSelectedProject(found.project_id)
+          if (found.project_id && !sp.get('project')) setSelectedProject(found.project_id)
         }
       }
-    })
-  },[])
+    }).catch(() => setLoadError(true))
+  }
 
   // When project changes - fetch sections + reset downstream
   function handleProjectChange(id:string) {
@@ -233,6 +243,8 @@ export default function UploadPage() {
 
   const inp = 'w-full px-3.5 py-2.5 text-sm rounded-xl outline-none transition-all'
   const inpSt = { background:'#F8FAFC', border:'1.5px solid #E2E8F0', color:'#0F172A' }
+
+  if (loadError) return <div className="px-6 py-8 max-w-5xl mx-auto"><LoadError onRetry={load} /></div>
 
   return (
     <div className="px-6 py-8 max-w-5xl mx-auto">

@@ -2,6 +2,7 @@
 import { Fragment, useState, useEffect, useMemo } from 'react'
 import { formatCurrency } from '@/lib/format'
 import { convertBySigningRate } from '@/lib/fx'
+import { LoadError, PageSpinner } from '@/components/LoadError'
 import Link from 'next/link'
 
 const TRANCHES = ['T1','T2','T3','T4','One-Shot']
@@ -26,6 +27,7 @@ export default function PaymentRegisterPage() {
   const [sections,        setSections]        = useState<{id:string;name:string}[]>([])
   const [fxRates,         setFxRates]         = useState<Record<string,number>>({ USD:1, NGN:1580 })
   const [loading,         setLoading]         = useState(true)
+  const [loadError,       setLoadError]       = useState(false)
   const [selectedProject, setSelectedProject] = useState('')
   const [selectedSection, setSelectedSection] = useState('')
   const [view,            setView]            = useState<'ngn'|'usd'>('ngn')
@@ -37,15 +39,21 @@ export default function PaymentRegisterPage() {
   }
 
   async function load() {
-    const [cRes, pRes, fxRes] = await Promise.all([
-      fetch('/api/contracts').then(r=>r.json()),
-      fetch('/api/projects').then(r=>r.json()),
-      fetch('/api/fx').then(r=>r.json()).catch(()=>({ rates:{} })),
-    ])
-    setContracts(Array.isArray(cRes) ? cRes : [])
-    const pList = Array.isArray(pRes) ? pRes : []
-    setProjects(pList.map((p:any) => ({ id:p.id, name:p.name })))
-    if (fxRes?.rates) setFxRates({ USD:1, ...fxRes.rates })
+    setLoadError(false)
+    setLoading(true)
+    try {
+      const [cRes, pRes, fxRes] = await Promise.all([
+        fetch('/api/contracts').then(r=>r.json()),
+        fetch('/api/projects').then(r=>r.json()),
+        fetch('/api/fx').then(r=>r.json()).catch(()=>({ rates:{} })),
+      ])
+      setContracts(Array.isArray(cRes) ? cRes : [])
+      const pList = Array.isArray(pRes) ? pRes : []
+      setProjects(pList.map((p:any) => ({ id:p.id, name:p.name })))
+      if (fxRes?.rates) setFxRates({ USD:1, ...fxRes.rates })
+    } catch {
+      setLoadError(true)
+    }
     setLoading(false)
   }
 
@@ -106,7 +114,8 @@ export default function PaymentRegisterPage() {
     URL.revokeObjectURL(url)
   }
 
-  if (loading) return <div className="flex items-center justify-center h-screen"><div className="w-8 h-8 rounded-full border-2 border-blue-500 border-t-transparent animate-spin"/></div>
+  if (loading) return <PageSpinner />
+  if (loadError) return <div className="px-6 py-8 max-w-7xl mx-auto"><LoadError onRetry={load} /></div>
 
   return (
     <div className="px-6 py-8 max-w-7xl mx-auto">

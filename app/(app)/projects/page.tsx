@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { formatCurrency } from '@/lib/format'
 import { convertBySigningRate } from '@/lib/fx'
+import { LoadError, PageSpinner } from '@/components/LoadError'
 
 const PALETTE = ['#3B82F6','#8B5CF6','#F59E0B','#EF4444','#10B981','#06B6D4','#F97316','#EC4899']
 const STATUS_META: Record<string,{ label:string; color:string; bg:string }> = {
@@ -12,11 +13,16 @@ const STATUS_META: Record<string,{ label:string; color:string; bg:string }> = {
 }
 
 export default function ProjectsPage() {
-  const [view,     setView]     = useState<'ngn'|'usd'>('ngn')
-  const [projects, setProjects] = useState<any[]>([])
-  const [loading,  setLoading]  = useState(true)
+  const [view,      setView]      = useState<'ngn'|'usd'>('ngn')
+  const [projects,  setProjects]  = useState<any[]>([])
+  const [loading,   setLoading]   = useState(true)
+  const [loadError, setLoadError] = useState(false)
 
-  useEffect(() => {
+  useEffect(() => { load() }, [])
+
+  function load() {
+    setLoadError(false)
+    setLoading(true)
     Promise.all([
       fetch('/api/projects').then(r => r.json()),
       fetch('/api/contracts').then(r => r.json()),
@@ -66,8 +72,11 @@ export default function ProjectsPage() {
       })
       setProjects(enriched)
       setLoading(false)
+    }).catch(() => {
+      setLoadError(true)
+      setLoading(false)
     })
-  }, [])
+  }
 
   const ccy = view === 'ngn' ? 'NGN' : 'USD'
   function committed(p: any) { return view === 'ngn' ? p.committedNGN : p.committedUSD }
@@ -109,9 +118,9 @@ export default function ProjectsPage() {
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center py-32">
-          <div className="w-8 h-8 rounded-full border-2 border-blue-500 border-t-transparent animate-spin"/>
-        </div>
+        <PageSpinner />
+      ) : loadError ? (
+        <LoadError onRetry={load} />
       ) : (
         <>
           {/* KPI cards */}

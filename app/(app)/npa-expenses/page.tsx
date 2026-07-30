@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
 import { formatCurrency } from '@/lib/format'
+import { LoadError, PageSpinner } from '@/components/LoadError'
 
 const CATEGORIES = [
   'Travel', 'Accommodation', 'Meals', 'Fuel & Transport',
@@ -37,6 +38,7 @@ const EMPTY = {
 export default function NpaExpensesPage() {
   const [expenses,   setExpenses]   = useState<any[]>([])
   const [loading,    setLoading]    = useState(true)
+  const [loadError,  setLoadError]  = useState(false)
   const [showForm,   setShowForm]   = useState(false)
   const [form,       setForm]       = useState<any>({ ...EMPTY })
   const [saving,     setSaving]     = useState(false)
@@ -47,8 +49,14 @@ export default function NpaExpensesPage() {
   const fileRef = useRef<HTMLInputElement>(null)
 
   async function load() {
-    const expRes = await fetch('/api/expenses?type=npa').then(r => r.json())
-    setExpenses(Array.isArray(expRes) ? expRes : [])
+    setLoadError(false)
+    setLoading(true)
+    try {
+      const expRes = await fetch('/api/expenses?type=npa').then(r => r.json())
+      setExpenses(Array.isArray(expRes) ? expRes : [])
+    } catch {
+      setLoadError(true)
+    }
     setLoading(false)
   }
 
@@ -137,11 +145,8 @@ export default function NpaExpensesPage() {
     await load()
   }
 
-  if (loading) return (
-    <div className="flex items-center justify-center h-screen">
-      <div className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: `${ACCENT}40`, borderTopColor: ACCENT }}/>
-    </div>
-  )
+  if (loading) return <PageSpinner />
+  if (loadError) return <div className="px-6 py-8 max-w-6xl mx-auto"><LoadError onRetry={load} /></div>
 
   return (
     <div className="px-6 py-8 max-w-6xl mx-auto">
